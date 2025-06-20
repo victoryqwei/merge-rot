@@ -6,6 +6,8 @@ export class PhysicsEngine {
   private engine: Matter.Engine;
   private world: Matter.World;
   private bodies: Matter.Body[] = [];
+  private gameOverTimer: number = 0;
+  private gameOverDelay: number = 120; // 2 seconds at 60fps
 
   constructor() {
     this.engine = Matter.Engine.create();
@@ -107,12 +109,38 @@ export class PhysicsEngine {
   }
 
   checkGameOver(): boolean {
+    // Check if any fruit is too high
+    const fruitAboveLine = this.bodies.some((body) => body.position.y - body.circleRadius! < GAME_CONFIG.GAME_OVER_HEIGHT);
+
+    if (fruitAboveLine) {
+      // Only trigger game over if all fruits have stopped moving AND timer has elapsed
+      if (this.allFruitsStopped()) {
+        this.gameOverTimer++;
+        if (this.gameOverTimer >= this.gameOverDelay) {
+          return true;
+        }
+      } else {
+        // Reset timer if fruits are still moving
+        this.gameOverTimer = 0;
+      }
+    } else {
+      // Reset timer if no fruits are above the line
+      this.gameOverTimer = 0;
+    }
+
+    return false;
+  }
+
+  private allFruitsStopped(): boolean {
+    const velocityThreshold = 0.5; // Minimum velocity to consider "stopped"
+
     for (const body of this.bodies) {
-      if (body.position.y - body.circleRadius! < GAME_CONFIG.GAME_OVER_HEIGHT) {
-        return true;
+      const velocity = Math.sqrt(body.velocity.x * body.velocity.x + body.velocity.y * body.velocity.y);
+      if (velocity > velocityThreshold) {
+        return false; // At least one fruit is still moving
       }
     }
-    return false;
+    return true; // All fruits have stopped moving
   }
 
   clear(): void {
@@ -120,5 +148,6 @@ export class PhysicsEngine {
       Matter.World.remove(this.world, body);
     }
     this.bodies = [];
+    this.gameOverTimer = 0;
   }
 }
