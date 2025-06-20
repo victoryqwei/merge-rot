@@ -5,6 +5,11 @@ import { PhysicsEngine } from "../utils/PhysicsEngine";
 export class FruitManager {
   private fruits: Fruit[] = [];
   private particles: Particle[] = [];
+  private physicsEngine: PhysicsEngine;
+
+  constructor(physicsEngine: PhysicsEngine) {
+    this.physicsEngine = physicsEngine;
+  }
 
   generateRandomFruit(): FruitType {
     const randomIndex = Math.floor(Math.random() * 3); // Start with smaller fruits
@@ -12,12 +17,11 @@ export class FruitManager {
   }
 
   createFruit(fruitType: FruitType, x: number, y: number): Fruit {
+    const body = this.physicsEngine.createFruitBody(fruitType.radius, x, y);
+
     return {
       ...fruitType,
-      x,
-      y,
-      vx: 0,
-      vy: 0,
+      body,
       type: FRUIT_TYPES.indexOf(fruitType),
     };
   }
@@ -31,9 +35,7 @@ export class FruitManager {
   }
 
   updateFruits(): void {
-    for (const fruit of this.fruits) {
-      PhysicsEngine.updateFruitPhysics(fruit);
-    }
+    this.physicsEngine.update();
   }
 
   checkCombinations(): number {
@@ -45,23 +47,34 @@ export class FruitManager {
         const fruit2 = this.fruits[j];
 
         if (fruit1.type === fruit2.type && fruit1.type < FRUIT_TYPES.length - 1) {
-          if (PhysicsEngine.checkCollision(fruit1, fruit2)) {
+          if (this.physicsEngine.checkCollision(fruit1, fruit2)) {
             // Combine fruits
             const newType = fruit1.type + 1;
-            const newFruit = this.createFruit(FRUIT_TYPES[newType], (fruit1.x + fruit2.x) / 2, (fruit1.y + fruit2.y) / 2);
-            newFruit.vx = (fruit1.vx + fruit2.vx) / 2;
-            newFruit.vy = (fruit1.vy + fruit2.vy) / 2;
+            const pos1 = this.physicsEngine.getBodyPosition(fruit1.body);
+            const pos2 = this.physicsEngine.getBodyPosition(fruit2.body);
+            const vel1 = this.physicsEngine.getBodyVelocity(fruit1.body);
+            const vel2 = this.physicsEngine.getBodyVelocity(fruit2.body);
 
-            // Remove old fruits and add new one
+            const newFruit = this.createFruit(FRUIT_TYPES[newType], (pos1.x + pos2.x) / 2, (pos1.y + pos2.y) / 2);
+
+            // Set velocity
+            newFruit.body.velocity.x = (vel1.x + vel2.x) / 2;
+            newFruit.body.velocity.y = (vel1.y + vel2.y) / 2;
+
+            // Remove old fruits
+            this.physicsEngine.removeBody(fruit1.body);
+            this.physicsEngine.removeBody(fruit2.body);
             this.fruits.splice(j, 1);
             this.fruits.splice(i, 1);
+
+            // Add new fruit
             this.fruits.push(newFruit);
 
             // Add score
             scoreIncrease += FRUIT_TYPES[newType].points * 10;
 
             // Add explosion effect
-            this.createExplosion(newFruit.x, newFruit.y);
+            this.createExplosion(newFruit.body.position.x, newFruit.body.position.y);
 
             return scoreIncrease; // Exit to avoid index issues
           }
@@ -103,15 +116,11 @@ export class FruitManager {
   }
 
   checkGameOver(): boolean {
-    for (const fruit of this.fruits) {
-      if (fruit.y - fruit.radius < GAME_CONFIG.GAME_OVER_HEIGHT) {
-        return true;
-      }
-    }
-    return false;
+    return this.physicsEngine.checkGameOver();
   }
 
   clear(): void {
+    this.physicsEngine.clear();
     this.fruits = [];
     this.particles = [];
   }

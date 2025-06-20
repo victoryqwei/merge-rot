@@ -1,4 +1,4 @@
-import type { Fruit, Particle } from "../types/GameTypes";
+import type { Fruit, FruitType, Particle } from "../types/GameTypes";
 import { GAME_CONFIG } from "../constants/GameConstants";
 
 export class Renderer {
@@ -38,16 +38,19 @@ export class Renderer {
   }
 
   drawFruit(fruit: Fruit): void {
+    const x = fruit.body.position.x;
+    const y = fruit.body.position.y;
+
     // Draw shadow
     this.ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
     this.ctx.beginPath();
-    this.ctx.arc(fruit.x + 2, fruit.y + 2, fruit.radius, 0, Math.PI * 2);
+    this.ctx.arc(x + 2, y + 2, fruit.radius, 0, Math.PI * 2);
     this.ctx.fill();
 
     // Draw fruit body
     this.ctx.fillStyle = fruit.color;
     this.ctx.beginPath();
-    this.ctx.arc(fruit.x, fruit.y, fruit.radius, 0, Math.PI * 2);
+    this.ctx.arc(x, y, fruit.radius, 0, Math.PI * 2);
     this.ctx.fill();
 
     // Draw fruit border
@@ -59,7 +62,7 @@ export class Renderer {
     this.ctx.font = `${fruit.radius}px Arial`;
     this.ctx.textAlign = "center";
     this.ctx.textBaseline = "middle";
-    this.ctx.fillText(fruit.emoji, fruit.x, fruit.y);
+    this.ctx.fillText(fruit.emoji, x, y);
   }
 
   drawParticle(particle: Particle): void {
@@ -78,5 +81,24 @@ export class Renderer {
     this.ctx.lineTo(GAME_CONFIG.CANVAS_WIDTH, GAME_CONFIG.GAME_OVER_HEIGHT);
     this.ctx.stroke();
     this.ctx.setLineDash([]);
+  }
+
+  drawMouseCursor(x: number, y: number, fruitType: FruitType): void {
+    // Draw a preview of the fruit at mouse position
+    this.ctx.globalAlpha = 0.6;
+    this.ctx.fillStyle = fruitType.color;
+    this.ctx.beginPath();
+    this.ctx.arc(x, y, fruitType.radius, 0, Math.PI * 2);
+    this.ctx.fill();
+
+    this.ctx.strokeStyle = "#333";
+    this.ctx.lineWidth = 2;
+    this.ctx.stroke();
+
+    this.ctx.font = `${fruitType.radius}px Arial`;
+    this.ctx.textAlign = "center";
+    this.ctx.textBaseline = "middle";
+    this.ctx.fillText(fruitType.emoji, x, y);
+    this.ctx.globalAlpha = 1.0;
   }
 }

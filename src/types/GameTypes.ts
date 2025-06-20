@@ -1,3 +1,5 @@
+import type { Body, Engine, World, Render } from "matter-js";
+
 export interface FruitType {
   emoji: string;
   radius: number;
@@ -6,10 +8,7 @@ export interface FruitType {
 }
 
 export interface Fruit extends FruitType {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
+  body: Body;
   type: number;
 }
 
@@ -28,4 +27,10 @@ export interface GameState {
   nextFruit: FruitType | null;
   gameOver: boolean;
   particles: Particle[];
+}
+
+export interface PhysicsWorld {
+  engine: Engine;
+  world: World;
+  render: Render;
 }
