@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suika Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .game-container {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .game-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .game-header h1 {
+      color: #333;
+      margin: 0 0 10px 0;
+      font-size: 2.5em;
+    }
+
+    .score-board {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+
+    .score,
+    .next-fruit {
+      background: #f8f9fa;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 2px solid #e9ecef;
+    }
+
+    canvas {
+      border: 3px solid #333;
+      border-radius: 10px;
+      background: #f8f9fa;
+      cursor: pointer;
+    }
+
+    .controls {
+      margin-top: 20px;
+      text-align: center;
+      color: #666;
+    }
+
+    .game-over {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 40px;
+      border-radius: 15px;
+      text-align: center;
+      display: none;
+    }
+
+    .restart-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 8px;
+      font-size: 1.1em;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .restart-btn:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="game-container">
+    <div class="game-header">
+      <h1>🍉 Suika Game</h1>
+    </div>
+
+    <div class="score-board">
+      <div class="score">Score: <span id="score">0</span></div>
+      <div class="next-fruit">Next: <span id="next-fruit">🍒</span></div>
+    </div>
+
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+
+    <div class="controls">
+      <p>Click to drop fruit • Combine fruits to make bigger ones!</p>
+    </div>
+  </div>
+
+  <div class="game-over" id="gameOver">
+    <h2>Game Over!</h2>
+    <p>Final Score: <span id="finalScore">0</span></p>
+    <button class="restart-btn" onclick="restartGame()">Play Again</button>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>
