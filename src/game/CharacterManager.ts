@@ -1,6 +1,7 @@
 import type { Character, CharacterType, Particle } from "../types/GameTypes";
 import { CHARACTER_TYPES, GAME_CONFIG } from "../constants/GameConstants";
 import { PhysicsEngine } from "../utils/PhysicsEngine";
+import { random } from "lodash";
 
 export class CharacterManager {
   private characters: Character[] = [];
@@ -12,7 +13,7 @@ export class CharacterManager {
   }
 
   generateRandomCharacter(): CharacterType {
-    const randomIndex = Math.floor(Math.random() * 3); // Start with smaller characters
+    const randomIndex = random(0, 4); // Start with smaller characters
     return CHARACTER_TYPES[randomIndex];
   }
 
@@ -90,8 +91,8 @@ export class CharacterManager {
       const particle: Particle = {
         x,
         y,
-        vx: (Math.random() - 0.5) * GAME_CONFIG.PARTICLE_SPEED,
-        vy: (Math.random() - 0.5) * GAME_CONFIG.PARTICLE_SPEED,
+        vx: random(-0.5, 0.5) * GAME_CONFIG.PARTICLE_SPEED,
+        vy: random(-0.5, 0.5) * GAME_CONFIG.PARTICLE_SPEED,
         life: GAME_CONFIG.PARTICLE_LIFE,
       };
       this.particles.push(particle);

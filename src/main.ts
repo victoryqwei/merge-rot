@@ -25,9 +25,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   game.setNextCharacterCallback((character) => {
-    const nextCharacterElement = document.getElementById("next-character");
+    const nextCharacterElement = document.getElementById("next-fruit");
     if (nextCharacterElement) {
-      nextCharacterElement.textContent = character.emoji;
+      nextCharacterElement.textContent = character.name;
     }
   });
 

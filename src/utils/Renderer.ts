@@ -1,9 +1,11 @@
 import type { Character, CharacterType, Particle } from "../types/GameTypes";
 import { GAME_CONFIG } from "../constants/GameConstants";
+import { ImageManager } from "./ImageManager";
 
 export class Renderer {
   private ctx: CanvasRenderingContext2D;
   private pixelRatio: number;
+  private imageManager: ImageManager;
 
   constructor(canvas: HTMLCanvasElement) {
     const context = canvas.getContext("2d");
@@ -12,6 +14,7 @@ export class Renderer {
     }
     this.ctx = context;
     this.pixelRatio = window.devicePixelRatio || 1;
+    this.imageManager = new ImageManager();
 
     this.setupHighDPICanvas(canvas);
   }
@@ -62,22 +65,30 @@ export class Renderer {
     this.ctx.arc(x + 2 * this.pixelRatio, y + 2 * this.pixelRatio, radius, 0, Math.PI * 2);
     this.ctx.fill();
 
-    // Draw character body
-    this.ctx.fillStyle = character.color;
-    this.ctx.beginPath();
-    this.ctx.arc(x, y, radius, 0, Math.PI * 2);
-    this.ctx.fill();
+    // Draw character image
+    const image = this.imageManager.getImage(character.name);
+    if (image) {
+      this.ctx.save();
+      this.ctx.beginPath();
+      this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+      this.ctx.clip();
+
+      const imageSize = radius * 2;
+      this.ctx.drawImage(image, x - radius, y - radius, imageSize, imageSize);
+
+      this.ctx.restore();
+    } else {
+      // Fallback to colored circle if image not loaded
+      this.ctx.fillStyle = "#ff6b6b";
+      this.ctx.beginPath();
+      this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
 
     // Draw character border
     this.ctx.strokeStyle = "#333";
     this.ctx.lineWidth = 2 * this.pixelRatio;
     this.ctx.stroke();
-
-    // Draw emoji
-    this.ctx.font = `${radius}px Arial`;
-    this.ctx.textAlign = "center";
-    this.ctx.textBaseline = "middle";
-    this.ctx.fillText(character.emoji, x, y);
   }
 
   drawParticle(particle: Particle): void {
@@ -105,23 +116,38 @@ export class Renderer {
 
     // Draw a preview of the character at mouse position
     this.ctx.globalAlpha = alpha;
-    this.ctx.fillStyle = characterType.color;
-    this.ctx.beginPath();
-    this.ctx.arc(scaledX, scaledY, scaledRadius, 0, Math.PI * 2);
-    this.ctx.fill();
+
+    const image = this.imageManager.getImage(characterType.name);
+    if (image) {
+      this.ctx.save();
+      this.ctx.beginPath();
+      this.ctx.arc(scaledX, scaledY, scaledRadius, 0, Math.PI * 2);
+      this.ctx.clip();
+
+      const imageSize = scaledRadius * 2;
+      this.ctx.drawImage(image, scaledX - scaledRadius, scaledY - scaledRadius, imageSize, imageSize);
+
+      this.ctx.restore();
+    } else {
+      // Fallback to colored circle if image not loaded
+      this.ctx.fillStyle = "#ff6b6b";
+      this.ctx.beginPath();
+      this.ctx.arc(scaledX, scaledY, scaledRadius, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
 
     this.ctx.strokeStyle = "#333";
     this.ctx.lineWidth = 2 * this.pixelRatio;
     this.ctx.stroke();
 
-    this.ctx.font = `${scaledRadius}px Arial`;
-    this.ctx.textAlign = "center";
-    this.ctx.textBaseline = "middle";
-    this.ctx.fillText(characterType.emoji, scaledX, scaledY);
     this.ctx.globalAlpha = 1.0;
   }
 
   getPixelRatio(): number {
     return this.pixelRatio;
+  }
+
+  isImagesLoaded(): boolean {
+    return this.imageManager.isLoaded();
   }
 }

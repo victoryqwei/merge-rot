@@ -10,7 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/lodash": "^4.17.18",
     "@types/matter-js": "^0.19.8",
+    "lodash": "^4.17.21",
     "matter-js": "^0.20.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"

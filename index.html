@@ -91,6 +91,12 @@
     .restart-btn:hover {
       background: #218838;
     }
+
+    .loading {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+    }
   </style>
 </head>
 
@@ -102,7 +108,7 @@
 
     <div class="score-board">
       <div class="score">Score: <span id="score">0</span></div>
-      <div class="next-character">Next: <span id="next-character">🍒</span></div>
+      <div class="next-character">Next: <span id="next-fruit">Loading...</span></div>
     </div>
 
     <canvas id="gameCanvas" width="400" height="600"></canvas>
