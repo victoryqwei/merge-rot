@@ -8,6 +8,7 @@ export class PhysicsEngine {
   private bodies: Matter.Body[] = [];
   private gameOverTimer: number = 0;
   private gameOverDelay: number = 120; // 2 seconds at 60fps
+  private collisionDetector: Matter.Detector;
 
   constructor() {
     this.engine = Matter.Engine.create();
@@ -15,6 +16,11 @@ export class PhysicsEngine {
 
     // Set up world properties
     this.world.gravity.y = 0.5;
+
+    // Create collision detector
+    this.collisionDetector = Matter.Detector.create({
+      bodies: [],
+    });
 
     // Create boundaries
     this.createBoundaries();
@@ -59,6 +65,9 @@ export class PhysicsEngine {
     this.bodies.push(body);
     Matter.World.add(this.world, body);
 
+    // Add body to collision detector
+    this.collisionDetector.bodies.push(body);
+
     return body;
   }
 
@@ -81,19 +90,32 @@ export class PhysicsEngine {
   }
 
   checkCollision(character1: Character, character2: Character): boolean {
-    // Calculate distance between character centers
-    const dx = character1.body.position.x - character2.body.position.x;
-    const dy = character1.body.position.y - character2.body.position.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
+    // Use Matter.js collision detection
+    const pairs = Matter.Detector.collisions(this.collisionDetector);
 
-    // Check if characters are touching (distance <= sum of radii)
-    const combinedRadius = character1.radius + character2.radius;
+    // Check if the two characters are colliding
+    for (const pair of pairs) {
+      if (
+        (pair.bodyA === character1.body && pair.bodyB === character2.body) ||
+        (pair.bodyA === character2.body && pair.bodyB === character1.body)
+      ) {
+        return true;
+      }
+    }
 
-    return distance <= combinedRadius;
+    return false;
   }
 
   removeBody(body: Matter.Body): void {
     Matter.World.remove(this.world, body);
+
+    // Remove from collision detector
+    const detectorIndex = this.collisionDetector.bodies.indexOf(body);
+    if (detectorIndex > -1) {
+      this.collisionDetector.bodies.splice(detectorIndex, 1);
+    }
+
+    // Remove from bodies array
     const index = this.bodies.indexOf(body);
     if (index > -1) {
       this.bodies.splice(index, 1);
@@ -148,6 +170,7 @@ export class PhysicsEngine {
       Matter.World.remove(this.world, body);
     }
     this.bodies = [];
+    this.collisionDetector.bodies = [];
     this.gameOverTimer = 0;
   }
 }

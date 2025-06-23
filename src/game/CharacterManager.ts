@@ -64,7 +64,10 @@ export class CharacterManager {
           continue;
         }
 
+        // Only process same-type characters
         if (character1.name !== character2.name) continue;
+
+        // Only check collision for same-type characters
         if (!this.physicsEngine.checkCollision(character1, character2)) continue;
 
         // Get the current character class and find the next one
