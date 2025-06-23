@@ -55,7 +55,17 @@ export class SuikaGame {
     // Track mouse movement
     this.canvas?.addEventListener("mousemove", (e) => {
       const rect = this.canvas?.getBoundingClientRect();
-      if (rect) this.mouseX = e.clientX - rect.left;
+      if (rect) {
+        let newMouseX = e.clientX - rect.left;
+
+        // Constrain mouse position by character radius to prevent going past box boundaries
+        if (this.currentCharacter) {
+          const radius = this.currentCharacter.radius;
+          newMouseX = Math.max(radius, Math.min(GAME_CONFIG.CANVAS_WIDTH - radius, newMouseX));
+        }
+
+        this.mouseX = newMouseX;
+      }
     });
 
     // Add character on click
@@ -65,7 +75,11 @@ export class SuikaGame {
 
       const rect = this.canvas?.getBoundingClientRect();
       if (rect) {
-        const x = e.clientX - rect.left;
+        let x = e.clientX - rect.left;
+
+        // Constrain drop position by character radius to prevent going past box boundaries
+        const radius = this.currentCharacter.radius;
+        x = Math.max(radius, Math.min(GAME_CONFIG.CANVAS_WIDTH - radius, x));
 
         // Drop at fixed Y position (just above the game over line)
         const dropY = GAME_CONFIG.GAME_OVER_HEIGHT - 50;
