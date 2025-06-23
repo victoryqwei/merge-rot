@@ -10,6 +10,8 @@ export class SoundManager {
   private onLoadComplete?: () => void;
   private volume = 1; // Default volume
   private musicVolume = 0.1; // Lower volume for background music
+  private characterDebounceTimer: number | null = null; // Global debounce timer
+  private pendingCharacterSound: string | null = null; // Track highest tier character to play
 
   constructor() {
     this.loadAllSounds();
@@ -69,6 +71,32 @@ export class SoundManager {
     this.sounds.get(characterName)?.play();
   }
 
+  // Play a character's sound with global debouncing (prioritizes highest tier character)
+  playSoundDebounced(characterName: string, debounceMs: number = 500): void {
+    // Clear existing timer
+    if (this.characterDebounceTimer) {
+      clearTimeout(this.characterDebounceTimer);
+    }
+
+    // Check if this character is higher tier than the currently pending one
+    const currentCharacterIndex = CHARACTER_TYPES.findIndex((c) => c.name === characterName);
+    const pendingCharacterIndex = this.pendingCharacterSound ? CHARACTER_TYPES.findIndex((c) => c.name === this.pendingCharacterSound) : -1;
+
+    // Only update if this character is higher tier (lower index = higher tier)
+    if (pendingCharacterIndex === -1 || currentCharacterIndex <= pendingCharacterIndex) {
+      this.pendingCharacterSound = characterName;
+    }
+
+    // Set new timer
+    this.characterDebounceTimer = window.setTimeout(() => {
+      if (this.pendingCharacterSound) {
+        this.playSound(this.pendingCharacterSound);
+        this.pendingCharacterSound = null;
+      }
+      this.characterDebounceTimer = null;
+    }, debounceMs);
+  }
+
   // Play the pop sound
   playPop(): void {
     this.popSound?.play();
@@ -76,6 +104,16 @@ export class SoundManager {
 
   // Play background music
   playBackgroundMusic(): void {
+    this.backgroundMusic?.play();
+  }
+
+  // Pause background music (maintains position)
+  pauseBackgroundMusic(): void {
+    this.backgroundMusic?.pause();
+  }
+
+  // Resume background music (continues from where it was paused)
+  resumeBackgroundMusic(): void {
     this.backgroundMusic?.play();
   }
 

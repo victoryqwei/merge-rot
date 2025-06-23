@@ -70,6 +70,15 @@ export class SuikaGame {
     window.addEventListener("resize", () => {
       this.handleResize();
     });
+
+    // Handle tab focus/blur for background music
+    window.addEventListener("blur", () => {
+      this.soundManager.pauseBackgroundMusic();
+    });
+
+    window.addEventListener("focus", () => {
+      this.soundManager.resumeBackgroundMusic();
+    });
   }
 
   private handleResize(): void {

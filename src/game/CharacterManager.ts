@@ -66,7 +66,9 @@ export class CharacterManager {
             newCharacter.body.velocity.y = (vel1.y + vel2.y) / 2;
 
             // Play sound for the new merged character
-            this.soundManager.playSound(CHARACTER_TYPES[newType].name);
+            const newCharacterType = CHARACTER_TYPES[newType];
+            // Use debounced sound for all characters - SoundManager will prioritize highest tier
+            this.soundManager.playSoundDebounced(newCharacterType.name, 500);
             // Play pop sound
             this.soundManager.playPop();
 
