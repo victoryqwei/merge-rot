@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Box, Center } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import { useGameStore } from "../stores/StoreContext";
@@ -11,17 +11,35 @@ interface GameCanvasProps {
 const GameCanvas: React.FC<GameCanvasProps> = observer(({ gameService }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameStore = useGameStore();
+  const [shakeAngle, setShakeAngle] = useState(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
-    // Initialize the game
     gameService.initializeGame(canvas);
+
+    let animationFrame: number;
+    function updateShake() {
+      const game = gameService.getGame();
+      if (game) {
+        setShakeAngle((game.getShakeAngle() * 180) / Math.PI); // radians to degrees
+      }
+      animationFrame = requestAnimationFrame(updateShake);
+    }
+    updateShake();
+    return () => cancelAnimationFrame(animationFrame);
   }, [gameService]);
 
   return (
-    <Box position="relative" borderRadius="lg" overflow="hidden" boxShadow="xl">
+    <Box
+      position="relative"
+      borderRadius="lg"
+      overflow="hidden"
+      boxShadow="xl"
+      style={{
+        transform: `rotate(${shakeAngle}deg)`,
+        transition: shakeAngle === 0 ? "transform 0.2s" : undefined,
+      }}>
       <canvas
         ref={canvasRef}
         width={400}

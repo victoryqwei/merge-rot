@@ -1,6 +1,7 @@
+import React, { useEffect, useState } from "react";
 import { Box, Button, VStack } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
-import React from "react";
+import { FaFilm } from "react-icons/fa6";
 import { useGameService } from "../hooks/useGameService";
 import GameCanvas from "./GameCanvas";
 import GameOverOverlay from "./GameOverOverlay";
@@ -8,6 +9,20 @@ import ScoreBoard from "./ScoreBoard";
 
 const App: React.FC = observer(() => {
   const gameService = useGameService();
+  const [shakeAngle, setShakeAngle] = useState(0);
+
+  useEffect(() => {
+    let animationFrame: number;
+    function updateShake() {
+      const game = gameService.getGame();
+      if (game) {
+        setShakeAngle(game.getShakeAngle());
+      }
+      animationFrame = requestAnimationFrame(updateShake);
+    }
+    updateShake();
+    return () => cancelAnimationFrame(animationFrame);
+  }, [gameService]);
 
   const handleRestart = () => {
     gameService.restartGame();
@@ -36,11 +51,17 @@ const App: React.FC = observer(() => {
         </Box>
 
         {/* Controls */}
-        <VStack spacing={4} color="white" textAlign="center">
-          <Button colorScheme="orange" size="lg" onClick={handleShake} _hover={{ transform: "scale(1.05)" }} transition="all 0.2s">
-            🥤 Shake!
+        {shakeAngle === 0 && (
+          <Button
+            colorScheme="orange"
+            size="lg"
+            onClick={handleShake}
+            _hover={{ transform: "scale(1.05)" }}
+            transition="all 0.2s"
+            leftIcon={<FaFilm />}>
+            Shake!
           </Button>
-        </VStack>
+        )}
       </VStack>
     </Box>
   );

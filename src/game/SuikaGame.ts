@@ -171,10 +171,6 @@ export class SuikaGame {
 
   private draw(): void {
     this.renderer.clear();
-
-    // Apply shake rotation
-    this.renderer.applyShakeRotation(this.shakeAngle);
-
     this.renderer.drawGameOverBox();
 
     // Draw characters
@@ -278,5 +274,9 @@ export class SuikaGame {
 
   public setHasStartedCallback(callback: (started: boolean) => void): void {
     this.onHasStarted = callback;
+  }
+
+  public getShakeAngle(): number {
+    return this.shakeAngle;
   }
 }
