@@ -18,9 +18,9 @@ const GameCanvas: React.FC = observer(() => {
   return (
     <Box
       position="relative"
+      padding="10px"
       borderRadius="lg"
       overflow="hidden"
-      boxShadow="xl"
       style={{
         transform: `rotate(${game.getShakeAngle()}rad)`,
         transformOrigin: "center",
