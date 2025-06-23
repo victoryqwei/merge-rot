@@ -1,6 +1,7 @@
 import * as Matter from "matter-js";
 import type { Character } from "../types/GameTypes";
 import { GAME_CONFIG } from "../constants/GameConstants";
+import { ShapeDetector } from "./ShapeDetector";
 
 export class PhysicsEngine {
   private engine: Matter.Engine;
@@ -61,6 +62,18 @@ export class PhysicsEngine {
       friction: 0.8,
       density: 0.001,
     });
+
+    this.bodies.push(body);
+    Matter.World.add(this.world, body);
+
+    // Add body to collision detector
+    this.collisionDetector.bodies.push(body);
+
+    return body;
+  }
+
+  async createCharacterBodyFromImage(image: HTMLImageElement, radius: number, x: number, y: number): Promise<Matter.Body> {
+    const body = await ShapeDetector.createCharacterBodyFromImage(image, x, y, radius);
 
     this.bodies.push(body);
     Matter.World.add(this.world, body);

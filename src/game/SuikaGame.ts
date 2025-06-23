@@ -46,7 +46,7 @@ export class SuikaGame {
     });
 
     // Add character on click
-    this.canvas.addEventListener("click", (e) => {
+    this.canvas.addEventListener("click", async (e) => {
       if (this.gameOver || !this.currentCharacter || this.dropCooldown > 0 || this.characterAnimationProgress < 1) return;
 
       const rect = this.canvas.getBoundingClientRect();
@@ -56,7 +56,7 @@ export class SuikaGame {
       const dropY = GAME_CONFIG.GAME_OVER_HEIGHT - 50;
 
       // Create and add the character at the restricted position
-      const character = this.characterManager.createCharacter(this.currentCharacter, x, dropY);
+      const character = await this.characterManager.createCharacter(this.currentCharacter, x, dropY);
       this.characterManager.addCharacter(character);
 
       // Start cooldown timer (convert ms to frames at 60fps)
@@ -100,7 +100,7 @@ export class SuikaGame {
     this.onNextCharacterUpdate?.(this.currentCharacter);
   }
 
-  private update(): void {
+  private async update(): Promise<void> {
     if (this.gameOver) return;
 
     // Update cooldown timer
@@ -115,7 +115,7 @@ export class SuikaGame {
     this.characterManager.updateCharacters();
 
     // Check for character combinations
-    const scoreIncrease = this.characterManager.checkCombinations();
+    const scoreIncrease = await this.characterManager.checkCombinations();
     if (scoreIncrease > 0) {
       this.score += scoreIncrease;
       this.onScoreUpdate?.(this.score);
@@ -160,9 +160,10 @@ export class SuikaGame {
   }
 
   private gameLoop(): void {
-    this.update();
-    this.draw();
-    requestAnimationFrame(() => this.gameLoop());
+    this.update().then(() => {
+      this.draw();
+      requestAnimationFrame(() => this.gameLoop());
+    });
   }
 
   private endGame(): void {

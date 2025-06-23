@@ -3,6 +3,7 @@ import type { Particle } from "../types/GameTypes";
 import { GAME_CONFIG } from "../constants/GameConstants";
 import { PhysicsEngine } from "../utils/PhysicsEngine";
 import { SoundManager } from "../utils/SoundManager";
+import { ImageManager } from "../utils/ImageManager";
 import { random } from "lodash";
 import * as Matter from "matter-js";
 
@@ -11,18 +12,31 @@ export class CharacterManager {
   private particles: Particle[] = [];
   private physicsEngine: PhysicsEngine;
   private soundManager: SoundManager;
+  private imageManager: ImageManager;
 
   constructor(physicsEngine: PhysicsEngine, soundManager: SoundManager) {
     this.physicsEngine = physicsEngine;
     this.soundManager = soundManager;
+    this.imageManager = new ImageManager();
   }
 
   generateRandomCharacter(): CharacterClass {
     return CharacterClass.getRandom(4); // Start with smaller characters (tier 0-4)
   }
 
-  createCharacter(characterType: CharacterClass, x: number, y: number): Character {
-    const body = this.physicsEngine.createCharacterBody(characterType.radius, x, y);
+  async createCharacter(characterType: CharacterClass, x: number, y: number): Promise<Character> {
+    let body: Matter.Body;
+
+    // Try to get the character image
+    const image = this.imageManager.getImage(characterType.name);
+
+    if (image && image.complete) {
+      // Use image-based physics body
+      body = await this.physicsEngine.createCharacterBodyFromImage(image, characterType.radius, x, y);
+    } else {
+      // Fallback to circle physics body
+      body = this.physicsEngine.createCharacterBody(characterType.radius, x, y);
+    }
 
     // Add some initial angular velocity for rotation
     Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.1); // Random rotation between -0.05 and 0.05
@@ -57,7 +71,7 @@ export class CharacterManager {
     }
   }
 
-  checkCombinations(): number {
+  async checkCombinations(): Promise<number> {
     let scoreIncrease = 0;
     const charactersToRemove: number[] = [];
     const charactersToAdd: Character[] = [];
@@ -98,7 +112,7 @@ export class CharacterManager {
         const vel2 = this.physicsEngine.getBodyVelocity(character2.body);
 
         // Create new merged character
-        const newCharacter = this.createCharacter(nextCharacterClass, (pos1.x + pos2.x) / 2, (pos1.y + pos2.y) / 2);
+        const newCharacter = await this.createCharacter(nextCharacterClass, (pos1.x + pos2.x) / 2, (pos1.y + pos2.y) / 2);
 
         // Set velocity
         newCharacter.body.velocity.x = (vel1.x + vel2.x) / 2;
