@@ -34,6 +34,10 @@ export class GameService {
       this.gameStore.setGameOver(true, finalScore);
     });
 
+    this.game.setHasStartedCallback((started: boolean) => {
+      this.gameStore.setHasStarted(started);
+    });
+
     // Store the game instance in the store
     this.gameStore.setGameInstance(this.game);
 

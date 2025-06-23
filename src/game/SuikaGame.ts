@@ -16,10 +16,12 @@ export class SuikaGame {
   private mouseX: number = 0;
   private gameOver: boolean = false;
   private dropCooldown: number = 0;
+  private hasStarted: boolean = false;
   private characterAnimationProgress: number = 0; // 0 to 1 for animation
   private onScoreUpdate?: (score: number) => void;
   private onNextCharacterUpdate?: (character: CharacterClass) => void;
   private onGameOver?: (finalScore: number) => void;
+  private onHasStarted?: (started: boolean) => void;
 
   // Shake properties
   private shakeIntensity: number = 0;
@@ -71,8 +73,12 @@ export class SuikaGame {
       // Start cooldown timer (convert ms to frames at 60fps)
       this.dropCooldown = Math.ceil(GAME_CONFIG.DROP_COOLDOWN_TIME / 16.67); // 1000ms / 60fps ≈ 16.67ms per frame
 
+      this.setHasStarted(true);
+
       // Generate next character
       this.generateNextCharacter();
+
+      if (this.onHasStarted) this.onHasStarted(true);
     });
 
     // Handle window resize for high DPI displays
@@ -101,6 +107,10 @@ export class SuikaGame {
     // Set CSS size back to original dimensions
     this.canvas.style.width = GAME_CONFIG.CANVAS_WIDTH + "px";
     this.canvas.style.height = GAME_CONFIG.CANVAS_HEIGHT + "px";
+  }
+
+  private setHasStarted(hasStarted: boolean): void {
+    this.hasStarted = hasStarted;
   }
 
   private generateNextCharacter(): void {
@@ -165,7 +175,6 @@ export class SuikaGame {
     // Apply shake rotation
     this.renderer.applyShakeRotation(this.shakeAngle);
 
-    this.renderer.drawGrid();
     this.renderer.drawGameOverBox();
 
     // Draw characters
@@ -265,5 +274,9 @@ export class SuikaGame {
     this.shakeDuration = duration;
     this.shakeTimer = duration;
     this.shakeTime = 0; // Reset shake time
+  }
+
+  public setHasStartedCallback(callback: (started: boolean) => void): void {
+    this.onHasStarted = callback;
   }
 }

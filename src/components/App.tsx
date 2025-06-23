@@ -1,10 +1,10 @@
-import React from "react";
-import { Box, VStack, Text, Button } from "@chakra-ui/react";
+import { Box, Button, VStack } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
+import React from "react";
 import { useGameService } from "../hooks/useGameService";
-import ScoreBoard from "./ScoreBoard";
 import GameCanvas from "./GameCanvas";
 import GameOverOverlay from "./GameOverOverlay";
+import ScoreBoard from "./ScoreBoard";
 
 const App: React.FC = observer(() => {
   const gameService = useGameService();
@@ -18,7 +18,13 @@ const App: React.FC = observer(() => {
   };
 
   return (
-    <Box minH="100vh" bgGradient="linear(to-br, blue.400, purple.600)" display="flex" justifyContent="center" alignItems="center" p={4}>
+    <Box
+      minH="100vh"
+      bgGradient="linear(to-t,rgb(129, 205, 255), #3b82f6)"
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      p={4}>
       <VStack spacing={6} align="center">
         {/* Score Board */}
         <ScoreBoard />
@@ -31,11 +37,6 @@ const App: React.FC = observer(() => {
 
         {/* Controls */}
         <VStack spacing={4} color="white" textAlign="center">
-          <VStack spacing={2}>
-            <Text fontSize="md">Click to drop characters</Text>
-            <Text fontSize="md">Combine same characters to score points!</Text>
-          </VStack>
-
           <Button colorScheme="orange" size="lg" onClick={handleShake} _hover={{ transform: "scale(1.05)" }} transition="all 0.2s">
             🥤 Shake!
           </Button>

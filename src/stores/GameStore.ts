@@ -9,6 +9,7 @@ export class GameStore {
   isLoading: boolean = true;
   gameOver: boolean = false;
   finalScore: number = 0;
+  hasStarted: boolean = false;
 
   // Game instance reference
   private gameInstance: SuikaGame | null = null;
@@ -41,12 +42,16 @@ export class GameStore {
     }
   }
 
+  setHasStarted(started: boolean) {
+    this.hasStarted = started;
+  }
+
   resetGame() {
     this.score = 0;
     this.nextCharacter = null;
     this.gameOver = false;
     this.finalScore = 0;
-
+    this.hasStarted = false;
     if (this.gameInstance) {
       this.gameInstance.restart();
     }
