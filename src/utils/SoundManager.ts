@@ -9,7 +9,7 @@ export class SoundManager {
   private totalCount = 0;
   private onLoadComplete?: () => void;
   private volume = 1; // Default volume
-  private musicVolume = 0.1; // Lower volume for background music
+  private musicVolume = 0.2; // Lower volume for background music
   private characterDebounceTimer: number | null = null; // Global debounce timer
   private pendingCharacterSound: string | null = null; // Track highest tier character to play
 
@@ -85,7 +85,7 @@ export class SoundManager {
       : -1;
 
     // Only update if this character is higher tier (lower index = higher tier)
-    if (pendingCharacterIndex === -1 || currentCharacterIndex <= pendingCharacterIndex) {
+    if (pendingCharacterIndex === -1 || currentCharacterIndex >= pendingCharacterIndex) {
       this.pendingCharacterSound = characterName;
     }
 
