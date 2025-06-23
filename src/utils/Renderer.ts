@@ -143,6 +143,20 @@ export class Renderer {
     this.ctx.globalAlpha = 1.0;
   }
 
+  drawDropIndicator(x: number, dropY: number): void {
+    // Draw vertical line from mouse position to drop position
+    this.ctx.strokeStyle = "rgba(0, 255, 0, 0.6)";
+    this.ctx.lineWidth = 2 * this.pixelRatio;
+    this.ctx.setLineDash([3 * this.pixelRatio, 3 * this.pixelRatio]);
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(x * this.pixelRatio, dropY * this.pixelRatio);
+    this.ctx.lineTo(x * this.pixelRatio, GAME_CONFIG.CANVAS_HEIGHT * this.pixelRatio);
+    this.ctx.stroke();
+
+    this.ctx.setLineDash([]);
+  }
+
   getPixelRatio(): number {
     return this.pixelRatio;
   }

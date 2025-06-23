@@ -14,10 +14,8 @@ export class SuikaGame {
   private score: number = 0;
   private currentCharacter: CharacterType | null = null;
   private mouseX: number = 0;
-  private mouseY: number = 0;
   private gameOver: boolean = false;
   private dropCooldown: number = 0;
-  private dropCooldownTime: number = 36; // 600ms at 60fps
   private onScoreUpdate?: (score: number) => void;
   private onNextCharacterUpdate?: (character: CharacterType) => void;
   private onGameOver?: (finalScore: number) => void;
@@ -44,7 +42,6 @@ export class SuikaGame {
     this.canvas.addEventListener("mousemove", (e) => {
       const rect = this.canvas.getBoundingClientRect();
       this.mouseX = e.clientX - rect.left;
-      this.mouseY = e.clientY - rect.top;
     });
 
     // Add character on click
@@ -53,14 +50,16 @@ export class SuikaGame {
 
       const rect = this.canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
 
-      // Create and add the character at mouse position
-      const character = this.characterManager.createCharacter(this.currentCharacter, x, y);
+      // Drop at fixed Y position (just above the game over line)
+      const dropY = GAME_CONFIG.GAME_OVER_HEIGHT - 50;
+
+      // Create and add the character at the restricted position
+      const character = this.characterManager.createCharacter(this.currentCharacter, x, dropY);
       this.characterManager.addCharacter(character);
 
-      // Start cooldown timer
-      this.dropCooldown = this.dropCooldownTime;
+      // Start cooldown timer (convert ms to frames at 60fps)
+      this.dropCooldown = Math.ceil(GAME_CONFIG.DROP_COOLDOWN_TIME / 16.67); // 1000ms / 60fps ≈ 16.67ms per frame
 
       // Generate next character
       this.generateNextCharacter();
@@ -127,10 +126,13 @@ export class SuikaGame {
       this.renderer.drawCharacter(character);
     }
 
-    // Draw current character preview at mouse position (with cooldown indication)
+    // Draw current character preview and drop indicator (only if in valid drop area)
     if (this.currentCharacter && !this.gameOver) {
-      const alpha = this.dropCooldown > 0 ? 0.3 : 0.6; // Dim when on cooldown
-      this.renderer.drawMouseCursor(this.mouseX, this.mouseY, this.currentCharacter, alpha);
+      const dropY = GAME_CONFIG.GAME_OVER_HEIGHT - 50;
+
+      const alpha = this.dropCooldown > 0 ? 0 : 1; // Dim when on cooldown
+      this.renderer.drawMouseCursor(this.mouseX, dropY, this.currentCharacter, alpha);
+      this.renderer.drawDropIndicator(this.mouseX, dropY);
     }
 
     // Draw particles
