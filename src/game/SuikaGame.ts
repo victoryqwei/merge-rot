@@ -13,6 +13,8 @@ export class SuikaGame {
   private mouseX: number = 0;
   private mouseY: number = 0;
   private gameOver: boolean = false;
+  private dropCooldown: number = 0;
+  private dropCooldownTime: number = 36; // 600ms at 60fps
   private onScoreUpdate?: (score: number) => void;
   private onNextFruitUpdate?: (fruit: FruitType) => void;
   private onGameOver?: (finalScore: number) => void;
@@ -41,7 +43,7 @@ export class SuikaGame {
 
     // Add fruit on click
     this.canvas.addEventListener("click", (e) => {
-      if (this.gameOver || !this.currentFruit) return;
+      if (this.gameOver || !this.currentFruit || this.dropCooldown > 0) return;
 
       const rect = this.canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -50,6 +52,9 @@ export class SuikaGame {
       // Create and add the fruit at mouse position
       const fruit = this.fruitManager.createFruit(this.currentFruit, x, y);
       this.fruitManager.addFruit(fruit);
+
+      // Start cooldown timer
+      this.dropCooldown = this.dropCooldownTime;
 
       // Generate next fruit
       this.generateNextFruit();
@@ -63,6 +68,11 @@ export class SuikaGame {
 
   private update(): void {
     if (this.gameOver) return;
+
+    // Update cooldown timer
+    if (this.dropCooldown > 0) {
+      this.dropCooldown--;
+    }
 
     // Update physics
     this.fruitManager.updateFruits();
@@ -93,9 +103,10 @@ export class SuikaGame {
       this.renderer.drawFruit(fruit);
     }
 
-    // Draw current fruit preview at mouse position
+    // Draw current fruit preview at mouse position (with cooldown indication)
     if (this.currentFruit && !this.gameOver) {
-      this.renderer.drawMouseCursor(this.mouseX, this.mouseY, this.currentFruit);
+      const alpha = this.dropCooldown > 0 ? 0.3 : 0.6; // Dim when on cooldown
+      this.renderer.drawMouseCursor(this.mouseX, this.mouseY, this.currentFruit, alpha);
     }
 
     // Draw particles
@@ -136,6 +147,7 @@ export class SuikaGame {
     this.score = 0;
     this.currentFruit = null;
     this.gameOver = false;
+    this.dropCooldown = 0;
     this.fruitManager.clear();
     this.generateNextFruit();
     this.onScoreUpdate?.(this.score);

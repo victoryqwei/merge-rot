@@ -83,9 +83,9 @@ export class Renderer {
     this.ctx.setLineDash([]);
   }
 
-  drawMouseCursor(x: number, y: number, fruitType: FruitType): void {
+  drawMouseCursor(x: number, y: number, fruitType: FruitType, alpha: number = 0.6): void {
     // Draw a preview of the fruit at mouse position
-    this.ctx.globalAlpha = 0.6;
+    this.ctx.globalAlpha = alpha;
     this.ctx.fillStyle = fruitType.color;
     this.ctx.beginPath();
     this.ctx.arc(x, y, fruitType.radius, 0, Math.PI * 2);
