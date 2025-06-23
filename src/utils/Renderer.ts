@@ -143,6 +143,43 @@ export class Renderer {
     this.ctx.globalAlpha = 1.0;
   }
 
+  drawAnimatedMouseCursor(x: number, y: number, characterType: CharacterType, animationProgress: number, alpha: number = 0.6): void {
+    const scaledX = x * this.pixelRatio;
+    const scaledY = y * this.pixelRatio;
+    const animatedRadius = characterType.radius * animationProgress * this.pixelRatio;
+
+    // Don't draw if animation progress is 0
+    if (animationProgress <= 0) return;
+
+    // Draw a preview of the character at mouse position with animation
+    this.ctx.globalAlpha = alpha * animationProgress; // Fade in with animation
+
+    const image = this.imageManager.getImage(characterType.name);
+    if (image) {
+      this.ctx.save();
+      this.ctx.beginPath();
+      this.ctx.arc(scaledX, scaledY, animatedRadius, 0, Math.PI * 2);
+      this.ctx.clip();
+
+      const imageSize = animatedRadius * 2;
+      this.ctx.drawImage(image, scaledX - animatedRadius, scaledY - animatedRadius, imageSize, imageSize);
+
+      this.ctx.restore();
+    } else {
+      // Fallback to colored circle if image not loaded
+      this.ctx.fillStyle = "#ff6b6b";
+      this.ctx.beginPath();
+      this.ctx.arc(scaledX, scaledY, animatedRadius, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
+
+    this.ctx.strokeStyle = "#333";
+    this.ctx.lineWidth = 2 * this.pixelRatio;
+    this.ctx.stroke();
+
+    this.ctx.globalAlpha = 1.0;
+  }
+
   drawDropIndicator(x: number, dropY: number): void {
     // Draw vertical line from mouse position to drop position
     this.ctx.strokeStyle = "rgba(0, 255, 0, 0.6)";

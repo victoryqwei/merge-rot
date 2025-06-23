@@ -16,6 +16,7 @@ export class SuikaGame {
   private mouseX: number = 0;
   private gameOver: boolean = false;
   private dropCooldown: number = 0;
+  private characterAnimationProgress: number = 0; // 0 to 1 for animation
   private onScoreUpdate?: (score: number) => void;
   private onNextCharacterUpdate?: (character: CharacterType) => void;
   private onGameOver?: (finalScore: number) => void;
@@ -46,7 +47,7 @@ export class SuikaGame {
 
     // Add character on click
     this.canvas.addEventListener("click", (e) => {
-      if (this.gameOver || !this.currentCharacter || this.dropCooldown > 0) return;
+      if (this.gameOver || !this.currentCharacter || this.dropCooldown > 0 || this.characterAnimationProgress < 1) return;
 
       const rect = this.canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -86,6 +87,7 @@ export class SuikaGame {
 
   private generateNextCharacter(): void {
     this.currentCharacter = this.characterManager.generateRandomCharacter();
+    this.characterAnimationProgress = 0; // Reset animation
     this.onNextCharacterUpdate?.(this.currentCharacter);
   }
 
@@ -95,6 +97,9 @@ export class SuikaGame {
     // Update cooldown timer
     if (this.dropCooldown > 0) {
       this.dropCooldown--;
+    } else {
+      // Animate character when ready to drop
+      this.characterAnimationProgress = Math.min(1, this.characterAnimationProgress + 0.05);
     }
 
     // Update physics
@@ -126,13 +131,17 @@ export class SuikaGame {
       this.renderer.drawCharacter(character);
     }
 
-    // Draw current character preview and drop indicator (only if in valid drop area)
+    // Draw current character preview and drop indicator
     if (this.currentCharacter && !this.gameOver) {
       const dropY = GAME_CONFIG.GAME_OVER_HEIGHT - 50;
 
-      const alpha = this.dropCooldown > 0 ? 0 : 1; // Dim when on cooldown
-      this.renderer.drawMouseCursor(this.mouseX, dropY, this.currentCharacter, alpha);
-      this.renderer.drawDropIndicator(this.mouseX, dropY);
+      // Draw animated character preview
+      this.renderer.drawAnimatedMouseCursor(this.mouseX, dropY, this.currentCharacter, this.characterAnimationProgress, 1);
+
+      // Only show drop indicator when character is fully animated and ready
+      if (this.characterAnimationProgress >= 1) {
+        this.renderer.drawDropIndicator(this.mouseX, dropY);
+      }
     }
 
     // Draw particles
