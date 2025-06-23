@@ -133,7 +133,7 @@ export class SuikaGame {
   private draw(): void {
     this.renderer.clear();
     this.renderer.drawGrid();
-    this.renderer.drawGameOverLine();
+    this.renderer.drawGameOverBox();
 
     // Draw characters
     for (const character of this.characterManager.getCharacters()) {

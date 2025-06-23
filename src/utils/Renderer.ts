@@ -87,15 +87,58 @@ export class Renderer {
     this.ctx.fill();
   }
 
-  drawGameOverLine(): void {
-    this.ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
-    this.ctx.lineWidth = 3 * this.pixelRatio;
-    this.ctx.setLineDash([5 * this.pixelRatio, 5 * this.pixelRatio]);
+  drawGameOverBox(): void {
+    const boxY = GAME_CONFIG.GAME_OVER_HEIGHT * this.pixelRatio;
+    const boxHeight = (GAME_CONFIG.CANVAS_HEIGHT - GAME_CONFIG.GAME_OVER_HEIGHT) * this.pixelRatio;
+    const boxWidth = GAME_CONFIG.CANVAS_WIDTH * this.pixelRatio;
+    const thickness = 50 * this.pixelRatio; // Thickness of the box walls
+
+    // Draw outer box (back face)
+    this.ctx.fillStyle = "rgba(139, 69, 19, 0.4)"; // Brown with transparency
+    this.ctx.fillRect(0, boxY, boxWidth, boxHeight);
+
+    // Draw outer box border
+    this.ctx.strokeStyle = "rgba(139, 69, 19, 0.9)"; // Darker brown for border
+    this.ctx.lineWidth = 2 * this.pixelRatio;
+
+    this.ctx.strokeRect(0, boxY, boxWidth, boxHeight);
+
+    // Draw inner box (front face) - creates the cutout effect
+    this.ctx.fillStyle = "rgba(160, 82, 45, 0.3)"; // Lighter brown for inner face
+    this.ctx.fillRect(thickness, boxY - thickness, boxWidth - thickness * 2, boxHeight);
+
+    // Draw inner box border
+    this.ctx.strokeStyle = "rgba(160, 82, 45, 0.8)"; // Lighter brown for inner border
+    this.ctx.lineWidth = 1 * this.pixelRatio;
+    this.ctx.strokeRect(thickness, boxY - thickness, boxWidth - thickness * 2, boxHeight);
+
+    // Draw connecting lines to create the 3D effect
+    this.ctx.strokeStyle = "rgba(139, 69, 19, 0.7)";
+    this.ctx.lineWidth = 1 * this.pixelRatio;
+
+    // Top-left corner
     this.ctx.beginPath();
-    this.ctx.moveTo(0, GAME_CONFIG.GAME_OVER_HEIGHT * this.pixelRatio);
-    this.ctx.lineTo(GAME_CONFIG.CANVAS_WIDTH * this.pixelRatio, GAME_CONFIG.GAME_OVER_HEIGHT * this.pixelRatio);
+    this.ctx.moveTo(0, boxY);
+    this.ctx.lineTo(thickness, boxY - thickness);
     this.ctx.stroke();
-    this.ctx.setLineDash([]);
+
+    // Top-right corner
+    this.ctx.beginPath();
+    this.ctx.moveTo(boxWidth, boxY);
+    this.ctx.lineTo(boxWidth - thickness, boxY - thickness);
+    this.ctx.stroke();
+
+    // Bottom-left corner
+    this.ctx.beginPath();
+    this.ctx.moveTo(0, boxY + boxHeight);
+    this.ctx.lineTo(thickness, boxY + boxHeight - thickness);
+    this.ctx.stroke();
+
+    // Bottom-right corner
+    this.ctx.beginPath();
+    this.ctx.moveTo(boxWidth, boxY + boxHeight);
+    this.ctx.lineTo(boxWidth - thickness, boxY + boxHeight - thickness);
+    this.ctx.stroke();
   }
 
   drawMouseCursor(x: number, y: number, characterType: CharacterClass, alpha: number = 0.6): void {
