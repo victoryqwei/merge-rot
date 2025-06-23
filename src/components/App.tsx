@@ -1,52 +1,43 @@
-import React, { useEffect, useState } from "react";
 import { Box, Button, VStack } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
+import React, { useEffect, useState } from "react";
 import { FaFilm } from "react-icons/fa6";
-import { useGameService } from "../hooks/useGameService";
+import { useGame } from "../game/useGame";
 import GameCanvas from "./GameCanvas";
 import GameOverOverlay from "./GameOverOverlay";
 import ScoreBoard from "./ScoreBoard";
 
 const App: React.FC = observer(() => {
-  const gameService = useGameService();
+  const game = useGame();
   const [shakeAngle, setShakeAngle] = useState(0);
 
   useEffect(() => {
     let animationFrame: number;
     function updateShake() {
-      const game = gameService.getGame();
-      if (game) {
-        setShakeAngle(game.getShakeAngle());
-      }
+      setShakeAngle(game.getShakeAngle());
       animationFrame = requestAnimationFrame(updateShake);
     }
     updateShake();
     return () => cancelAnimationFrame(animationFrame);
-  }, [gameService]);
+  }, [game]);
 
   const handleRestart = () => {
-    gameService.restartGame();
+    game.restart();
   };
 
   const handleShake = () => {
-    gameService.shake();
+    game.shake();
   };
 
   return (
-    <Box
-      minH="100vh"
-      bgGradient="linear(to-t,rgb(129, 205, 255), #3b82f6)"
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      p={4}>
+    <Box minH="100vh" bgGradient="linear(to-t,rgb(129, 205, 255), #3b82f6)" display="flex" justifyContent="center" p={4}>
       <VStack spacing={6} align="center">
         {/* Score Board */}
         <ScoreBoard />
 
         {/* Game Canvas Container */}
         <Box position="relative">
-          <GameCanvas gameService={gameService} />
+          <GameCanvas />
           <GameOverOverlay onRestart={handleRestart} />
         </Box>
 

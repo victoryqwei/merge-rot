@@ -1,16 +1,16 @@
 import React from "react";
 import { Center, VStack, Text, Button } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
-import { useGameStore } from "../stores/StoreContext";
+import { useGame } from "../game/useGame";
 
 interface GameOverOverlayProps {
   onRestart: () => void;
 }
 
 const GameOverOverlay: React.FC<GameOverOverlayProps> = observer(({ onRestart }) => {
-  const gameStore = useGameStore();
+  const game = useGame();
 
-  if (!gameStore.gameOver) {
+  if (!game.gameOver) {
     return null;
   }
 
@@ -21,7 +21,7 @@ const GameOverOverlay: React.FC<GameOverOverlayProps> = observer(({ onRestart })
           Game Over!
         </Text>
         <Text fontSize="xl" color="white">
-          Final Score: {gameStore.finalScore}
+          Final Score: {game.score}
         </Text>
         <Button colorScheme="blue" size="lg" onClick={onRestart} _hover={{ transform: "translateY(-2px)" }} transition="all 0.3s">
           Play Again

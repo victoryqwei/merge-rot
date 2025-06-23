@@ -4,39 +4,42 @@ import { Renderer } from "../utils/Renderer";
 import { PhysicsEngine } from "../utils/PhysicsEngine";
 import { SoundManager } from "../utils/SoundManager";
 import { GAME_CONFIG } from "../constants/GameConstants";
+import { makeAutoObservable } from "mobx";
 
 export class SuikaGame {
-  private canvas: HTMLCanvasElement;
-  private renderer: Renderer;
-  private physicsEngine: PhysicsEngine;
-  private characterManager: CharacterManager;
-  private soundManager: SoundManager;
-  private score: number = 0;
-  private currentCharacter: CharacterClass | null = null;
-  private mouseX: number = 0;
-  private gameOver: boolean = false;
-  private dropCooldown: number = 0;
-  private hasStarted: boolean = false;
-  private characterAnimationProgress: number = 0; // 0 to 1 for animation
-  private onScoreUpdate?: (score: number) => void;
-  private onNextCharacterUpdate?: (character: CharacterClass) => void;
-  private onGameOver?: (finalScore: number) => void;
-  private onHasStarted?: (started: boolean) => void;
+  public canvas: HTMLCanvasElement | null = null;
+  renderer?: Renderer;
+  public physicsEngine: PhysicsEngine;
+  public characterManager: CharacterManager;
+  public soundManager: SoundManager;
+  public score: number = 0;
+  public currentCharacter: CharacterClass | null = null;
+  public nextCharacter: CharacterClass | null = null;
+  public mouseX: number = 0;
+  public gameOver: boolean = false;
+  public dropCooldown: number = 0;
+  public hasStarted: boolean = false;
+  public characterAnimationProgress: number = 0; // 0 to 1 for animation
 
   // Shake properties
-  private shakeIntensity: number = 0;
-  private shakeDuration: number = 0;
-  private shakeTimer: number = 0;
-  private shakeAngle: number = 0;
-  private shakeTime: number = 0; // For smooth oscillation
-  private shakeVelocity: number = 0; // For physics calculations
+  public shakeIntensity: number = 0;
+  public shakeDuration: number = 0;
+  public shakeTimer: number = 0;
+  public shakeAngle: number = 0;
+  public shakeTime: number = 0; // For smooth oscillation
+  public shakeVelocity: number = 0; // For physics calculations
 
-  constructor(canvas: HTMLCanvasElement) {
-    this.canvas = canvas;
-    this.renderer = new Renderer(canvas);
+  constructor(canvas: HTMLCanvasElement | null) {
+    makeAutoObservable(this);
     this.physicsEngine = new PhysicsEngine();
     this.soundManager = new SoundManager();
     this.characterManager = new CharacterManager(this.physicsEngine, this.soundManager);
+    if (canvas) this.setCanvas(canvas);
+  }
+
+  setCanvas(canvas: HTMLCanvasElement) {
+    this.canvas = canvas;
+    this.renderer = new Renderer(canvas);
     this.init();
   }
 
@@ -50,35 +53,35 @@ export class SuikaGame {
 
   private setupEventListeners(): void {
     // Track mouse movement
-    this.canvas.addEventListener("mousemove", (e) => {
-      const rect = this.canvas.getBoundingClientRect();
-      this.mouseX = e.clientX - rect.left;
+    this.canvas?.addEventListener("mousemove", (e) => {
+      const rect = this.canvas?.getBoundingClientRect();
+      if (rect) this.mouseX = e.clientX - rect.left;
     });
 
     // Add character on click
-    this.canvas.addEventListener("click", async (e) => {
+    this.canvas?.addEventListener("click", async (e) => {
       if (this.gameOver || !this.currentCharacter || this.dropCooldown > 0 || this.characterAnimationProgress < 1 || this.shakeTimer > 0)
         return;
 
-      const rect = this.canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
+      const rect = this.canvas?.getBoundingClientRect();
+      if (rect) {
+        const x = e.clientX - rect.left;
 
-      // Drop at fixed Y position (just above the game over line)
-      const dropY = GAME_CONFIG.GAME_OVER_HEIGHT - 50;
+        // Drop at fixed Y position (just above the game over line)
+        const dropY = GAME_CONFIG.GAME_OVER_HEIGHT - 50;
 
-      // Create and add the character at the restricted position
-      const character = await this.characterManager.createCharacter(this.currentCharacter, x, dropY);
-      this.characterManager.addCharacter(character);
+        // Create and add the character at the restricted position
+        const character = await this.characterManager.createCharacter(this.currentCharacter, x, dropY);
+        this.characterManager.addCharacter(character);
 
-      // Start cooldown timer (convert ms to frames at 60fps)
-      this.dropCooldown = Math.ceil(GAME_CONFIG.DROP_COOLDOWN_TIME / 16.67); // 1000ms / 60fps ≈ 16.67ms per frame
+        // Start cooldown timer (convert ms to frames at 60fps)
+        this.dropCooldown = Math.ceil(GAME_CONFIG.DROP_COOLDOWN_TIME / 16.67); // 1000ms / 60fps ≈ 16.67ms per frame
 
-      this.setHasStarted(true);
+        this.setHasStarted(true);
 
-      // Generate next character
-      this.generateNextCharacter();
-
-      if (this.onHasStarted) this.onHasStarted(true);
+        // Generate next character
+        this.generateNextCharacter();
+      }
     });
 
     // Handle window resize for high DPI displays
@@ -98,15 +101,17 @@ export class SuikaGame {
 
   private handleResize(): void {
     // Re-setup the canvas for high DPI if needed
-    const pixelRatio = this.renderer.getPixelRatio();
+    const pixelRatio = this.renderer?.getPixelRatio() || 1;
 
     // Update canvas size
-    this.canvas.width = GAME_CONFIG.CANVAS_WIDTH * pixelRatio;
-    this.canvas.height = GAME_CONFIG.CANVAS_HEIGHT * pixelRatio;
+    if (this.canvas) {
+      this.canvas.width = GAME_CONFIG.CANVAS_WIDTH * pixelRatio;
+      this.canvas.height = GAME_CONFIG.CANVAS_HEIGHT * pixelRatio;
 
-    // Set CSS size back to original dimensions
-    this.canvas.style.width = GAME_CONFIG.CANVAS_WIDTH + "px";
-    this.canvas.style.height = GAME_CONFIG.CANVAS_HEIGHT + "px";
+      // Set CSS size back to original dimensions
+      this.canvas.style.width = GAME_CONFIG.CANVAS_WIDTH + "px";
+      this.canvas.style.height = GAME_CONFIG.CANVAS_HEIGHT + "px";
+    }
   }
 
   private setHasStarted(hasStarted: boolean): void {
@@ -114,9 +119,9 @@ export class SuikaGame {
   }
 
   private generateNextCharacter(): void {
-    this.currentCharacter = this.characterManager.generateRandomCharacter();
+    this.currentCharacter = this.nextCharacter || this.characterManager.generateRandomCharacter();
     this.characterAnimationProgress = 0; // Reset animation
-    this.onNextCharacterUpdate?.(this.currentCharacter);
+    this.nextCharacter = this.characterManager.generateRandomCharacter();
   }
 
   private async update(): Promise<void> {
@@ -157,7 +162,6 @@ export class SuikaGame {
     const scoreIncrease = await this.characterManager.checkCombinations();
     if (scoreIncrease > 0) {
       this.score += scoreIncrease;
-      this.onScoreUpdate?.(this.score);
     }
 
     // Update particles
@@ -170,12 +174,12 @@ export class SuikaGame {
   }
 
   private draw(): void {
-    this.renderer.clear();
-    this.renderer.drawGameOverBox();
+    this.renderer?.clear();
+    this.renderer?.drawGameOverBox();
 
     // Draw characters
     for (const character of this.characterManager.getCharacters()) {
-      this.renderer.drawCharacter(character);
+      this.renderer?.drawCharacter(character);
     }
 
     // Draw current character preview and drop indicator
@@ -183,22 +187,22 @@ export class SuikaGame {
       const dropY = GAME_CONFIG.GAME_OVER_HEIGHT - 50;
 
       // Draw animated character preview
-      this.renderer.drawAnimatedMouseCursor(this.mouseX, dropY, this.currentCharacter, this.characterAnimationProgress, 1);
+      this.renderer?.drawAnimatedMouseCursor(this.mouseX, dropY, this.currentCharacter, this.characterAnimationProgress, 1);
 
       // Only show drop indicator when character is fully animated and ready
       if (this.characterAnimationProgress >= 1) {
-        this.renderer.drawDropIndicator(this.mouseX, dropY);
+        this.renderer?.drawDropIndicator(this.mouseX, dropY);
       }
     }
 
     // Draw particles
     for (const particle of this.characterManager.getParticles()) {
-      this.renderer.drawParticle(particle);
+      this.renderer?.drawParticle(particle);
     }
 
     // Restore canvas state if shake was applied
     if (this.shakeAngle !== 0) {
-      this.renderer.restoreShakeRotation();
+      this.renderer?.restoreShakeRotation();
     }
   }
 
@@ -211,20 +215,6 @@ export class SuikaGame {
 
   private endGame(): void {
     this.gameOver = true;
-    this.onGameOver?.(this.score);
-  }
-
-  // Public methods for external control
-  public setScoreCallback(callback: (score: number) => void): void {
-    this.onScoreUpdate = callback;
-  }
-
-  public setNextCharacterCallback(callback: (character: CharacterClass) => void): void {
-    this.onNextCharacterUpdate = callback;
-  }
-
-  public setGameOverCallback(callback: (finalScore: number) => void): void {
-    this.onGameOver = callback;
   }
 
   public getScore(): number {
@@ -262,7 +252,6 @@ export class SuikaGame {
     this.dropCooldown = 0;
     this.characterManager.clear();
     this.generateNextCharacter();
-    this.onScoreUpdate?.(this.score);
   }
 
   public shake(intensity: number = 20, duration: number = 400): void {
@@ -270,10 +259,6 @@ export class SuikaGame {
     this.shakeDuration = duration;
     this.shakeTimer = duration;
     this.shakeTime = 0; // Reset shake time
-  }
-
-  public setHasStartedCallback(callback: (started: boolean) => void): void {
-    this.onHasStarted = callback;
   }
 
   public getShakeAngle(): number {

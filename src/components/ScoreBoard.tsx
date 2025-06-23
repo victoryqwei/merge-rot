@@ -1,16 +1,16 @@
 import React from "react";
 import { HStack, Text, Box, Image, VStack, Button } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
-import { useGameStore } from "../stores/StoreContext";
+import { useGame } from "../game/useGame";
 import { useCharacterImage } from "../hooks/useCharacterImage";
 import { AiOutlineHome } from "react-icons/ai";
 
 const ScoreBoard: React.FC = observer(() => {
-  const gameStore = useGameStore();
-  const nextCharacterImage = useCharacterImage(gameStore.nextCharacter?.name || null);
+  const game = useGame();
+  const nextCharacterImage = useCharacterImage(game.nextCharacter?.name || null);
 
   return (
-    <HStack w="400px" justify="space-between" p={4}>
+    <HStack w="400px" justify="space-between" p={4} h="100px">
       <Box>
         <Button
           variant="unstyled"
@@ -25,17 +25,17 @@ const ScoreBoard: React.FC = observer(() => {
       </Box>
 
       <Text color="white" fontWeight="bold" fontSize="xl" textAlign="center" w="100%">
-        {gameStore.displayScore === 0 ? "- Italian Brainrot -" : `${gameStore.displayScore}`}
+        {game.score === 0 ? "- Italian Brainrot -" : `${game.score}`}
       </Text>
       <VStack spacing={1} align="center">
-        {gameStore.hasStarted && gameStore.nextCharacter && nextCharacterImage ? (
+        {game.hasStarted && game.nextCharacter && nextCharacterImage ? (
           <>
             <Box w="60px" h="60px" overflow="hidden" display="flex" alignItems="center" justifyContent="center">
               <Image
                 src={nextCharacterImage}
-                alt={gameStore.nextCharacter.displayName}
-                w="100%"
-                h="100%"
+                alt={game.nextCharacter.displayName}
+                maxW="100%"
+                maxH="100%"
                 objectFit="contain"
                 onError={(e) => {
                   // Fallback to colored circle if image fails to load
