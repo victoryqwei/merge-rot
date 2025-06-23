@@ -2,6 +2,7 @@ import type { FruitType } from "../types/GameTypes";
 import { FruitManager } from "./FruitManager";
 import { Renderer } from "../utils/Renderer";
 import { PhysicsEngine } from "../utils/PhysicsEngine";
+import { GAME_CONFIG } from "../constants/GameConstants";
 
 export class SuikaGame {
   private canvas: HTMLCanvasElement;
@@ -59,6 +60,24 @@ export class SuikaGame {
       // Generate next fruit
       this.generateNextFruit();
     });
+
+    // Handle window resize for high DPI displays
+    window.addEventListener("resize", () => {
+      this.handleResize();
+    });
+  }
+
+  private handleResize(): void {
+    // Re-setup the canvas for high DPI if needed
+    const pixelRatio = this.renderer.getPixelRatio();
+
+    // Update canvas size
+    this.canvas.width = GAME_CONFIG.CANVAS_WIDTH * pixelRatio;
+    this.canvas.height = GAME_CONFIG.CANVAS_HEIGHT * pixelRatio;
+
+    // Set CSS size back to original dimensions
+    this.canvas.style.width = GAME_CONFIG.CANVAS_WIDTH + "px";
+    this.canvas.style.height = GAME_CONFIG.CANVAS_HEIGHT + "px";
   }
 
   private generateNextFruit(): void {

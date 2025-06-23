@@ -3,6 +3,7 @@ import { GAME_CONFIG } from "../constants/GameConstants";
 
 export class Renderer {
   private ctx: CanvasRenderingContext2D;
+  private pixelRatio: number;
 
   constructor(canvas: HTMLCanvasElement) {
     const context = canvas.getContext("2d");
@@ -10,10 +11,23 @@ export class Renderer {
       throw new Error("Could not get 2D context from canvas");
     }
     this.ctx = context;
+    this.pixelRatio = window.devicePixelRatio || 1;
+
+    this.setupHighDPICanvas(canvas);
+  }
+
+  private setupHighDPICanvas(canvas: HTMLCanvasElement): void {
+    // Set the canvas size in memory (scaled up for high DPI)
+    canvas.width = GAME_CONFIG.CANVAS_WIDTH * this.pixelRatio;
+    canvas.height = GAME_CONFIG.CANVAS_HEIGHT * this.pixelRatio;
+
+    // Set the CSS size to the original game dimensions
+    canvas.style.width = GAME_CONFIG.CANVAS_WIDTH + "px";
+    canvas.style.height = GAME_CONFIG.CANVAS_HEIGHT + "px";
   }
 
   clear(): void {
-    this.ctx.clearRect(0, 0, GAME_CONFIG.CANVAS_WIDTH, GAME_CONFIG.CANVAS_HEIGHT);
+    this.ctx.clearRect(0, 0, GAME_CONFIG.CANVAS_WIDTH * this.pixelRatio, GAME_CONFIG.CANVAS_HEIGHT * this.pixelRatio);
   }
 
   drawGrid(): void {
@@ -21,45 +35,46 @@ export class Renderer {
     this.ctx.lineWidth = 1;
 
     // Vertical lines
-    for (let x = 0; x < GAME_CONFIG.CANVAS_WIDTH; x += GAME_CONFIG.GRID_SIZE) {
+    for (let x = 0; x < GAME_CONFIG.CANVAS_WIDTH * this.pixelRatio; x += GAME_CONFIG.GRID_SIZE * this.pixelRatio) {
       this.ctx.beginPath();
       this.ctx.moveTo(x, 0);
-      this.ctx.lineTo(x, GAME_CONFIG.CANVAS_HEIGHT);
+      this.ctx.lineTo(x, GAME_CONFIG.CANVAS_HEIGHT * this.pixelRatio);
       this.ctx.stroke();
     }
 
     // Horizontal lines
-    for (let y = 0; y < GAME_CONFIG.CANVAS_HEIGHT; y += GAME_CONFIG.GRID_SIZE) {
+    for (let y = 0; y < GAME_CONFIG.CANVAS_HEIGHT * this.pixelRatio; y += GAME_CONFIG.GRID_SIZE * this.pixelRatio) {
       this.ctx.beginPath();
       this.ctx.moveTo(0, y);
-      this.ctx.lineTo(GAME_CONFIG.CANVAS_WIDTH, y);
+      this.ctx.lineTo(GAME_CONFIG.CANVAS_WIDTH * this.pixelRatio, y);
       this.ctx.stroke();
     }
   }
 
   drawFruit(fruit: Fruit): void {
-    const x = fruit.body.position.x;
-    const y = fruit.body.position.y;
+    const x = fruit.body.position.x * this.pixelRatio;
+    const y = fruit.body.position.y * this.pixelRatio;
+    const radius = fruit.radius * this.pixelRatio;
 
     // Draw shadow
     this.ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
     this.ctx.beginPath();
-    this.ctx.arc(x + 2, y + 2, fruit.radius, 0, Math.PI * 2);
+    this.ctx.arc(x + 2 * this.pixelRatio, y + 2 * this.pixelRatio, radius, 0, Math.PI * 2);
     this.ctx.fill();
 
     // Draw fruit body
     this.ctx.fillStyle = fruit.color;
     this.ctx.beginPath();
-    this.ctx.arc(x, y, fruit.radius, 0, Math.PI * 2);
+    this.ctx.arc(x, y, radius, 0, Math.PI * 2);
     this.ctx.fill();
 
     // Draw fruit border
     this.ctx.strokeStyle = "#333";
-    this.ctx.lineWidth = 2;
+    this.ctx.lineWidth = 2 * this.pixelRatio;
     this.ctx.stroke();
 
     // Draw emoji
-    this.ctx.font = `${fruit.radius}px Arial`;
+    this.ctx.font = `${radius}px Arial`;
     this.ctx.textAlign = "center";
     this.ctx.textBaseline = "middle";
     this.ctx.fillText(fruit.emoji, x, y);
@@ -68,37 +83,45 @@ export class Renderer {
   drawParticle(particle: Particle): void {
     this.ctx.fillStyle = `rgba(255, 255, 255, ${particle.life / GAME_CONFIG.PARTICLE_LIFE})`;
     this.ctx.beginPath();
-    this.ctx.arc(particle.x, particle.y, 2, 0, Math.PI * 2);
+    this.ctx.arc(particle.x * this.pixelRatio, particle.y * this.pixelRatio, 2 * this.pixelRatio, 0, Math.PI * 2);
     this.ctx.fill();
   }
 
   drawGameOverLine(): void {
     this.ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
-    this.ctx.lineWidth = 3;
-    this.ctx.setLineDash([5, 5]);
+    this.ctx.lineWidth = 3 * this.pixelRatio;
+    this.ctx.setLineDash([5 * this.pixelRatio, 5 * this.pixelRatio]);
     this.ctx.beginPath();
-    this.ctx.moveTo(0, GAME_CONFIG.GAME_OVER_HEIGHT);
-    this.ctx.lineTo(GAME_CONFIG.CANVAS_WIDTH, GAME_CONFIG.GAME_OVER_HEIGHT);
+    this.ctx.moveTo(0, GAME_CONFIG.GAME_OVER_HEIGHT * this.pixelRatio);
+    this.ctx.lineTo(GAME_CONFIG.CANVAS_WIDTH * this.pixelRatio, GAME_CONFIG.GAME_OVER_HEIGHT * this.pixelRatio);
     this.ctx.stroke();
     this.ctx.setLineDash([]);
   }
 
   drawMouseCursor(x: number, y: number, fruitType: FruitType, alpha: number = 0.6): void {
+    const scaledX = x * this.pixelRatio;
+    const scaledY = y * this.pixelRatio;
+    const scaledRadius = fruitType.radius * this.pixelRatio;
+
     // Draw a preview of the fruit at mouse position
     this.ctx.globalAlpha = alpha;
     this.ctx.fillStyle = fruitType.color;
     this.ctx.beginPath();
-    this.ctx.arc(x, y, fruitType.radius, 0, Math.PI * 2);
+    this.ctx.arc(scaledX, scaledY, scaledRadius, 0, Math.PI * 2);
     this.ctx.fill();
 
     this.ctx.strokeStyle = "#333";
-    this.ctx.lineWidth = 2;
+    this.ctx.lineWidth = 2 * this.pixelRatio;
     this.ctx.stroke();
 
-    this.ctx.font = `${fruitType.radius}px Arial`;
+    this.ctx.font = `${scaledRadius}px Arial`;
     this.ctx.textAlign = "center";
     this.ctx.textBaseline = "middle";
-    this.ctx.fillText(fruitType.emoji, x, y);
+    this.ctx.fillText(fruitType.emoji, scaledX, scaledY);
     this.ctx.globalAlpha = 1.0;
+  }
+
+  getPixelRatio(): number {
+    return this.pixelRatio;
   }
 }
