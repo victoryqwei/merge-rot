@@ -1,5 +1,5 @@
 import { Howl } from "howler";
-import { CHARACTER_TYPES } from "../constants/GameConstants";
+import { CharacterClass } from "../types/GameTypes";
 
 export class SoundManager {
   private sounds = new Map<string, Howl>();
@@ -19,7 +19,7 @@ export class SoundManager {
 
   // Load all character, pop, and background music sounds
   private loadAllSounds(): void {
-    const characterNames = CHARACTER_TYPES.map((c) => c.name);
+    const characterNames = CharacterClass.getAllCharacters().map((c) => c.name);
     this.totalCount = characterNames.length + 2; // +1 for pop, +1 for background music
 
     // Load character sounds
@@ -72,15 +72,17 @@ export class SoundManager {
   }
 
   // Play a character's sound with global debouncing (prioritizes highest tier character)
-  playSoundDebounced(characterName: string, debounceMs: number = 500): void {
+  playSoundDebounced(characterName: string, debounceMs: number = 800): void {
     // Clear existing timer
     if (this.characterDebounceTimer) {
       clearTimeout(this.characterDebounceTimer);
     }
 
     // Check if this character is higher tier than the currently pending one
-    const currentCharacterIndex = CHARACTER_TYPES.findIndex((c) => c.name === characterName);
-    const pendingCharacterIndex = this.pendingCharacterSound ? CHARACTER_TYPES.findIndex((c) => c.name === this.pendingCharacterSound) : -1;
+    const currentCharacterIndex = CharacterClass.getAllCharacters().findIndex((c) => c.name === characterName);
+    const pendingCharacterIndex = this.pendingCharacterSound
+      ? CharacterClass.getAllCharacters().findIndex((c) => c.name === this.pendingCharacterSound)
+      : -1;
 
     // Only update if this character is higher tier (lower index = higher tier)
     if (pendingCharacterIndex === -1 || currentCharacterIndex <= pendingCharacterIndex) {

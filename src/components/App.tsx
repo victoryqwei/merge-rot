@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Box, Text, Button, VStack, HStack, Center, useToast } from "@chakra-ui/react";
 import { SuikaGame } from "../game/SuikaGame";
-import type { CharacterType } from "../types/GameTypes";
+import { CharacterClass } from "../types/GameTypes";
 
 const App: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<SuikaGame | null>(null);
   const [score, setScore] = useState(0);
-  const [nextCharacter, setNextCharacter] = useState<CharacterType | null>(null);
+  const [nextCharacter, setNextCharacter] = useState<CharacterClass | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [gameOver, setGameOver] = useState(false);
   const toast = useToast();
@@ -27,7 +27,7 @@ const App: React.FC = () => {
         setScore(newScore);
       });
 
-      gameRef.current.setNextCharacterCallback((character: CharacterType) => {
+      gameRef.current.setNextCharacterCallback((character: CharacterClass) => {
         setNextCharacter(character);
       });
 

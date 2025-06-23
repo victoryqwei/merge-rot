@@ -1,4 +1,4 @@
-import type { CharacterType } from "../types/GameTypes";
+import { CharacterClass } from "../types/GameTypes";
 import { CharacterManager } from "./CharacterManager";
 import { Renderer } from "../utils/Renderer";
 import { PhysicsEngine } from "../utils/PhysicsEngine";
@@ -12,13 +12,13 @@ export class SuikaGame {
   private characterManager: CharacterManager;
   private soundManager: SoundManager;
   private score: number = 0;
-  private currentCharacter: CharacterType | null = null;
+  private currentCharacter: CharacterClass | null = null;
   private mouseX: number = 0;
   private gameOver: boolean = false;
   private dropCooldown: number = 0;
   private characterAnimationProgress: number = 0; // 0 to 1 for animation
   private onScoreUpdate?: (score: number) => void;
-  private onNextCharacterUpdate?: (character: CharacterType) => void;
+  private onNextCharacterUpdate?: (character: CharacterClass) => void;
   private onGameOver?: (finalScore: number) => void;
 
   constructor(canvas: HTMLCanvasElement) {
@@ -175,7 +175,7 @@ export class SuikaGame {
     this.onScoreUpdate = callback;
   }
 
-  public setNextCharacterCallback(callback: (character: CharacterType) => void): void {
+  public setNextCharacterCallback(callback: (character: CharacterClass) => void): void {
     this.onNextCharacterUpdate = callback;
   }
 

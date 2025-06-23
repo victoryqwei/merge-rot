@@ -1,5 +1,6 @@
-import type { Character, CharacterType, Particle } from "../types/GameTypes";
-import { CHARACTER_TYPES, GAME_CONFIG } from "../constants/GameConstants";
+import type { Character, Particle } from "../types/GameTypes";
+import { CharacterClass } from "../types/GameTypes";
+import { GAME_CONFIG } from "../constants/GameConstants";
 import { PhysicsEngine } from "../utils/PhysicsEngine";
 import { SoundManager } from "../utils/SoundManager";
 import { random } from "lodash";
@@ -15,18 +16,19 @@ export class CharacterManager {
     this.soundManager = soundManager;
   }
 
-  generateRandomCharacter(): CharacterType {
-    const randomIndex = random(0, 4); // Start with smaller characters
-    return CHARACTER_TYPES[randomIndex];
+  generateRandomCharacter(): CharacterClass {
+    return CharacterClass.getRandom(4); // Start with smaller characters (tier 0-4)
   }
 
-  createCharacter(characterType: CharacterType, x: number, y: number): Character {
+  createCharacter(characterType: CharacterClass, x: number, y: number): Character {
     const body = this.physicsEngine.createCharacterBody(characterType.radius, x, y);
 
     return {
-      ...characterType,
+      name: characterType.name,
+      radius: characterType.radius,
+      points: characterType.points,
+      displayName: characterType.displayName,
       body,
-      type: CHARACTER_TYPES.indexOf(characterType),
     };
   }
 
@@ -50,25 +52,29 @@ export class CharacterManager {
         const character1 = this.characters[i];
         const character2 = this.characters[j];
 
-        if (character1.type === character2.type && character1.type < CHARACTER_TYPES.length - 1) {
+        if (character1.name === character2.name) {
           if (this.physicsEngine.checkCollision(character1, character2)) {
-            // Combine characters
-            const newType = character1.type + 1;
+            // Get the current character class and find the next one
+            const currentCharacterClass = CharacterClass.getByName(character1.name);
+            if (!currentCharacterClass) continue;
+
+            const nextCharacterClass = currentCharacterClass.getNextCharacter();
+            if (!nextCharacterClass) continue; // Can't merge if it's the highest tier
+
             const pos1 = this.physicsEngine.getBodyPosition(character1.body);
             const pos2 = this.physicsEngine.getBodyPosition(character2.body);
             const vel1 = this.physicsEngine.getBodyVelocity(character1.body);
             const vel2 = this.physicsEngine.getBodyVelocity(character2.body);
 
-            const newCharacter = this.createCharacter(CHARACTER_TYPES[newType], (pos1.x + pos2.x) / 2, (pos1.y + pos2.y) / 2);
+            const newCharacter = this.createCharacter(nextCharacterClass, (pos1.x + pos2.x) / 2, (pos1.y + pos2.y) / 2);
 
             // Set velocity
             newCharacter.body.velocity.x = (vel1.x + vel2.x) / 2;
             newCharacter.body.velocity.y = (vel1.y + vel2.y) / 2;
 
             // Play sound for the new merged character
-            const newCharacterType = CHARACTER_TYPES[newType];
             // Use debounced sound for all characters - SoundManager will prioritize highest tier
-            this.soundManager.playSoundDebounced(newCharacterType.name, 500);
+            this.soundManager.playSoundDebounced(nextCharacterClass.name, 500);
             // Play pop sound
             this.soundManager.playPop();
 
@@ -82,7 +88,7 @@ export class CharacterManager {
             this.characters.push(newCharacter);
 
             // Add score
-            scoreIncrease += CHARACTER_TYPES[newType].points * 10;
+            scoreIncrease += nextCharacterClass.points * 10;
 
             // Add explosion effect
             this.createExplosion(newCharacter.body.position.x, newCharacter.body.position.y);

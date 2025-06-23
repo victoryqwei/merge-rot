@@ -1,4 +1,5 @@
-import type { Character, CharacterType, Particle } from "../types/GameTypes";
+import type { Character, Particle } from "../types/GameTypes";
+import { CharacterClass } from "../types/GameTypes";
 import { GAME_CONFIG } from "../constants/GameConstants";
 import { ImageManager } from "./ImageManager";
 
@@ -109,7 +110,7 @@ export class Renderer {
     this.ctx.setLineDash([]);
   }
 
-  drawMouseCursor(x: number, y: number, characterType: CharacterType, alpha: number = 0.6): void {
+  drawMouseCursor(x: number, y: number, characterType: CharacterClass, alpha: number = 0.6): void {
     const scaledX = x * this.pixelRatio;
     const scaledY = y * this.pixelRatio;
     const scaledRadius = characterType.radius * this.pixelRatio;
@@ -143,7 +144,7 @@ export class Renderer {
     this.ctx.globalAlpha = 1.0;
   }
 
-  drawAnimatedMouseCursor(x: number, y: number, characterType: CharacterType, animationProgress: number, alpha: number = 0.6): void {
+  drawAnimatedMouseCursor(x: number, y: number, characterType: CharacterClass, animationProgress: number, alpha: number = 0.6): void {
     const scaledX = x * this.pixelRatio;
     const scaledY = y * this.pixelRatio;
     const animatedRadius = characterType.radius * animationProgress * this.pixelRatio;
