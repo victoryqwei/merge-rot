@@ -1,10 +1,12 @@
+import { Howl } from "howler";
 import { CHARACTER_TYPES } from "../constants/GameConstants";
 
 export class SoundManager {
-  private sounds: Map<string, HTMLAudioElement> = new Map();
+  private sounds: Map<string, Howl> = new Map();
   private loadedCount: number = 0;
   private totalCount: number = 0;
   private onLoadComplete?: () => void;
+  private volume: number = 0.7; // Default volume
 
   constructor() {
     this.loadSounds();
@@ -20,36 +22,60 @@ export class SoundManager {
 
     characterNames.forEach((name) => {
       const soundFileName = this.getSoundFileName(name);
-      const audio = new Audio(`/src/assets/sounds/${soundFileName}.mp3`);
-
-      audio.addEventListener("canplaythrough", () => {
-        this.loadedCount++;
-        if (this.loadedCount === this.totalCount) {
-          this.onLoadComplete?.();
-        }
+      const sound = new Howl({
+        src: [`/src/assets/sounds/${soundFileName}.mp3`],
+        preload: true,
+        volume: this.volume,
+        onload: () => {
+          this.loadedCount++;
+          if (this.loadedCount === this.totalCount) {
+            this.onLoadComplete?.();
+          }
+        },
+        onloaderror: (id, error) => {
+          console.warn(`Failed to load sound for ${name}:`, error);
+          this.loadedCount++;
+          if (this.loadedCount === this.totalCount) {
+            this.onLoadComplete?.();
+          }
+        },
       });
 
-      audio.addEventListener("error", (e) => {
-        console.warn(`Failed to load sound for ${name}:`, e);
-        this.loadedCount++;
-        if (this.loadedCount === this.totalCount) {
-          this.onLoadComplete?.();
-        }
-      });
-
-      this.sounds.set(name, audio);
+      this.sounds.set(name, sound);
     });
   }
 
   playSound(characterName: string): void {
     const sound = this.sounds.get(characterName);
     if (sound) {
-      // Reset the audio to the beginning and play
-      sound.currentTime = 0;
-      sound.play().catch((error) => {
-        console.warn(`Failed to play sound for ${characterName}:`, error);
-      });
+      sound.play();
     }
+  }
+
+  stopSound(characterName: string): void {
+    const sound = this.sounds.get(characterName);
+    if (sound) {
+      sound.stop();
+    }
+  }
+
+  setVolume(volume: number): void {
+    this.volume = Math.max(0, Math.min(1, volume)); // Clamp between 0 and 1
+
+    // Update volume for all loaded sounds
+    this.sounds.forEach((sound) => {
+      sound.volume(this.volume);
+    });
+  }
+
+  getVolume(): number {
+    return this.volume;
+  }
+
+  stopAllSounds(): void {
+    this.sounds.forEach((sound) => {
+      sound.stop();
+    });
   }
 
   setOnLoadComplete(callback: () => void): void {

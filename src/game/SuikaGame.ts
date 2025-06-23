@@ -165,6 +165,14 @@ export class SuikaGame {
     return this.score;
   }
 
+  public setVolume(volume: number): void {
+    this.soundManager.setVolume(volume);
+  }
+
+  public getVolume(): number {
+    return this.soundManager.getVolume();
+  }
+
   public restart(): void {
     this.score = 0;
     this.currentCharacter = null;
