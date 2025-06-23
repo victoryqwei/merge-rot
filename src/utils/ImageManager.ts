@@ -23,7 +23,7 @@ export class ImageManager {
           this.onLoadComplete?.();
         }
       };
-      img.src = `/src/assets/${name}.png`;
+      img.src = `/src/assets/characters/${name}.png`;
       this.images.set(name, img);
     });
   }
