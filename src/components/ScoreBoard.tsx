@@ -28,7 +28,7 @@ const ScoreBoard: React.FC = observer(() => {
               alt={gameStore.nextCharacter.displayName}
               w="100%"
               h="100%"
-              objectFit="cover"
+              objectFit="contain"
               onError={(e) => {
                 // Fallback to colored circle if image fails to load
                 const target = e.target as HTMLImageElement;

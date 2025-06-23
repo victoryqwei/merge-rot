@@ -26,14 +26,14 @@ export class CharacterClass {
   // Static method to get all characters
   static getAllCharacters(): CharacterClass[] {
     return [
-      new CharacterClass("shrimp-cat", 15, 1, "Trippi Troppi", 0),
-      new CharacterClass("capuccino", 20, 2, "Capuccino Assassino", 1),
-      new CharacterClass("capybara-coconut", 25, 3, "Burbaloni Lulilolli", 2),
-      new CharacterClass("monkey-banana", 30, 4, "Chimpanzini Bananini", 3),
+      new CharacterClass("shrimp-cat", 25, 1, "Trippi Troppi", 0),
+      new CharacterClass("capuccino", 30, 2, "Capuccino Assassino", 1),
+      new CharacterClass("capybara-coconut", 35, 3, "Burbaloni Lulilolli", 2),
+      new CharacterClass("monkey-banana", 35, 4, "Chimpanzini Bananini", 3),
       new CharacterClass("frog-tire", 35, 5, "Boneca Ambalabu", 4),
-      new CharacterClass("camel-fridge", 40, 6, "Frigo Camelo", 5),
-      new CharacterClass("elephant", 45, 7, "Lirili Larila", 6),
-      new CharacterClass("cow", 50, 8, "La Vaca Saturno Saturnita", 7),
+      new CharacterClass("camel-fridge", 45, 6, "Frigo Camelo", 5),
+      new CharacterClass("elephant", 50, 7, "Lirili Larila", 6),
+      new CharacterClass("cow", 55, 8, "La Vaca Saturno Saturnita", 7),
       new CharacterClass("baseball-bat", 55, 9, "Tung Tung Tung Sahur", 8),
       new CharacterClass("shark", 60, 10, "Tralalero Tralala", 9),
       new CharacterClass("crocodile", 65, 11, "Bombardino Crocodilo", 10),

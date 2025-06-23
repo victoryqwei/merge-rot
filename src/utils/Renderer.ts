@@ -60,13 +60,7 @@ export class Renderer {
     const y = character.body.position.y * this.pixelRatio;
     const radius = character.radius * this.pixelRatio;
 
-    // Draw shadow
-    this.ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
-    this.ctx.beginPath();
-    this.ctx.arc(x + 2 * this.pixelRatio, y + 2 * this.pixelRatio, radius, 0, Math.PI * 2);
-    this.ctx.fill();
-
-    // Draw character image with rotation
+    // Draw character image with rotation (no circular clipping)
     const image = this.imageManager.getImage(character.name);
     if (image) {
       this.ctx.save();
@@ -77,28 +71,13 @@ export class Renderer {
       // Apply rotation
       this.ctx.rotate(character.rotation);
 
-      // Create circular clip path
-      this.ctx.beginPath();
-      this.ctx.arc(0, 0, radius, 0, Math.PI * 2);
-      this.ctx.clip();
-
-      // Draw the rotated image
+      // Draw the rotated image without circular clipping
       const imageSize = radius * 2;
       this.ctx.drawImage(image, -radius, -radius, imageSize, imageSize);
 
       this.ctx.restore();
-    } else {
-      // Fallback to colored circle if image not loaded
-      this.ctx.fillStyle = "#ff6b6b";
-      this.ctx.beginPath();
-      this.ctx.arc(x, y, radius, 0, Math.PI * 2);
-      this.ctx.fill();
     }
-
-    // Draw character border
-    this.ctx.strokeStyle = "#333";
-    this.ctx.lineWidth = 2 * this.pixelRatio;
-    this.ctx.stroke();
+    // No fallback circle - only draw if image is available
   }
 
   drawParticle(particle: Particle): void {
@@ -134,27 +113,13 @@ export class Renderer {
       // Move to character center
       this.ctx.translate(scaledX, scaledY);
 
-      // Create circular clip path
-      this.ctx.beginPath();
-      this.ctx.arc(0, 0, scaledRadius, 0, Math.PI * 2);
-      this.ctx.clip();
-
-      // Draw the image
+      // Draw the image without circular clipping
       const imageSize = scaledRadius * 2;
       this.ctx.drawImage(image, -scaledRadius, -scaledRadius, imageSize, imageSize);
 
       this.ctx.restore();
-    } else {
-      // Fallback to colored circle if image not loaded
-      this.ctx.fillStyle = "#ff6b6b";
-      this.ctx.beginPath();
-      this.ctx.arc(scaledX, scaledY, scaledRadius, 0, Math.PI * 2);
-      this.ctx.fill();
     }
-
-    this.ctx.strokeStyle = "#333";
-    this.ctx.lineWidth = 2 * this.pixelRatio;
-    this.ctx.stroke();
+    // No fallback circle - only draw if image is available
 
     this.ctx.globalAlpha = 1.0;
   }
@@ -177,27 +142,13 @@ export class Renderer {
       // Move to character center
       this.ctx.translate(scaledX, scaledY);
 
-      // Create circular clip path
-      this.ctx.beginPath();
-      this.ctx.arc(0, 0, animatedRadius, 0, Math.PI * 2);
-      this.ctx.clip();
-
-      // Draw the image
+      // Draw the image without circular clipping
       const imageSize = animatedRadius * 2;
       this.ctx.drawImage(image, -animatedRadius, -animatedRadius, imageSize, imageSize);
 
       this.ctx.restore();
-    } else {
-      // Fallback to colored circle if image not loaded
-      this.ctx.fillStyle = "#ff6b6b";
-      this.ctx.beginPath();
-      this.ctx.arc(scaledX, scaledY, animatedRadius, 0, Math.PI * 2);
-      this.ctx.fill();
     }
-
-    this.ctx.strokeStyle = "#333";
-    this.ctx.lineWidth = 2 * this.pixelRatio;
-    this.ctx.stroke();
+    // No fallback circle - only draw if image is available
 
     this.ctx.globalAlpha = 1.0;
   }
