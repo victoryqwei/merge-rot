@@ -1,15 +1,18 @@
 import type { Character, CharacterType, Particle } from "../types/GameTypes";
 import { CHARACTER_TYPES, GAME_CONFIG } from "../constants/GameConstants";
 import { PhysicsEngine } from "../utils/PhysicsEngine";
+import { SoundManager } from "../utils/SoundManager";
 import { random } from "lodash";
 
 export class CharacterManager {
   private characters: Character[] = [];
   private particles: Particle[] = [];
   private physicsEngine: PhysicsEngine;
+  private soundManager: SoundManager;
 
-  constructor(physicsEngine: PhysicsEngine) {
+  constructor(physicsEngine: PhysicsEngine, soundManager: SoundManager) {
     this.physicsEngine = physicsEngine;
+    this.soundManager = soundManager;
   }
 
   generateRandomCharacter(): CharacterType {
@@ -61,6 +64,9 @@ export class CharacterManager {
             // Set velocity
             newCharacter.body.velocity.x = (vel1.x + vel2.x) / 2;
             newCharacter.body.velocity.y = (vel1.y + vel2.y) / 2;
+
+            // Play sound for the new merged character
+            this.soundManager.playSound(CHARACTER_TYPES[newType].name);
 
             // Remove old characters
             this.physicsEngine.removeBody(character1.body);

@@ -2,7 +2,7 @@ import type { CharacterType } from "../types/GameTypes";
 
 export const CHARACTER_TYPES: CharacterType[] = [
   { name: "shrimp-cat", radius: 15, points: 1, displayName: "Trippi Troppi" },
-  { name: "cappuccino", radius: 20, points: 2, displayName: "Capuccino Assassino" },
+  { name: "capuccino", radius: 20, points: 2, displayName: "Capuccino Assassino" },
   { name: "capybara-coconut", radius: 25, points: 3, displayName: "Burbaloni Lulilolli" },
   { name: "monkey-banana", radius: 30, points: 4, displayName: "Chimpanzini Bananini" },
   { name: "frog-tire", radius: 35, points: 5, displayName: "Boneca Ambalabu" },

@@ -2,6 +2,7 @@ import type { CharacterType } from "../types/GameTypes";
 import { CharacterManager } from "./CharacterManager";
 import { Renderer } from "../utils/Renderer";
 import { PhysicsEngine } from "../utils/PhysicsEngine";
+import { SoundManager } from "../utils/SoundManager";
 import { GAME_CONFIG } from "../constants/GameConstants";
 
 export class SuikaGame {
@@ -9,6 +10,7 @@ export class SuikaGame {
   private renderer: Renderer;
   private physicsEngine: PhysicsEngine;
   private characterManager: CharacterManager;
+  private soundManager: SoundManager;
   private score: number = 0;
   private currentCharacter: CharacterType | null = null;
   private mouseX: number = 0;
@@ -24,7 +26,8 @@ export class SuikaGame {
     this.canvas = canvas;
     this.renderer = new Renderer(canvas);
     this.physicsEngine = new PhysicsEngine();
-    this.characterManager = new CharacterManager(this.physicsEngine);
+    this.soundManager = new SoundManager();
+    this.characterManager = new CharacterManager(this.physicsEngine, this.soundManager);
     this.init();
   }
 
