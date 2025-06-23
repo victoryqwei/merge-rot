@@ -67,6 +67,8 @@ export class CharacterManager {
 
             // Play sound for the new merged character
             this.soundManager.playSound(CHARACTER_TYPES[newType].name);
+            // Play pop sound
+            this.soundManager.playPop();
 
             // Remove old characters
             this.physicsEngine.removeBody(character1.body);
