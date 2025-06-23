@@ -11,7 +11,7 @@ export const CHARACTER_TYPES: CharacterType[] = [
   { name: "cow", radius: 50, points: 8, displayName: "La Vaca Saturno Saturnita" },
   { name: "baseball-bat", radius: 55, points: 9, displayName: "Tung Tung Tung Sahur" },
   { name: "shark", radius: 60, points: 10, displayName: "Tralalero Tralala" },
-  { name: "crocodile", radius: 65, points: 11, displayName: "Bombardiro Crocodilo" },
+  { name: "crocodile", radius: 65, points: 11, displayName: "Bombardino Crocodilo" },
   { name: "big-feet", radius: 70, points: 12, displayName: "Brr Brr Patapim" },
 ];
 
