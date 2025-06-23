@@ -21,6 +21,14 @@ export class SuikaGame {
   private onNextCharacterUpdate?: (character: CharacterClass) => void;
   private onGameOver?: (finalScore: number) => void;
 
+  // Shake properties
+  private shakeIntensity: number = 0;
+  private shakeDuration: number = 0;
+  private shakeTimer: number = 0;
+  private shakeAngle: number = 0;
+  private shakeTime: number = 0; // For smooth oscillation
+  private shakeVelocity: number = 0; // For physics calculations
+
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.renderer = new Renderer(canvas);
@@ -47,7 +55,8 @@ export class SuikaGame {
 
     // Add character on click
     this.canvas.addEventListener("click", async (e) => {
-      if (this.gameOver || !this.currentCharacter || this.dropCooldown > 0 || this.characterAnimationProgress < 1) return;
+      if (this.gameOver || !this.currentCharacter || this.dropCooldown > 0 || this.characterAnimationProgress < 1 || this.shakeTimer > 0)
+        return;
 
       const rect = this.canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -103,6 +112,26 @@ export class SuikaGame {
   private async update(): Promise<void> {
     if (this.gameOver) return;
 
+    // Update shake
+    if (this.shakeTimer > 0) {
+      this.shakeTimer--;
+      this.shakeTime += 0.05; // Even slower oscillation speed
+      const progress = this.shakeTimer / this.shakeDuration;
+      const intensity = this.shakeIntensity * progress;
+
+      // Calculate shake angle and velocity
+      const previousAngle = this.shakeAngle;
+      this.shakeAngle = (Math.sin(this.shakeTime) * intensity * Math.PI) / 180; // Convert to radians
+      this.shakeVelocity = this.shakeAngle - previousAngle; // Calculate velocity
+
+      // Apply shake to physics based on actual movement
+      this.physicsEngine.applyShake(this.shakeAngle, this.shakeVelocity);
+    } else {
+      this.shakeAngle = 0;
+      this.shakeVelocity = 0;
+      this.shakeTime = 0;
+    }
+
     // Update cooldown timer
     if (this.dropCooldown > 0) {
       this.dropCooldown--;
@@ -132,6 +161,10 @@ export class SuikaGame {
 
   private draw(): void {
     this.renderer.clear();
+
+    // Apply shake rotation
+    this.renderer.applyShakeRotation(this.shakeAngle);
+
     this.renderer.drawGrid();
     this.renderer.drawGameOverBox();
 
@@ -141,7 +174,7 @@ export class SuikaGame {
     }
 
     // Draw current character preview and drop indicator
-    if (this.currentCharacter && !this.gameOver) {
+    if (this.currentCharacter && !this.gameOver && this.shakeTimer === 0) {
       const dropY = GAME_CONFIG.GAME_OVER_HEIGHT - 50;
 
       // Draw animated character preview
@@ -156,6 +189,11 @@ export class SuikaGame {
     // Draw particles
     for (const particle of this.characterManager.getParticles()) {
       this.renderer.drawParticle(particle);
+    }
+
+    // Restore canvas state if shake was applied
+    if (this.shakeAngle !== 0) {
+      this.renderer.restoreShakeRotation();
     }
   }
 
@@ -220,5 +258,12 @@ export class SuikaGame {
     this.characterManager.clear();
     this.generateNextCharacter();
     this.onScoreUpdate?.(this.score);
+  }
+
+  public shake(intensity: number = 20, duration: number = 400): void {
+    this.shakeIntensity = intensity;
+    this.shakeDuration = duration;
+    this.shakeTimer = duration;
+    this.shakeTime = 0; // Reset shake time
   }
 }

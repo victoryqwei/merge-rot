@@ -190,4 +190,28 @@ export class PhysicsEngine {
     this.collisionDetector.bodies = [];
     this.gameOverTimer = 0;
   }
+
+  applyShake(shakeAngle: number, shakeVelocity: number): void {
+    // Apply shake forces to all bodies based on the box movement
+    for (const body of this.bodies) {
+      // Calculate force based on shake angle and velocity
+      const forceMultiplier = 0.01; // Adjust this to control force strength
+
+      // Apply horizontal force based on shake angle (tilt effect)
+      const horizontalForce = shakeAngle * forceMultiplier;
+
+      // Apply vertical force based on shake velocity (acceleration effect)
+      const verticalForce = shakeVelocity * forceMultiplier;
+
+      // Apply forces to the body
+      Matter.Body.applyForce(body, body.position, {
+        x: horizontalForce,
+        y: verticalForce,
+      });
+
+      // Apply angular velocity based on shake movement
+      const angularForce = shakeVelocity * 0.01;
+      Matter.Body.setAngularVelocity(body, body.angularVelocity + angularForce);
+    }
+  }
 }

@@ -48,6 +48,12 @@ export class GameService {
     }
   }
 
+  shake(): void {
+    if (this.game) {
+      this.game.shake();
+    }
+  }
+
   getGame(): SuikaGame | null {
     return this.game;
   }

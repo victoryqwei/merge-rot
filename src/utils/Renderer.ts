@@ -94,21 +94,20 @@ export class Renderer {
     const thickness = 50 * this.pixelRatio; // Thickness of the box walls
 
     // Draw outer box (back face)
-    this.ctx.fillStyle = "rgba(139, 69, 19, 0.4)"; // Brown with transparency
+    this.ctx.fillStyle = "rgba(139, 69, 19, 0.4)"; // Darker brown with transparency
     this.ctx.fillRect(0, boxY, boxWidth, boxHeight);
 
     // Draw outer box border
     this.ctx.strokeStyle = "rgba(139, 69, 19, 0.9)"; // Darker brown for border
     this.ctx.lineWidth = 2 * this.pixelRatio;
-
     this.ctx.strokeRect(0, boxY, boxWidth, boxHeight);
 
     // Draw inner box (front face) - creates the cutout effect
-    this.ctx.fillStyle = "rgba(160, 82, 45, 0.3)"; // Lighter brown for inner face
+    this.ctx.fillStyle = "rgba(210, 180, 140, 0.3)"; // Much lighter tan/brown for inner face
     this.ctx.fillRect(thickness, boxY - thickness, boxWidth - thickness * 2, boxHeight);
 
     // Draw inner box border
-    this.ctx.strokeStyle = "rgba(160, 82, 45, 0.8)"; // Lighter brown for inner border
+    this.ctx.strokeStyle = "rgba(210, 180, 140, 0.8)"; // Lighter tan for inner border
     this.ctx.lineWidth = 1 * this.pixelRatio;
     this.ctx.strokeRect(thickness, boxY - thickness, boxWidth - thickness * 2, boxHeight);
 
@@ -216,5 +215,20 @@ export class Renderer {
 
   isImagesLoaded(): boolean {
     return this.imageManager.isLoaded();
+  }
+
+  applyShakeRotation(angle: number): void {
+    if (angle !== 0) {
+      this.ctx.save();
+      const centerX = (GAME_CONFIG.CANVAS_WIDTH * this.pixelRatio) / 2;
+      const centerY = (GAME_CONFIG.CANVAS_HEIGHT * this.pixelRatio) / 2;
+      this.ctx.translate(centerX, centerY);
+      this.ctx.rotate(angle);
+      this.ctx.translate(-centerX, -centerY);
+    }
+  }
+
+  restoreShakeRotation(): void {
+    this.ctx.restore();
   }
 }
