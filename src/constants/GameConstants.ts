@@ -1,6 +1,6 @@
-import type { FruitType } from "../types/GameTypes";
+import type { CharacterType } from "../types/GameTypes";
 
-export const FRUIT_TYPES: FruitType[] = [
+export const CHARACTER_TYPES: CharacterType[] = [
   { emoji: "🍒", radius: 15, color: "#ff6b6b", points: 1 },
   { emoji: "🍓", radius: 20, color: "#ff8e8e", points: 2 },
   { emoji: "🍇", radius: 25, color: "#a855f7", points: 3 },

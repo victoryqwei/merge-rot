@@ -1,13 +1,13 @@
 import type { Body, Engine, World, Render } from "matter-js";
 
-export interface FruitType {
+export interface CharacterType {
   emoji: string;
   radius: number;
   color: string;
   points: number;
 }
 
-export interface Fruit extends FruitType {
+export interface Character extends CharacterType {
   body: Body;
   type: number;
 }
@@ -22,9 +22,9 @@ export interface Particle {
 
 export interface GameState {
   score: number;
-  fruits: Fruit[];
-  currentFruit: Fruit | null;
-  nextFruit: FruitType | null;
+  characters: Character[];
+  currentCharacter: Character | null;
+  nextCharacter: CharacterType | null;
   gameOver: boolean;
   particles: Particle[];
 }

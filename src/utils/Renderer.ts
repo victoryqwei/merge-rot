@@ -1,4 +1,4 @@
-import type { Fruit, FruitType, Particle } from "../types/GameTypes";
+import type { Character, CharacterType, Particle } from "../types/GameTypes";
 import { GAME_CONFIG } from "../constants/GameConstants";
 
 export class Renderer {
@@ -51,10 +51,10 @@ export class Renderer {
     }
   }
 
-  drawFruit(fruit: Fruit): void {
-    const x = fruit.body.position.x * this.pixelRatio;
-    const y = fruit.body.position.y * this.pixelRatio;
-    const radius = fruit.radius * this.pixelRatio;
+  drawCharacter(character: Character): void {
+    const x = character.body.position.x * this.pixelRatio;
+    const y = character.body.position.y * this.pixelRatio;
+    const radius = character.radius * this.pixelRatio;
 
     // Draw shadow
     this.ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
@@ -62,13 +62,13 @@ export class Renderer {
     this.ctx.arc(x + 2 * this.pixelRatio, y + 2 * this.pixelRatio, radius, 0, Math.PI * 2);
     this.ctx.fill();
 
-    // Draw fruit body
-    this.ctx.fillStyle = fruit.color;
+    // Draw character body
+    this.ctx.fillStyle = character.color;
     this.ctx.beginPath();
     this.ctx.arc(x, y, radius, 0, Math.PI * 2);
     this.ctx.fill();
 
-    // Draw fruit border
+    // Draw character border
     this.ctx.strokeStyle = "#333";
     this.ctx.lineWidth = 2 * this.pixelRatio;
     this.ctx.stroke();
@@ -77,7 +77,7 @@ export class Renderer {
     this.ctx.font = `${radius}px Arial`;
     this.ctx.textAlign = "center";
     this.ctx.textBaseline = "middle";
-    this.ctx.fillText(fruit.emoji, x, y);
+    this.ctx.fillText(character.emoji, x, y);
   }
 
   drawParticle(particle: Particle): void {
@@ -98,14 +98,14 @@ export class Renderer {
     this.ctx.setLineDash([]);
   }
 
-  drawMouseCursor(x: number, y: number, fruitType: FruitType, alpha: number = 0.6): void {
+  drawMouseCursor(x: number, y: number, characterType: CharacterType, alpha: number = 0.6): void {
     const scaledX = x * this.pixelRatio;
     const scaledY = y * this.pixelRatio;
-    const scaledRadius = fruitType.radius * this.pixelRatio;
+    const scaledRadius = characterType.radius * this.pixelRatio;
 
-    // Draw a preview of the fruit at mouse position
+    // Draw a preview of the character at mouse position
     this.ctx.globalAlpha = alpha;
-    this.ctx.fillStyle = fruitType.color;
+    this.ctx.fillStyle = characterType.color;
     this.ctx.beginPath();
     this.ctx.arc(scaledX, scaledY, scaledRadius, 0, Math.PI * 2);
     this.ctx.fill();
@@ -117,7 +117,7 @@ export class Renderer {
     this.ctx.font = `${scaledRadius}px Arial`;
     this.ctx.textAlign = "center";
     this.ctx.textBaseline = "middle";
-    this.ctx.fillText(fruitType.emoji, scaledX, scaledY);
+    this.ctx.fillText(characterType.emoji, scaledX, scaledY);
     this.ctx.globalAlpha = 1.0;
   }
 

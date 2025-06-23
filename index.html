@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Suika Game</title>
+  <title>Character Merge Game</title>
   <style>
     body {
       margin: 0;
@@ -44,7 +44,7 @@
     }
 
     .score,
-    .next-fruit {
+    .next-character {
       background: #f8f9fa;
       padding: 10px 20px;
       border-radius: 10px;
@@ -97,18 +97,18 @@
 <body>
   <div class="game-container">
     <div class="game-header">
-      <h1>🍉 Suika Game</h1>
+      <h1>🎮 Character Merge</h1>
     </div>
 
     <div class="score-board">
       <div class="score">Score: <span id="score">0</span></div>
-      <div class="next-fruit">Next: <span id="next-fruit">🍒</span></div>
+      <div class="next-character">Next: <span id="next-character">🍒</span></div>
     </div>
 
     <canvas id="gameCanvas" width="400" height="600"></canvas>
 
     <div class="controls">
-      <p>Move mouse to position • Click to drop fruit • Combine fruits to make bigger ones!</p>
+      <p>Move mouse to position • Click to drop character • Combine characters to make bigger ones!</p>
     </div>
   </div>
 

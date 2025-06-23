@@ -4,7 +4,7 @@ import { Renderer } from "../utils/Renderer";
 import { PhysicsEngine } from "../utils/PhysicsEngine";
 import { GAME_CONFIG } from "../constants/GameConstants";
 
-export class SuikaGame {
+export class MergeRotGame {
   private canvas: HTMLCanvasElement;
   private renderer: Renderer;
   private physicsEngine: PhysicsEngine;
@@ -82,7 +82,9 @@ export class SuikaGame {
 
   private generateNextCharacter(): void {
     this.currentCharacter = this.characterManager.generateRandomCharacter();
-    this.onNextCharacterUpdate?.(this.currentCharacter);
+    if (this.currentCharacter) {
+      this.onNextCharacterUpdate?.(this.currentCharacter);
+    }
   }
 
   private update(): void {

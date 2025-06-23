@@ -24,10 +24,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  game.setNextFruitCallback((fruit) => {
-    const nextFruitElement = document.getElementById("next-fruit");
-    if (nextFruitElement) {
-      nextFruitElement.textContent = fruit.emoji;
+  game.setNextCharacterCallback((character) => {
+    const nextCharacterElement = document.getElementById("next-character");
+    if (nextCharacterElement) {
+      nextCharacterElement.textContent = character.emoji;
     }
   });
 

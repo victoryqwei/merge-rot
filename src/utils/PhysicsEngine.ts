@@ -1,5 +1,5 @@
 import * as Matter from "matter-js";
-import type { Fruit } from "../types/GameTypes";
+import type { Character } from "../types/GameTypes";
 import { GAME_CONFIG } from "../constants/GameConstants";
 
 export class PhysicsEngine {
@@ -49,7 +49,7 @@ export class PhysicsEngine {
     Matter.World.add(this.world, [leftWall, rightWall, floor]);
   }
 
-  createFruitBody(radius: number, x: number, y: number): Matter.Body {
+  createCharacterBody(radius: number, x: number, y: number): Matter.Body {
     const body = Matter.Bodies.circle(x, y, radius, {
       restitution: 0.7,
       friction: 0.8,
@@ -80,11 +80,14 @@ export class PhysicsEngine {
     };
   }
 
-  checkCollision(fruit1: Fruit, fruit2: Fruit): boolean {
+  checkCollision(character1: Character, character2: Character): boolean {
     const pairs = this.engine.pairs.list;
 
     for (const pair of pairs) {
-      if ((pair.bodyA === fruit1.body && pair.bodyB === fruit2.body) || (pair.bodyA === fruit2.body && pair.bodyB === fruit1.body)) {
+      if (
+        (pair.bodyA === character1.body && pair.bodyB === character2.body) ||
+        (pair.bodyA === character2.body && pair.bodyB === character1.body)
+      ) {
         return true;
       }
     }
@@ -109,38 +112,38 @@ export class PhysicsEngine {
   }
 
   checkGameOver(): boolean {
-    // Check if any fruit is too high
-    const fruitAboveLine = this.bodies.some((body) => body.position.y - body.circleRadius! < GAME_CONFIG.GAME_OVER_HEIGHT);
+    // Check if any character is too high
+    const characterAboveLine = this.bodies.some((body) => body.position.y - body.circleRadius! < GAME_CONFIG.GAME_OVER_HEIGHT);
 
-    if (fruitAboveLine) {
-      // Only trigger game over if all fruits have stopped moving AND timer has elapsed
-      if (this.allFruitsStopped()) {
+    if (characterAboveLine) {
+      // Only trigger game over if all characters have stopped moving AND timer has elapsed
+      if (this.allCharactersStopped()) {
         this.gameOverTimer++;
         if (this.gameOverTimer >= this.gameOverDelay) {
           return true;
         }
       } else {
-        // Reset timer if fruits are still moving
+        // Reset timer if characters are still moving
         this.gameOverTimer = 0;
       }
     } else {
-      // Reset timer if no fruits are above the line
+      // Reset timer if no characters are above the line
       this.gameOverTimer = 0;
     }
 
     return false;
   }
 
-  private allFruitsStopped(): boolean {
+  private allCharactersStopped(): boolean {
     const velocityThreshold = 0.5; // Minimum velocity to consider "stopped"
 
     for (const body of this.bodies) {
       const velocity = Math.sqrt(body.velocity.x * body.velocity.x + body.velocity.y * body.velocity.y);
       if (velocity > velocityThreshold) {
-        return false; // At least one fruit is still moving
+        return false; // At least one character is still moving
       }
     }
-    return true; // All fruits have stopped moving
+    return true; // All characters have stopped moving
   }
 
   clear(): void {
