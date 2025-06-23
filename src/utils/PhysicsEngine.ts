@@ -89,6 +89,10 @@ export class PhysicsEngine {
     };
   }
 
+  getBodyRotation(body: Matter.Body): number {
+    return body.angle;
+  }
+
   checkCollision(character1: Character, character2: Character): boolean {
     // Use Matter.js collision detection
     const pairs = Matter.Detector.collisions(this.collisionDetector);

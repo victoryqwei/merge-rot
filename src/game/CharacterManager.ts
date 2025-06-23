@@ -4,6 +4,7 @@ import { GAME_CONFIG } from "../constants/GameConstants";
 import { PhysicsEngine } from "../utils/PhysicsEngine";
 import { SoundManager } from "../utils/SoundManager";
 import { random } from "lodash";
+import * as Matter from "matter-js";
 
 export class CharacterManager {
   private characters = new Map<number, Character>(); // Use Map with character ID as key
@@ -23,13 +24,17 @@ export class CharacterManager {
   createCharacter(characterType: CharacterClass, x: number, y: number): Character {
     const body = this.physicsEngine.createCharacterBody(characterType.radius, x, y);
 
+    // Add some initial angular velocity for rotation
+    Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.1); // Random rotation between -0.05 and 0.05
+
     const newCharacter = new Character(
       CharacterClass.generateId(),
       characterType.name,
       characterType.radius,
       characterType.points,
       characterType.displayName,
-      body
+      body,
+      0 // Initial rotation
     );
 
     return newCharacter;
@@ -45,6 +50,11 @@ export class CharacterManager {
 
   updateCharacters(): void {
     this.physicsEngine.update();
+
+    // Update character rotations based on physics body rotation
+    for (const character of this.characters.values()) {
+      character.rotation = this.physicsEngine.getBodyRotation(character.body);
+    }
   }
 
   checkCombinations(): number {
@@ -93,6 +103,10 @@ export class CharacterManager {
         // Set velocity
         newCharacter.body.velocity.x = (vel1.x + vel2.x) / 2;
         newCharacter.body.velocity.y = (vel1.y + vel2.y) / 2;
+
+        // Add some extra angular velocity for the merged character
+        const extraRotation = (Math.random() - 0.5) * 0.2; // Extra rotation for merged characters
+        Matter.Body.setAngularVelocity(newCharacter.body, extraRotation);
 
         // Play sound for the new merged character
         this.soundManager.playSoundDebounced(nextCharacterClass.name, 800);

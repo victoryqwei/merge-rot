@@ -66,16 +66,25 @@ export class Renderer {
     this.ctx.arc(x + 2 * this.pixelRatio, y + 2 * this.pixelRatio, radius, 0, Math.PI * 2);
     this.ctx.fill();
 
-    // Draw character image
+    // Draw character image with rotation
     const image = this.imageManager.getImage(character.name);
     if (image) {
       this.ctx.save();
+
+      // Move to character center
+      this.ctx.translate(x, y);
+
+      // Apply rotation
+      this.ctx.rotate(character.rotation);
+
+      // Create circular clip path
       this.ctx.beginPath();
-      this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+      this.ctx.arc(0, 0, radius, 0, Math.PI * 2);
       this.ctx.clip();
 
+      // Draw the rotated image
       const imageSize = radius * 2;
-      this.ctx.drawImage(image, x - radius, y - radius, imageSize, imageSize);
+      this.ctx.drawImage(image, -radius, -radius, imageSize, imageSize);
 
       this.ctx.restore();
     } else {
@@ -121,12 +130,18 @@ export class Renderer {
     const image = this.imageManager.getImage(characterType.name);
     if (image) {
       this.ctx.save();
+
+      // Move to character center
+      this.ctx.translate(scaledX, scaledY);
+
+      // Create circular clip path
       this.ctx.beginPath();
-      this.ctx.arc(scaledX, scaledY, scaledRadius, 0, Math.PI * 2);
+      this.ctx.arc(0, 0, scaledRadius, 0, Math.PI * 2);
       this.ctx.clip();
 
+      // Draw the image
       const imageSize = scaledRadius * 2;
-      this.ctx.drawImage(image, scaledX - scaledRadius, scaledY - scaledRadius, imageSize, imageSize);
+      this.ctx.drawImage(image, -scaledRadius, -scaledRadius, imageSize, imageSize);
 
       this.ctx.restore();
     } else {
@@ -158,12 +173,18 @@ export class Renderer {
     const image = this.imageManager.getImage(characterType.name);
     if (image) {
       this.ctx.save();
+
+      // Move to character center
+      this.ctx.translate(scaledX, scaledY);
+
+      // Create circular clip path
       this.ctx.beginPath();
-      this.ctx.arc(scaledX, scaledY, animatedRadius, 0, Math.PI * 2);
+      this.ctx.arc(0, 0, animatedRadius, 0, Math.PI * 2);
       this.ctx.clip();
 
+      // Draw the image
       const imageSize = animatedRadius * 2;
-      this.ctx.drawImage(image, scaledX - animatedRadius, scaledY - animatedRadius, imageSize, imageSize);
+      this.ctx.drawImage(image, -animatedRadius, -animatedRadius, imageSize, imageSize);
 
       this.ctx.restore();
     } else {

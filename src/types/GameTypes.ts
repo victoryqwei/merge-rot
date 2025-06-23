@@ -61,7 +61,8 @@ export class Character {
     public readonly radius: number,
     public readonly points: number,
     public readonly displayName: string,
-    public readonly body: Body
+    public readonly body: Body,
+    public rotation: number = 0
   ) {}
 }
 
