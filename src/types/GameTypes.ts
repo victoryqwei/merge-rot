@@ -54,21 +54,15 @@ export class CharacterClass {
   }
 }
 
-// Legacy interface for backward compatibility (can be removed later)
-export interface CharacterType {
-  name: string;
-  radius: number;
-  points: number;
-  displayName: string;
-}
-
-export interface Character {
-  id: number; // Unique identifier
-  name: string;
-  radius: number;
-  points: number;
-  displayName: string;
-  body: Body;
+export class Character {
+  constructor(
+    public readonly id: number,
+    public readonly name: string,
+    public readonly radius: number,
+    public readonly points: number,
+    public readonly displayName: string,
+    public readonly body: Body
+  ) {}
 }
 
 export interface Particle {

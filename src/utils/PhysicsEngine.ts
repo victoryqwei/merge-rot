@@ -96,8 +96,8 @@ export class PhysicsEngine {
     // Check if the two characters are colliding
     for (const pair of pairs) {
       if (
-        (pair.bodyA === character1.body && pair.bodyB === character2.body) ||
-        (pair.bodyA === character2.body && pair.bodyB === character1.body)
+        (pair.bodyA.id === character1.body.id && pair.bodyB.id === character2.body.id) ||
+        (pair.bodyA.id === character2.body.id && pair.bodyB.id === character1.body.id)
       ) {
         return true;
       }

@@ -1,5 +1,5 @@
-import type { Character, Particle } from "../types/GameTypes";
-import { CharacterClass } from "../types/GameTypes";
+import { Character, CharacterClass } from "../types/GameTypes";
+import type { Particle } from "../types/GameTypes";
 import { GAME_CONFIG } from "../constants/GameConstants";
 import { PhysicsEngine } from "../utils/PhysicsEngine";
 import { SoundManager } from "../utils/SoundManager";
@@ -23,14 +23,16 @@ export class CharacterManager {
   createCharacter(characterType: CharacterClass, x: number, y: number): Character {
     const body = this.physicsEngine.createCharacterBody(characterType.radius, x, y);
 
-    return {
-      id: CharacterClass.generateId(), // Generate unique ID
-      name: characterType.name,
-      radius: characterType.radius,
-      points: characterType.points,
-      displayName: characterType.displayName,
-      body,
-    };
+    const newCharacter = new Character(
+      CharacterClass.generateId(),
+      characterType.name,
+      characterType.radius,
+      characterType.points,
+      characterType.displayName,
+      body
+    );
+
+    return newCharacter;
   }
 
   addCharacter(character: Character): void {
@@ -58,6 +60,8 @@ export class CharacterManager {
       for (let j = i + 1; j < characterArray.length; j++) {
         const character1 = characterArray[i];
         const character2 = characterArray[j];
+
+        if (character1.id === character2.id) continue;
 
         // Skip if either character is already marked for removal
         if (charactersToRemove.includes(character1.id) || charactersToRemove.includes(character2.id)) {
@@ -91,7 +95,7 @@ export class CharacterManager {
         newCharacter.body.velocity.y = (vel1.y + vel2.y) / 2;
 
         // Play sound for the new merged character
-        this.soundManager.playSoundDebounced(nextCharacterClass.name, 500);
+        this.soundManager.playSoundDebounced(nextCharacterClass.name, 800);
         this.soundManager.playPop();
 
         // Mark characters for removal
