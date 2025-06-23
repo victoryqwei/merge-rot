@@ -10,8 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@chakra-ui/react": "^2.8.2",
+    "@emotion/react": "^11",
+    "@emotion/styled": "^11",
     "@types/lodash": "^4.17.18",
     "@types/matter-js": "^0.19.8",
+    "framer-motion": "^6",
     "lodash": "^4.17.21",
     "matter-js": "^0.20.0",
     "react": "^19.1.0",
