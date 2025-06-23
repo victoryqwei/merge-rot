@@ -4,19 +4,21 @@ import { CHARACTER_TYPES } from "../constants/GameConstants";
 export class SoundManager {
   private sounds = new Map<string, Howl>();
   private popSound: Howl | null = null;
+  private backgroundMusic: Howl | null = null;
   private loadedCount = 0;
   private totalCount = 0;
   private onLoadComplete?: () => void;
-  private volume = 0.7; // Default volume
+  private volume = 1; // Default volume
+  private musicVolume = 0.1; // Lower volume for background music
 
   constructor() {
     this.loadAllSounds();
   }
 
-  // Load all character and pop sounds
+  // Load all character, pop, and background music sounds
   private loadAllSounds(): void {
     const characterNames = CHARACTER_TYPES.map((c) => c.name);
-    this.totalCount = characterNames.length + 1; // +1 for pop
+    this.totalCount = characterNames.length + 2; // +1 for pop, +1 for background music
 
     // Load character sounds
     characterNames.forEach((name) => {
@@ -25,6 +27,16 @@ export class SoundManager {
 
     // Load pop sound
     this.popSound = this.createHowl("/src/assets/sounds/pop.mp3", "pop");
+
+    // Load background music
+    this.backgroundMusic = new Howl({
+      src: ["/src/assets/sounds/background-music.mp3"],
+      preload: true,
+      volume: this.musicVolume,
+      loop: true, // Loop the background music
+      onload: () => this.handleLoad(),
+      onloaderror: (_id, error) => this.handleLoadError("background-music", error),
+    });
   }
 
   // Helper to create a Howl instance with event handlers
@@ -62,6 +74,16 @@ export class SoundManager {
     this.popSound?.play();
   }
 
+  // Play background music
+  playBackgroundMusic(): void {
+    this.backgroundMusic?.play();
+  }
+
+  // Stop background music
+  stopBackgroundMusic(): void {
+    this.backgroundMusic?.stop();
+  }
+
   // Stop a character's sound
   stopSound(characterName: string): void {
     this.sounds.get(characterName)?.stop();
@@ -71,6 +93,7 @@ export class SoundManager {
   stopAllSounds(): void {
     this.sounds.forEach((sound) => sound.stop());
     this.popSound?.stop();
+    this.backgroundMusic?.stop();
   }
 
   // Set volume for all sounds
@@ -80,8 +103,18 @@ export class SoundManager {
     this.popSound?.volume(this.volume);
   }
 
+  // Set volume for background music
+  setMusicVolume(volume: number): void {
+    this.musicVolume = Math.max(0, Math.min(1, volume));
+    this.backgroundMusic?.volume(this.musicVolume);
+  }
+
   getVolume(): number {
     return this.volume;
+  }
+
+  getMusicVolume(): number {
+    return this.musicVolume;
   }
 
   // Set callback for when all sounds are loaded

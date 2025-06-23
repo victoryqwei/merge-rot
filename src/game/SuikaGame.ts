@@ -35,6 +35,8 @@ export class SuikaGame {
     this.generateNextCharacter();
     this.setupEventListeners();
     this.gameLoop();
+    // Start background music
+    this.soundManager.playBackgroundMusic();
   }
 
   private setupEventListeners(): void {
@@ -171,6 +173,22 @@ export class SuikaGame {
 
   public getVolume(): number {
     return this.soundManager.getVolume();
+  }
+
+  public setMusicVolume(volume: number): void {
+    this.soundManager.setMusicVolume(volume);
+  }
+
+  public getMusicVolume(): number {
+    return this.soundManager.getMusicVolume();
+  }
+
+  public stopBackgroundMusic(): void {
+    this.soundManager.stopBackgroundMusic();
+  }
+
+  public playBackgroundMusic(): void {
+    this.soundManager.playBackgroundMusic();
   }
 
   public restart(): void {
