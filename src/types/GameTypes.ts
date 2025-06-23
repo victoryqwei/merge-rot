@@ -2,6 +2,7 @@ import type { Body, Engine, World, Render } from "matter-js";
 
 export interface CharacterType {
   name: string;
+  displayName: string;
   radius: number;
   points: number;
 }
