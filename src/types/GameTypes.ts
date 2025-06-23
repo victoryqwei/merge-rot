@@ -1,9 +1,8 @@
 import type { Body, Engine, World, Render } from "matter-js";
 
 export interface CharacterType {
-  emoji: string;
+  name: string;
   radius: number;
-  color: string;
   points: number;
 }
 

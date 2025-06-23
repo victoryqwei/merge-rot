@@ -1,16 +1,18 @@
 import type { CharacterType } from "../types/GameTypes";
 
 export const CHARACTER_TYPES: CharacterType[] = [
-  { emoji: "🍒", radius: 15, color: "#ff6b6b", points: 1 },
-  { emoji: "🍓", radius: 20, color: "#ff8e8e", points: 2 },
-  { emoji: "🍇", radius: 25, color: "#a855f7", points: 3 },
-  { emoji: "🍊", radius: 30, color: "#ffa726", points: 4 },
-  { emoji: "🍎", radius: 35, color: "#ef5350", points: 5 },
-  { emoji: "🍐", radius: 40, color: "#66bb6a", points: 6 },
-  { emoji: "🍑", radius: 45, color: "#ffb3ba", points: 7 },
-  { emoji: "🍍", radius: 50, color: "#ffd54f", points: 8 },
-  { emoji: "🍈", radius: 55, color: "#81c784", points: 9 },
-  { emoji: "🍉", radius: 60, color: "#4caf50", points: 10 },
+  { name: "shrimp-cat", radius: 15, points: 1 },
+  { name: "cappuccino", radius: 20, points: 2 },
+  { name: "capybara-coconut", radius: 25, points: 3 },
+  { name: "monkey-banana", radius: 30, points: 4 },
+  { name: "frog-tire", radius: 35, points: 5 },
+  { name: "camel-fridge", radius: 40, points: 6 },
+  { name: "elephant", radius: 45, points: 7 },
+  { name: "cow", radius: 50, points: 8 },
+  { name: "baseball-bat", radius: 55, points: 9 },
+  { name: "shark", radius: 60, points: 10 },
+  { name: "crocodile", radius: 65, points: 11 },
+  { name: "big-feet", radius: 70, points: 12 },
 ];
 
 export const PHYSICS = {
