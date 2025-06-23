@@ -6,7 +6,7 @@ import { SoundManager } from "../utils/SoundManager";
 import { random } from "lodash";
 
 export class CharacterManager {
-  private characters: Character[] = [];
+  private characters = new Map<number, Character>(); // Use Map with character ID as key
   private particles: Particle[] = [];
   private physicsEngine: PhysicsEngine;
   private soundManager: SoundManager;
@@ -24,6 +24,7 @@ export class CharacterManager {
     const body = this.physicsEngine.createCharacterBody(characterType.radius, x, y);
 
     return {
+      id: CharacterClass.generateId(), // Generate unique ID
       name: characterType.name,
       radius: characterType.radius,
       points: characterType.points,
@@ -33,11 +34,11 @@ export class CharacterManager {
   }
 
   addCharacter(character: Character): void {
-    this.characters.push(character);
+    this.characters.set(character.id, character);
   }
 
   getCharacters(): Character[] {
-    return this.characters;
+    return Array.from(this.characters.values());
   }
 
   updateCharacters(): void {
@@ -46,58 +47,80 @@ export class CharacterManager {
 
   checkCombinations(): number {
     let scoreIncrease = 0;
+    const charactersToRemove: number[] = [];
+    const charactersToAdd: Character[] = [];
 
-    for (let i = 0; i < this.characters.length; i++) {
-      for (let j = i + 1; j < this.characters.length; j++) {
-        const character1 = this.characters[i];
-        const character2 = this.characters[j];
+    // Convert map to array for easier iteration
+    const characterArray = Array.from(this.characters.values());
 
-        if (character1.name === character2.name) {
-          if (this.physicsEngine.checkCollision(character1, character2)) {
-            // Get the current character class and find the next one
-            const currentCharacterClass = CharacterClass.getByName(character1.name);
-            if (!currentCharacterClass) continue;
+    // Check all character pairs for combinations
+    for (let i = 0; i < characterArray.length; i++) {
+      for (let j = i + 1; j < characterArray.length; j++) {
+        const character1 = characterArray[i];
+        const character2 = characterArray[j];
 
-            const nextCharacterClass = currentCharacterClass.getNextCharacter();
-            if (!nextCharacterClass) continue; // Can't merge if it's the highest tier
-
-            const pos1 = this.physicsEngine.getBodyPosition(character1.body);
-            const pos2 = this.physicsEngine.getBodyPosition(character2.body);
-            const vel1 = this.physicsEngine.getBodyVelocity(character1.body);
-            const vel2 = this.physicsEngine.getBodyVelocity(character2.body);
-
-            const newCharacter = this.createCharacter(nextCharacterClass, (pos1.x + pos2.x) / 2, (pos1.y + pos2.y) / 2);
-
-            // Set velocity
-            newCharacter.body.velocity.x = (vel1.x + vel2.x) / 2;
-            newCharacter.body.velocity.y = (vel1.y + vel2.y) / 2;
-
-            // Play sound for the new merged character
-            // Use debounced sound for all characters - SoundManager will prioritize highest tier
-            this.soundManager.playSoundDebounced(nextCharacterClass.name, 500);
-            // Play pop sound
-            this.soundManager.playPop();
-
-            // Remove old characters
-            this.physicsEngine.removeBody(character1.body);
-            this.physicsEngine.removeBody(character2.body);
-            this.characters.splice(j, 1);
-            this.characters.splice(i, 1);
-
-            // Add new character
-            this.characters.push(newCharacter);
-
-            // Add score
-            scoreIncrease += nextCharacterClass.points * 10;
-
-            // Add explosion effect
-            this.createExplosion(newCharacter.body.position.x, newCharacter.body.position.y);
-
-            return scoreIncrease; // Exit to avoid index issues
-          }
+        // Skip if either character is already marked for removal
+        if (charactersToRemove.includes(character1.id) || charactersToRemove.includes(character2.id)) {
+          continue;
         }
+
+        if (character1.name !== character2.name) continue;
+        if (!this.physicsEngine.checkCollision(character1, character2)) continue;
+
+        // Get the current character class and find the next one
+        const currentCharacterClass = CharacterClass.getByName(character1.name);
+        if (!currentCharacterClass) continue;
+
+        const nextCharacterClass = currentCharacterClass.getNextCharacter();
+        if (!nextCharacterClass) continue; // Can't merge if it's the highest tier
+
+        // Calculate new position and velocity
+        const pos1 = this.physicsEngine.getBodyPosition(character1.body);
+        const pos2 = this.physicsEngine.getBodyPosition(character2.body);
+        const vel1 = this.physicsEngine.getBodyVelocity(character1.body);
+        const vel2 = this.physicsEngine.getBodyVelocity(character2.body);
+
+        // Create new merged character
+        const newCharacter = this.createCharacter(nextCharacterClass, (pos1.x + pos2.x) / 2, (pos1.y + pos2.y) / 2);
+
+        // Set velocity
+        newCharacter.body.velocity.x = (vel1.x + vel2.x) / 2;
+        newCharacter.body.velocity.y = (vel1.y + vel2.y) / 2;
+
+        // Play sound for the new merged character
+        this.soundManager.playSoundDebounced(nextCharacterClass.name, 500);
+        this.soundManager.playPop();
+
+        // Mark characters for removal
+        charactersToRemove.push(character1.id, character2.id);
+
+        // Add new character to the list
+        charactersToAdd.push(newCharacter);
+
+        // Add score
+        scoreIncrease += nextCharacterClass.points * 10;
+
+        // Add explosion effect
+        this.createExplosion(newCharacter.body.position.x, newCharacter.body.position.y);
+
+        // Break out of inner loop since we've found a combination
+        break;
       }
     }
+
+    // Remove old characters and their physics bodies
+    charactersToRemove.forEach((id) => {
+      const character = this.characters.get(id);
+      if (character) {
+        this.physicsEngine.removeBody(character.body);
+        this.characters.delete(id);
+      }
+    });
+
+    // Add new characters
+    charactersToAdd.forEach((character) => {
+      this.characters.set(character.id, character);
+    });
 
     return scoreIncrease;
   }
@@ -138,7 +161,7 @@ export class CharacterManager {
 
   clear(): void {
     this.physicsEngine.clear();
-    this.characters = [];
+    this.characters.clear();
     this.particles = [];
   }
 }

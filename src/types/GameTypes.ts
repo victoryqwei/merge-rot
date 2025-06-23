@@ -1,6 +1,8 @@
 import type { Body, Engine, World, Render } from "matter-js";
 
 export class CharacterClass {
+  private static nextId = 1; // Static counter for unique IDs
+
   constructor(
     public readonly name: string,
     public readonly radius: number,
@@ -8,6 +10,11 @@ export class CharacterClass {
     public readonly displayName: string,
     public readonly tier: number
   ) {}
+
+  // Generate a unique ID
+  static generateId(): number {
+    return this.nextId++;
+  }
 
   // Static method to get the next character in the evolution chain
   getNextCharacter(): CharacterClass | null {
@@ -56,6 +63,7 @@ export interface CharacterType {
 }
 
 export interface Character {
+  id: number; // Unique identifier
   name: string;
   radius: number;
   points: number;

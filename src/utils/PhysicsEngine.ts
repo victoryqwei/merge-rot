@@ -81,18 +81,15 @@ export class PhysicsEngine {
   }
 
   checkCollision(character1: Character, character2: Character): boolean {
-    const pairs = this.engine.pairs.list;
+    // Calculate distance between character centers
+    const dx = character1.body.position.x - character2.body.position.x;
+    const dy = character1.body.position.y - character2.body.position.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
 
-    for (const pair of pairs) {
-      if (
-        (pair.bodyA === character1.body && pair.bodyB === character2.body) ||
-        (pair.bodyA === character2.body && pair.bodyB === character1.body)
-      ) {
-        return true;
-      }
-    }
+    // Check if characters are touching (distance <= sum of radii)
+    const combinedRadius = character1.radius + character2.radius;
 
-    return false;
+    return distance <= combinedRadius;
   }
 
   removeBody(body: Matter.Body): void {
