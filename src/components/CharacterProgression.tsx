@@ -12,16 +12,16 @@ const CharacterProgression: React.FC = observer(() => {
   // Show "Touch to play" if game hasn't started yet
   if (!game.hasStarted) {
     return (
-      <Box textAlign="center" height="40px">
-        <Text color="white" fontSize="lg" fontWeight="bold">
-          Touch to play
+      <Box textAlign="center" p={3}>
+        <Text color="white" fontSize="4xl" fontWeight="bold" height="40px">
+          TOUCH TO PLAY
         </Text>
       </Box>
     );
   }
 
   return (
-    <HStack spacing={1} justify="center" flexWrap="wrap" height="40px">
+    <HStack spacing={1} justify="center" flexWrap="wrap" bg="whiteAlpha.400" borderRadius="full" p={2}>
       {allCharacters.map((character, index) => (
         <CharacterItem key={character.name} character={character} index={index} totalCharacters={allCharacters.length} />
       ))}
@@ -35,11 +35,19 @@ interface CharacterItemProps {
   totalCharacters: number;
 }
 
-const CharacterItem: React.FC<CharacterItemProps> = ({ character }) => {
+const CharacterItem: React.FC<CharacterItemProps> = ({ character, index, totalCharacters }) => {
   const characterImage = useCharacterImage(character.name);
 
+  const isLastCharacter = index === totalCharacters - 1;
+
   return (
-    <Box h="40px" overflow="hidden" display="flex" alignItems="center" justifyContent="center" position="relative">
+    <Box
+      h={isLastCharacter ? "50px" : "40px"}
+      overflow="hidden"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      position="relative">
       {characterImage ? (
         <Image
           src={characterImage}

@@ -32,7 +32,7 @@ export class PhysicsEngine {
 
     // Left wall
     const leftWall = Matter.Bodies.rectangle(
-      -thickness / 2 + GAME_CONFIG.PADDING,
+      -thickness / 2 + GAME_CONFIG.PADDING + 5,
       GAME_CONFIG.BOX_HEIGHT / 2,
       thickness,
       GAME_CONFIG.BOX_HEIGHT,
@@ -43,7 +43,7 @@ export class PhysicsEngine {
 
     // Right wall
     const rightWall = Matter.Bodies.rectangle(
-      GAME_CONFIG.BOX_WIDTH + thickness / 2 + GAME_CONFIG.PADDING,
+      GAME_CONFIG.BOX_WIDTH + thickness / 2 + GAME_CONFIG.PADDING - 5,
       GAME_CONFIG.BOX_HEIGHT / 2,
       thickness,
       GAME_CONFIG.BOX_HEIGHT,
@@ -53,7 +53,7 @@ export class PhysicsEngine {
     // Floor
     const floor = Matter.Bodies.rectangle(
       GAME_CONFIG.BOX_WIDTH / 2,
-      GAME_CONFIG.BOX_HEIGHT + thickness / 2,
+      GAME_CONFIG.BOX_HEIGHT + thickness / 2 - 5,
       GAME_CONFIG.BOX_WIDTH,
       thickness,
       { isStatic: true }

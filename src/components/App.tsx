@@ -43,7 +43,7 @@ const App: React.FC = observer(() => {
 
           {/* Controls */}
           <VStack position="absolute" left="100%" top="50px" spacing={4} ml={4}>
-            {shakeAngle === 0 && (
+            {shakeAngle === 0 && game.hasStarted && (
               <Button
                 colorScheme="green"
                 size="md"
