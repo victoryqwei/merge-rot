@@ -8,7 +8,7 @@ export class SoundManager {
   private loadedCount = 0;
   private totalCount = 0;
   private onLoadComplete?: () => void;
-  private volume = 1; // Default volume
+  private volume = 0.8; // Default volume
   private musicVolume = 0.2; // Lower volume for background music
   private characterDebounceTimer: number | null = null; // Global debounce timer
   private pendingCharacterSound: string | null = null; // Track highest tier character to play

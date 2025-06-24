@@ -63,6 +63,35 @@ export class Renderer {
     this.ctx.fill();
   }
 
+  drawOuterEdges(padding = 0, color = "rgba(139, 69, 19, 1)") {
+    const boxY = GAME_CONFIG.GAME_OVER_HEIGHT * this.pixelRatio;
+    const boxHeight = (GAME_CONFIG.BOX_HEIGHT - GAME_CONFIG.GAME_OVER_HEIGHT) * this.pixelRatio;
+    const boxWidth = GAME_CONFIG.BOX_WIDTH * this.pixelRatio;
+    const thickness = 50 * this.pixelRatio;
+
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = 2 * this.pixelRatio;
+    this.ctx.beginPath();
+    const radius = 5 * this.pixelRatio;
+    this.ctx.moveTo(padding, boxY + radius + padding);
+    this.ctx.lineTo(padding, boxY + boxHeight - radius - padding); // Left edge
+    this.ctx.arcTo(padding, boxY + boxHeight - padding, padding + radius, boxY + boxHeight - padding, radius); // Bottom left corner
+    this.ctx.lineTo(boxWidth - radius - padding, boxY + boxHeight - padding); // Bottom edge
+    this.ctx.arcTo(boxWidth - padding, boxY + boxHeight - padding, boxWidth - padding, boxY + boxHeight - radius - padding, radius); // Bottom right corner
+    this.ctx.lineTo(boxWidth - padding, boxY + radius + padding); // Right edge
+
+    this.ctx.arcTo(boxWidth - padding, boxY + padding, boxWidth - padding, boxY - thickness + padding, radius);
+    this.ctx.lineTo(boxWidth - thickness - padding, boxY - thickness + padding);
+
+    this.ctx.arcTo(thickness + padding, boxY - thickness + padding, thickness + padding, boxY - thickness + padding, radius);
+    this.ctx.lineTo(thickness + padding, boxY - thickness + padding);
+
+    this.ctx.arcTo(padding, boxY + padding, padding, boxY + radius + padding, radius);
+    this.ctx.closePath();
+
+    this.ctx.stroke();
+  }
+
   drawBox(): void {
     const boxY = GAME_CONFIG.GAME_OVER_HEIGHT * this.pixelRatio;
     const boxHeight = (GAME_CONFIG.BOX_HEIGHT - GAME_CONFIG.GAME_OVER_HEIGHT) * this.pixelRatio;
@@ -72,38 +101,99 @@ export class Renderer {
     this.ctx.save();
     this.ctx.translate(GAME_CONFIG.PADDING * this.pixelRatio, 0);
 
-    this.ctx.strokeStyle = "rgba(210, 180, 140, 0.8)";
-    this.ctx.lineWidth = 2 * this.pixelRatio;
-    this.ctx.strokeRect(thickness, boxY - thickness, boxWidth - thickness * 2, boxHeight);
+    // this.ctx.strokeStyle = "rgba(210, 180, 140, 0.8)";
+    // this.ctx.lineWidth = 2 * this.pixelRatio;
+    // this.ctx.strokeRect(thickness, boxY - thickness, boxWidth - thickness * 2, boxHeight);
 
-    this.ctx.fillStyle = "rgba(139, 69, 19, 0.4)";
-    this.ctx.fillRect(0, boxY, boxWidth, boxHeight);
+    // this.ctx.fillStyle = "rgba(139, 69, 19, 0.4)";
+    // this.ctx.fillRect(0, boxY, boxWidth, boxHeight);
 
-    this.ctx.fillStyle = "rgba(210, 180, 140, 0.3)";
-    this.ctx.fillRect(thickness, boxY - thickness, boxWidth - thickness * 2, boxHeight);
+    // this.ctx.fillStyle = "rgba(210, 180, 140, 0.3)";
+    // this.ctx.fillRect(thickness, boxY - thickness, boxWidth - thickness * 2, boxHeight);
 
-    this.ctx.strokeStyle = "rgba(139, 69, 19, 0.9)";
-    this.ctx.lineWidth = 2 * this.pixelRatio;
-    this.ctx.strokeRect(0, boxY, boxWidth, boxHeight);
+    // draw outer edges
+    const padding = 2 * this.pixelRatio;
+    this.drawOuterEdges(padding, "rgb(223, 170, 132)");
+    this.drawOuterEdges(0, "rgba(139, 69, 19, 1)");
 
-    this.ctx.strokeStyle = "rgba(139, 69, 19, 0.7)";
-    this.ctx.lineWidth = 2 * this.pixelRatio;
+    // draw top edge
     this.ctx.beginPath();
-    this.ctx.moveTo(0, boxY);
-    this.ctx.lineTo(thickness, boxY - thickness);
+    this.ctx.moveTo(padding * 2, boxY + padding * 2);
+    this.ctx.lineTo(boxWidth - padding * 2, boxY + padding * 2);
     this.ctx.stroke();
+
+    this.ctx.strokeStyle = "rgba(139, 69, 19, 0.4)";
+    this.ctx.lineWidth = 2 * this.pixelRatio;
+
+    // Bottom inner edge
     this.ctx.beginPath();
-    this.ctx.moveTo(boxWidth, boxY);
-    this.ctx.lineTo(boxWidth - thickness, boxY - thickness);
+    this.ctx.moveTo(thickness + padding, boxY + boxHeight - thickness + padding);
+    this.ctx.lineTo(boxWidth - thickness - padding, boxY + boxHeight - thickness + padding);
     this.ctx.stroke();
+
+    // Bottom left edge
     this.ctx.beginPath();
     this.ctx.moveTo(0, boxY + boxHeight);
     this.ctx.lineTo(thickness, boxY + boxHeight - thickness);
     this.ctx.stroke();
+
+    // Bottom right edge
     this.ctx.beginPath();
     this.ctx.moveTo(boxWidth, boxY + boxHeight);
     this.ctx.lineTo(boxWidth - thickness, boxY + boxHeight - thickness);
     this.ctx.stroke();
+
+    // Inner left edge
+    this.ctx.beginPath();
+    this.ctx.moveTo(thickness, boxY - thickness);
+    this.ctx.lineTo(thickness, boxY + boxHeight - thickness);
+    this.ctx.stroke();
+
+    // Inner right edge
+    this.ctx.beginPath();
+    this.ctx.moveTo(boxWidth - thickness, boxY - thickness);
+    this.ctx.lineTo(boxWidth - thickness, boxY + boxHeight - thickness);
+    this.ctx.stroke();
+
+    // Draw left face
+    this.ctx.beginPath();
+    this.ctx.moveTo(thickness, boxY - thickness);
+    this.ctx.lineTo(thickness, boxY + boxHeight - thickness);
+    this.ctx.lineTo(0, boxY + boxHeight);
+    this.ctx.lineTo(0, boxY);
+    this.ctx.closePath();
+    this.ctx.fillStyle = "rgba(139, 69, 19, 0.4)";
+    this.ctx.fill();
+
+    // Draw right face
+    this.ctx.beginPath();
+    this.ctx.moveTo(boxWidth - thickness, boxY - thickness);
+    this.ctx.lineTo(boxWidth - thickness, boxY + boxHeight - thickness);
+    this.ctx.lineTo(boxWidth, boxY + boxHeight);
+    this.ctx.lineTo(boxWidth, boxY);
+    this.ctx.closePath();
+    this.ctx.fillStyle = "rgba(139, 69, 19, 0.4)";
+    this.ctx.fill();
+
+    // Draw back face
+    this.ctx.beginPath();
+    this.ctx.moveTo(thickness, boxY - thickness);
+    this.ctx.lineTo(thickness, boxY + boxHeight - thickness);
+    this.ctx.lineTo(boxWidth - thickness, boxY + boxHeight - thickness);
+    this.ctx.lineTo(boxWidth - thickness, boxY - thickness);
+    this.ctx.closePath();
+    this.ctx.fillStyle = "rgba(179, 126, 88, 0.4)";
+    this.ctx.fill();
+
+    // Draw bottom face
+    this.ctx.beginPath();
+    this.ctx.moveTo(0, boxY + boxHeight);
+    this.ctx.lineTo(thickness, boxY + boxHeight - thickness);
+    this.ctx.lineTo(boxWidth - thickness, boxY + boxHeight - thickness);
+    this.ctx.lineTo(boxWidth, boxY + boxHeight);
+    this.ctx.closePath();
+    this.ctx.fillStyle = "rgba(179, 126, 88, 0.4)";
+    this.ctx.fill();
 
     this.ctx.restore();
   }

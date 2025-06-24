@@ -1,4 +1,4 @@
-import { Box, Button, VStack } from "@chakra-ui/react";
+import { Box, Button, Center, VStack } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import { FaFilm } from "react-icons/fa6";
@@ -30,8 +30,8 @@ const App: React.FC = observer(() => {
   };
 
   return (
-    <Box minH="100vh" bgGradient="linear(to-t,rgb(129, 205, 255), #3b82f6)" display="flex" justifyContent="center" p={4}>
-      <VStack spacing={6} align="center">
+    <Center minH="100vh" bgGradient="linear(to-t,rgb(129, 205, 255), #3b82f6)" display="flex" justifyContent="center">
+      <VStack spacing={2} align="center">
         {/* Score Board */}
         <ScoreBoard />
 
@@ -39,22 +39,26 @@ const App: React.FC = observer(() => {
         <Box position="relative">
           <GameCanvas />
           <GameOverOverlay onRestart={handleRestart} />
-        </Box>
 
-        {/* Controls */}
-        {shakeAngle === 0 && (
-          <Button
-            colorScheme="orange"
-            size="lg"
-            onClick={handleShake}
-            _hover={{ transform: "scale(1.05)" }}
-            transition="all 0.2s"
-            leftIcon={<FaFilm />}>
-            Shake!
-          </Button>
-        )}
+          {/* Controls */}
+          <VStack position="absolute" left="100%" top="50px" spacing={4} ml={4}>
+            {shakeAngle === 0 && (
+              <Button
+                colorScheme="green"
+                size="md"
+                onClick={handleShake}
+                _hover={{ transform: "scale(1.05)" }}
+                transition="all 0.2s"
+                leftIcon={<FaFilm />}
+                rightIcon={undefined}
+                border="2px solid white">
+                Shake!
+              </Button>
+            )}
+          </VStack>
+        </Box>
       </VStack>
-    </Box>
+    </Center>
   );
 });
 
