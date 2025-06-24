@@ -65,9 +65,12 @@ export class Renderer {
 
   drawBox(): void {
     const boxY = GAME_CONFIG.GAME_OVER_HEIGHT * this.pixelRatio;
-    const boxHeight = (GAME_CONFIG.CANVAS_HEIGHT - GAME_CONFIG.GAME_OVER_HEIGHT) * this.pixelRatio;
-    const boxWidth = GAME_CONFIG.CANVAS_WIDTH * this.pixelRatio;
+    const boxHeight = (GAME_CONFIG.BOX_HEIGHT - GAME_CONFIG.GAME_OVER_HEIGHT) * this.pixelRatio;
+    const boxWidth = GAME_CONFIG.BOX_WIDTH * this.pixelRatio;
     const thickness = 50 * this.pixelRatio;
+
+    this.ctx.save();
+    this.ctx.translate(GAME_CONFIG.PADDING * this.pixelRatio, 0);
 
     this.ctx.strokeStyle = "rgba(210, 180, 140, 0.8)";
     this.ctx.lineWidth = 2 * this.pixelRatio;
@@ -101,6 +104,8 @@ export class Renderer {
     this.ctx.moveTo(boxWidth, boxY + boxHeight);
     this.ctx.lineTo(boxWidth - thickness, boxY + boxHeight - thickness);
     this.ctx.stroke();
+
+    this.ctx.restore();
   }
 
   drawMouseCursor(x: number, y: number, characterType: CharacterClass, alpha: number = 0.6): void {

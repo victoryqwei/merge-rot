@@ -31,24 +31,30 @@ export class PhysicsEngine {
     const thickness = 20;
 
     // Left wall
-    const leftWall = Matter.Bodies.rectangle(-thickness / 2, GAME_CONFIG.CANVAS_HEIGHT / 2, thickness, GAME_CONFIG.CANVAS_HEIGHT, {
-      isStatic: true,
-    });
+    const leftWall = Matter.Bodies.rectangle(
+      -thickness / 2 + GAME_CONFIG.PADDING,
+      GAME_CONFIG.BOX_HEIGHT / 2,
+      thickness,
+      GAME_CONFIG.BOX_HEIGHT,
+      {
+        isStatic: true,
+      }
+    );
 
     // Right wall
     const rightWall = Matter.Bodies.rectangle(
-      GAME_CONFIG.CANVAS_WIDTH + thickness / 2,
-      GAME_CONFIG.CANVAS_HEIGHT / 2,
+      GAME_CONFIG.BOX_WIDTH + thickness / 2 + GAME_CONFIG.PADDING,
+      GAME_CONFIG.BOX_HEIGHT / 2,
       thickness,
-      GAME_CONFIG.CANVAS_HEIGHT,
+      GAME_CONFIG.BOX_HEIGHT,
       { isStatic: true }
     );
 
     // Floor
     const floor = Matter.Bodies.rectangle(
-      GAME_CONFIG.CANVAS_WIDTH / 2,
-      GAME_CONFIG.CANVAS_HEIGHT + thickness / 2,
-      GAME_CONFIG.CANVAS_WIDTH,
+      GAME_CONFIG.BOX_WIDTH / 2,
+      GAME_CONFIG.BOX_HEIGHT + thickness / 2,
+      GAME_CONFIG.BOX_WIDTH,
       thickness,
       { isStatic: true }
     );
