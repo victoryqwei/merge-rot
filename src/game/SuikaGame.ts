@@ -161,7 +161,7 @@ export class SuikaGame {
     // Update shake
     if (this.shakeTimerTime > 0) {
       this.shakeTimerTime -= this.deltaTime;
-      this.shakeTime += this.deltaTime * 5; // 3 radians per second oscillation speed
+      this.shakeTime += this.deltaTime * 6; // 6 radians per second oscillation speed
       this.shakeLiftTime += this.deltaTime; // Lift animation speed in seconds
       const progress = this.shakeTimerTime / this.shakeDuration;
       const intensity = this.shakeIntensity * progress;
@@ -247,7 +247,7 @@ export class SuikaGame {
 
   private draw(): void {
     this.renderer?.clear();
-    this.renderer?.drawGameOverBox();
+    this.renderer?.drawBox();
 
     // Draw characters
     for (const character of this.characterManager.getCharacters()) {
@@ -258,13 +258,13 @@ export class SuikaGame {
     if (this.currentCharacter && !this.gameOver && this.shakeTimerTime === 0) {
       const dropY = GAME_CONFIG.GAME_OVER_HEIGHT - 50;
 
-      // Draw animated character preview
-      this.renderer?.drawAnimatedMouseCursor(this.mouseX, dropY, this.currentCharacter, this.characterAnimationProgress, 1);
-
       // Only show drop indicator when character is fully animated and ready
       if (this.characterAnimationProgress >= 1) {
         this.renderer?.drawDropIndicator(this.mouseX, dropY);
       }
+
+      // Draw animated character preview
+      this.renderer?.drawAnimatedMouseCursor(this.mouseX, dropY, this.currentCharacter, this.characterAnimationProgress, 1);
     }
 
     // Draw particles

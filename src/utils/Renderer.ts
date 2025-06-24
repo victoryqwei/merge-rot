@@ -63,23 +63,28 @@ export class Renderer {
     this.ctx.fill();
   }
 
-  drawGameOverBox(): void {
+  drawBox(): void {
     const boxY = GAME_CONFIG.GAME_OVER_HEIGHT * this.pixelRatio;
     const boxHeight = (GAME_CONFIG.CANVAS_HEIGHT - GAME_CONFIG.GAME_OVER_HEIGHT) * this.pixelRatio;
     const boxWidth = GAME_CONFIG.CANVAS_WIDTH * this.pixelRatio;
     const thickness = 50 * this.pixelRatio;
+
+    this.ctx.strokeStyle = "rgba(210, 180, 140, 0.8)";
+    this.ctx.lineWidth = 2 * this.pixelRatio;
+    this.ctx.strokeRect(thickness, boxY - thickness, boxWidth - thickness * 2, boxHeight);
+
     this.ctx.fillStyle = "rgba(139, 69, 19, 0.4)";
     this.ctx.fillRect(0, boxY, boxWidth, boxHeight);
+
+    this.ctx.fillStyle = "rgba(210, 180, 140, 0.3)";
+    this.ctx.fillRect(thickness, boxY - thickness, boxWidth - thickness * 2, boxHeight);
+
     this.ctx.strokeStyle = "rgba(139, 69, 19, 0.9)";
     this.ctx.lineWidth = 2 * this.pixelRatio;
     this.ctx.strokeRect(0, boxY, boxWidth, boxHeight);
-    this.ctx.fillStyle = "rgba(210, 180, 140, 0.3)";
-    this.ctx.fillRect(thickness, boxY - thickness, boxWidth - thickness * 2, boxHeight);
-    this.ctx.strokeStyle = "rgba(210, 180, 140, 0.8)";
-    this.ctx.lineWidth = 1 * this.pixelRatio;
-    this.ctx.strokeRect(thickness, boxY - thickness, boxWidth - thickness * 2, boxHeight);
+
     this.ctx.strokeStyle = "rgba(139, 69, 19, 0.7)";
-    this.ctx.lineWidth = 1 * this.pixelRatio;
+    this.ctx.lineWidth = 2 * this.pixelRatio;
     this.ctx.beginPath();
     this.ctx.moveTo(0, boxY);
     this.ctx.lineTo(thickness, boxY - thickness);
@@ -134,14 +139,12 @@ export class Renderer {
   }
 
   drawDropIndicator(x: number, dropY: number): void {
-    this.ctx.strokeStyle = "rgba(0, 255, 0, 0.6)";
+    this.ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
     this.ctx.lineWidth = 2 * this.pixelRatio;
-    this.ctx.setLineDash([3 * this.pixelRatio, 3 * this.pixelRatio]);
     this.ctx.beginPath();
     this.ctx.moveTo(x * this.pixelRatio, dropY * this.pixelRatio);
     this.ctx.lineTo(x * this.pixelRatio, GAME_CONFIG.CANVAS_HEIGHT * this.pixelRatio);
     this.ctx.stroke();
-    this.ctx.setLineDash([]);
   }
 
   getPixelRatio(): number {
