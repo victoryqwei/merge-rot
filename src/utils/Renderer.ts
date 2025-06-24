@@ -3,6 +3,8 @@ import { CharacterClass } from "../types/GameTypes";
 import { GAME_CONFIG } from "../constants/GameConstants";
 import { ImageManager } from "./ImageManager";
 
+const THICKNESS = 50;
+
 export class Renderer {
   private ctx: CanvasRenderingContext2D;
   private pixelRatio: number;
@@ -67,7 +69,7 @@ export class Renderer {
     const boxY = GAME_CONFIG.GAME_OVER_HEIGHT * this.pixelRatio;
     const boxHeight = (GAME_CONFIG.BOX_HEIGHT - GAME_CONFIG.GAME_OVER_HEIGHT) * this.pixelRatio;
     const boxWidth = GAME_CONFIG.BOX_WIDTH * this.pixelRatio;
-    const thickness = 50 * this.pixelRatio;
+    const thickness = THICKNESS * this.pixelRatio;
 
     this.ctx.strokeStyle = color;
     this.ctx.lineWidth = 2 * this.pixelRatio;
@@ -100,16 +102,6 @@ export class Renderer {
 
     this.ctx.save();
     this.ctx.translate(GAME_CONFIG.PADDING * this.pixelRatio, 0);
-
-    // this.ctx.strokeStyle = "rgba(210, 180, 140, 0.8)";
-    // this.ctx.lineWidth = 2 * this.pixelRatio;
-    // this.ctx.strokeRect(thickness, boxY - thickness, boxWidth - thickness * 2, boxHeight);
-
-    // this.ctx.fillStyle = "rgba(139, 69, 19, 0.4)";
-    // this.ctx.fillRect(0, boxY, boxWidth, boxHeight);
-
-    // this.ctx.fillStyle = "rgba(210, 180, 140, 0.3)";
-    // this.ctx.fillRect(thickness, boxY - thickness, boxWidth - thickness * 2, boxHeight);
 
     // draw outer edges
     const padding = 2 * this.pixelRatio;
@@ -234,11 +226,18 @@ export class Renderer {
   }
 
   drawDropIndicator(x: number, dropY: number): void {
-    this.ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
+    const thickness = THICKNESS * this.pixelRatio;
+    const startY = dropY * this.pixelRatio;
+    const endY = GAME_CONFIG.CANVAS_HEIGHT * this.pixelRatio - thickness;
+    const gradient = this.ctx.createLinearGradient(0, startY, 0, endY);
+    gradient.addColorStop(0, "rgba(255, 255, 255, 0.6)");
+    gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+
+    this.ctx.strokeStyle = gradient;
     this.ctx.lineWidth = 2 * this.pixelRatio;
     this.ctx.beginPath();
-    this.ctx.moveTo(x * this.pixelRatio, dropY * this.pixelRatio);
-    this.ctx.lineTo(x * this.pixelRatio, GAME_CONFIG.CANVAS_HEIGHT * this.pixelRatio);
+    this.ctx.moveTo(x * this.pixelRatio, startY);
+    this.ctx.lineTo(x * this.pixelRatio, endY);
     this.ctx.stroke();
   }
 

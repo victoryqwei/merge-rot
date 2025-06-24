@@ -6,6 +6,7 @@ import { useGame } from "../game/useGame";
 import GameCanvas from "./GameCanvas";
 import GameOverOverlay from "./GameOverOverlay";
 import ScoreBoard from "./ScoreBoard";
+import CharacterProgression from "./CharacterProgression";
 
 const App: React.FC = observer(() => {
   const game = useGame();
@@ -57,6 +58,9 @@ const App: React.FC = observer(() => {
             )}
           </VStack>
         </Box>
+
+        {/* Character Progression */}
+        <CharacterProgression />
       </VStack>
     </Center>
   );

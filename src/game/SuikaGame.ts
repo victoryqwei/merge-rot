@@ -249,11 +249,6 @@ export class SuikaGame {
     this.renderer?.clear();
     this.renderer?.drawBox();
 
-    // Draw characters
-    for (const character of this.characterManager.getCharacters()) {
-      this.renderer?.drawCharacter(character);
-    }
-
     // Draw current character preview and drop indicator
     if (this.currentCharacter && !this.gameOver && this.shakeTimerTime === 0) {
       const dropY = GAME_CONFIG.GAME_OVER_HEIGHT - 50;
@@ -265,6 +260,11 @@ export class SuikaGame {
 
       // Draw animated character preview
       this.renderer?.drawAnimatedMouseCursor(this.mouseX, dropY, this.currentCharacter, this.characterAnimationProgress, 1);
+    }
+
+    // Draw characters
+    for (const character of this.characterManager.getCharacters()) {
+      this.renderer?.drawCharacter(character);
     }
 
     // Draw particles
