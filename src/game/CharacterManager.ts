@@ -173,12 +173,12 @@ export class CharacterManager {
     }
   }
 
-  updateParticles(): void {
+  updateParticles(deltaTime: number = 1 / 60): void {
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const particle = this.particles[i];
-      particle.x += particle.vx;
-      particle.y += particle.vy;
-      particle.life--;
+      particle.x += particle.vx * deltaTime * 60; // Scale to maintain same speed at 60fps
+      particle.y += particle.vy * deltaTime * 60;
+      particle.life -= deltaTime * 60; // Scale to maintain same lifetime at 60fps
 
       if (particle.life <= 0) {
         this.particles.splice(i, 1);

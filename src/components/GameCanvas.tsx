@@ -22,8 +22,9 @@ const GameCanvas: React.FC = observer(() => {
       borderRadius="lg"
       overflow="hidden"
       style={{
-        transform: `rotate(${game.getShakeAngle()}rad)`,
+        transform: `rotate(${game.getShakeAngle()}rad) translateY(${-game.getShakeLiftY()}px)`,
         transformOrigin: "center",
+        transition: "transform 0.1s ease-out",
       }}>
       <canvas
         ref={canvasRef}
@@ -31,8 +32,6 @@ const GameCanvas: React.FC = observer(() => {
         height={600}
         style={{
           display: "block",
-          cursor: "crosshair",
-          background: "#f0f0f0",
         }}
       />
     </Box>
