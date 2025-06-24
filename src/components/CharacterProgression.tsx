@@ -1,14 +1,27 @@
-import { Box, HStack, Image } from "@chakra-ui/react";
+import { Box, HStack, Image, Text } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { useCharacterImage } from "../hooks/useCharacterImage";
 import { CharacterClass } from "../types/GameTypes";
+import { useGame } from "../game/useGame";
 
 const CharacterProgression: React.FC = observer(() => {
   const allCharacters = CharacterClass.getAllCharacters();
+  const game = useGame();
+
+  // Show "Touch to play" if game hasn't started yet
+  if (!game.hasStarted) {
+    return (
+      <Box textAlign="center" height="40px">
+        <Text color="white" fontSize="lg" fontWeight="bold">
+          Touch to play
+        </Text>
+      </Box>
+    );
+  }
 
   return (
-    <HStack spacing={1} justify="center" flexWrap="wrap">
+    <HStack spacing={1} justify="center" flexWrap="wrap" height="40px">
       {allCharacters.map((character, index) => (
         <CharacterItem key={character.name} character={character} index={index} totalCharacters={allCharacters.length} />
       ))}
