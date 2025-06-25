@@ -6,70 +6,74 @@ import { SoundManager } from "../utils/SoundManager";
 import { GAME_CONFIG } from "../constants/GameConstants";
 import { makeAutoObservable } from "mobx";
 
+// Import managers
+import { InputManager } from "./managers/InputManager";
+import { ShakeManager } from "./managers/ShakeManager";
+import { AnimationManager } from "./managers/AnimationManager";
+import { GameStateManager } from "./managers/GameStateManager";
+import { GameLoop } from "./managers/GameLoop";
+
 export class SuikaGame {
   public canvas: HTMLCanvasElement | null = null;
-  renderer?: Renderer;
-  public physicsEngine: PhysicsEngine;
-  public characterManager: CharacterManager;
-  public soundManager: SoundManager;
-  public score: number = 0;
-  public currentCharacter: CharacterClass | null = null;
-  public nextCharacter: CharacterClass | null = null;
-  public mouseX: number = GAME_CONFIG.BOX_WIDTH / 2;
-  public gameOver: boolean = false;
-  public dropCooldown: number = 0;
-  public hasStarted: boolean = false;
-  public characterAnimationProgress: number = 0; // 0 to 1 for animation
-  public dropCooldownTime: number = 0; // Time-based cooldown in seconds
+  private renderer?: Renderer;
+  private physicsEngine: PhysicsEngine;
+  private characterManager: CharacterManager;
+  private soundManager: SoundManager;
 
-  // Mobile drag and drop properties
-  public isDragging: boolean = false;
-  public dragStartX: number = 0;
-  public dragStartY: number = 0;
-  public isMobile: boolean = false;
-
-  // Shake properties
-  public shakeIntensity: number = 0;
-  public shakeDuration: number = 0;
-  public shakeTimer: number = 0;
-  public shakeAngle: number = 0;
-  public shakeTime: number = 0; // For smooth oscillation
-  public shakeVelocity: number = 0; // For physics calculations
-  public shakeTimerTime: number = 0; // Time-based shake timer in seconds
-
-  // Lift animation properties
-  public shakeLiftY: number = 0; // Current lift offset in pixels
-  public shakeLiftTime: number = 0; // Time for lift animation
-  public shakeEndTime: number = 0; // Time when shaking ended (for going down phase)
-
-  // Delta time tracking for frame-rate independent animations
-  private lastFrameTime: number = 0;
-  private deltaTime: number = 0; // Time in seconds since last frame
+  // Managers
+  private inputManager: InputManager;
+  private shakeManager: ShakeManager;
+  private animationManager: AnimationManager;
+  private gameStateManager: GameStateManager;
+  private gameLoop: GameLoop;
 
   constructor(canvas: HTMLCanvasElement | null) {
     makeAutoObservable(this);
+
+    // Initialize core systems
     this.physicsEngine = new PhysicsEngine();
     this.soundManager = new SoundManager();
     this.characterManager = new CharacterManager(this.physicsEngine, this.soundManager);
+
+    // Initialize managers
+    this.inputManager = new InputManager();
+    this.shakeManager = new ShakeManager();
+    this.animationManager = new AnimationManager();
+    this.gameStateManager = new GameStateManager(this.characterManager);
+
+    // Set up manager connections
+    this.setupManagerConnections();
+
+    // Initialize game loop
+    this.gameLoop = new GameLoop({
+      update: this.update.bind(this),
+      draw: this.draw.bind(this),
+    });
+
     if (canvas) this.setCanvas(canvas);
   }
 
-  private detectMobile(): void {
-    // Detect if the device supports touch events
-    this.isMobile = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+  private setupManagerConnections(): void {
+    // Connect shake manager to physics engine
+    this.shakeManager.setOnShakeUpdate((angle, velocity) => {
+      this.physicsEngine.applyShake(angle, velocity);
+    });
+
+    // Connect input manager drop callback
+    this.inputManager.setOnDrop(this.handleDrop.bind(this));
   }
 
-  setCanvas(canvas: HTMLCanvasElement) {
+  setCanvas(canvas: HTMLCanvasElement): void {
     this.canvas = canvas;
     this.renderer = new Renderer(canvas);
+    this.inputManager.setCanvas(canvas);
     this.init();
   }
 
   private init(): void {
-    this.detectMobile();
-    this.generateNextCharacter();
-    this.setupEventListeners();
-    this.gameLoop();
+    this.gameStateManager.generateNextCharacter();
+    this.setupWindowEvents();
+    this.gameLoop.start();
 
     // Start background music
     this.soundManager.setOnLoadComplete(() => {
@@ -77,13 +81,7 @@ export class SuikaGame {
     });
   }
 
-  private setupEventListeners(): void {
-    if (this.isMobile) {
-      this.setupMobileEvents();
-    } else {
-      this.setupDesktopEvents();
-    }
-
+  private setupWindowEvents(): void {
     // Handle window resize for high DPI displays
     window.addEventListener("resize", () => {
       this.handleResize();
@@ -99,97 +97,12 @@ export class SuikaGame {
     });
   }
 
-  private setupDesktopEvents(): void {
-    // Track mouse movement
-    this.canvas?.addEventListener("mousemove", (e) => {
-      const mouseX = this.getMouseX(e.clientX);
-      if (mouseX !== null) {
-        this.mouseX = mouseX;
-      }
-    });
-
-    // Add character on click
-    this.canvas?.addEventListener("click", async (e) => {
-      await this.handleDrop(e.clientX);
-    });
-  }
-
-  private setupMobileEvents(): void {
-    // Track touch movement
-    this.canvas?.addEventListener(
-      "touchmove",
-      (e) => {
-        e.preventDefault(); // Prevent scrolling
-        if (e.touches.length > 0) {
-          const mouseX = this.getMouseX(e.touches[0].clientX);
-          if (mouseX !== null) {
-            this.mouseX = mouseX;
-          }
-        }
-      },
-      { passive: false }
-    );
-
-    // Start drag on touch start
-    this.canvas?.addEventListener(
-      "touchstart",
-      (e) => {
-        e.preventDefault();
-        if (e.touches.length > 0) {
-          this.dragStartX = e.touches[0].clientX;
-          this.dragStartY = e.touches[0].clientY;
-          this.isDragging = true;
-        }
-      },
-      { passive: false }
-    );
-
-    // End drag and drop on touch end
-    this.canvas?.addEventListener(
-      "touchend",
-      async (e) => {
-        e.preventDefault();
-        if (this.isDragging) {
-          await this.handleDrop(this.mouseX + GAME_CONFIG.PADDING); // Use current mouseX position
-          this.isDragging = false;
-        }
-      },
-      { passive: false }
-    );
-
-    // Handle touch cancel
-    this.canvas?.addEventListener(
-      "touchcancel",
-      (e) => {
-        e.preventDefault();
-        this.isDragging = false;
-      },
-      { passive: false }
-    );
-  }
-
-  private getMouseX(clientX: number): number | null {
-    const rect = this.canvas?.getBoundingClientRect();
-    if (!rect) return null;
-
-    let mouseX = clientX - rect.left - GAME_CONFIG.PADDING;
-
-    // Constrain mouse position by character radius to prevent going past box boundaries
-    if (this.currentCharacter) {
-      const radius = this.currentCharacter.radius;
-      mouseX = Math.max(radius, Math.min(GAME_CONFIG.BOX_WIDTH - radius, mouseX));
-    }
-
-    return mouseX + GAME_CONFIG.PADDING;
-  }
-
   private async handleDrop(clientX: number): Promise<void> {
     if (
-      this.gameOver ||
-      !this.currentCharacter ||
-      this.dropCooldownTime > 0 ||
-      this.characterAnimationProgress < 1 ||
-      this.shakeTimerTime > 0
+      this.gameStateManager.isGameOver() ||
+      !this.gameStateManager.getCurrentCharacter() ||
+      !this.animationManager.canDrop() ||
+      this.shakeManager.isShaking()
     )
       return;
 
@@ -200,16 +113,33 @@ export class SuikaGame {
     const dropY = GAME_CONFIG.GAME_OVER_HEIGHT - 50;
 
     // Create and add the character at the restricted position
-    const character = await this.characterManager.createCharacter(this.currentCharacter, x, dropY);
+    const character = await this.characterManager.createCharacter(this.gameStateManager.getCurrentCharacter()!, x, dropY);
     this.characterManager.addCharacter(character);
 
-    // Start cooldown timer (time-based)
-    this.dropCooldownTime = GAME_CONFIG.DROP_COOLDOWN_TIME / 1000; // Convert ms to seconds
-
-    this.setHasStarted(true);
+    // Start cooldown timer
+    this.animationManager.startDropCooldown();
+    this.gameStateManager.setHasStarted(true);
 
     // Generate next character
-    this.generateNextCharacter();
+    this.gameStateManager.generateNextCharacter();
+    this.animationManager.resetCharacterAnimation();
+    this.inputManager.setCurrentCharacter(this.gameStateManager.getCurrentCharacter());
+  }
+
+  private getMouseX(clientX: number): number | null {
+    const rect = this.canvas?.getBoundingClientRect();
+    if (!rect) return null;
+
+    let mouseX = clientX - rect.left - GAME_CONFIG.PADDING;
+
+    // Constrain mouse position by character radius to prevent going past box boundaries
+    const currentCharacter = this.gameStateManager.getCurrentCharacter();
+    if (currentCharacter) {
+      const radius = currentCharacter.radius;
+      mouseX = Math.max(radius, Math.min(GAME_CONFIG.BOX_WIDTH - radius, mouseX));
+    }
+
+    return mouseX + GAME_CONFIG.PADDING;
   }
 
   private handleResize(): void {
@@ -227,104 +157,11 @@ export class SuikaGame {
     }
   }
 
-  private setHasStarted(hasStarted: boolean): void {
-    this.hasStarted = hasStarted;
-  }
-
-  private generateNextCharacter(): void {
-    this.currentCharacter = this.nextCharacter || this.characterManager.generateRandomCharacter();
-    this.characterAnimationProgress = 0; // Reset animation
-    this.nextCharacter = this.characterManager.generateRandomCharacter();
-  }
-
-  private async update(): Promise<void> {
-    if (this.gameOver) return;
-
-    // Update shake
-    if (this.shakeTimerTime > 0) {
-      this.shakeTimerTime -= this.deltaTime;
-      this.shakeTime += this.deltaTime * 6; // 6 radians per second oscillation speed
-      this.shakeLiftTime += this.deltaTime; // Lift animation speed in seconds
-      const progress = this.shakeTimerTime / this.shakeDuration;
-      const intensity = this.shakeIntensity * progress;
-
-      // Calculate shake angle and velocity
-      const previousAngle = this.shakeAngle;
-      this.shakeAngle = (Math.sin(this.shakeTime) * intensity * Math.PI) / 180; // Convert to radians
-      this.shakeVelocity = this.shakeAngle - previousAngle; // Calculate velocity
-
-      // Calculate lift animation: up for 200ms, hold, then down
-      const liftDuration = 0.2; // 200ms = 0.2 seconds
-      const liftProgress = Math.min(this.shakeLiftTime, liftDuration) / liftDuration;
-
-      if (liftProgress < 1) {
-        // Going up phase (0-200ms)
-        this.shakeLiftY = liftProgress * 50; // 0 to 50px
-      } else {
-        // Hold phase - stay at 50px while shaking continues
-        this.shakeLiftY = 50;
-      }
-
-      // Apply shake to physics based on actual movement
-      this.physicsEngine.applyShake(this.shakeAngle, this.shakeVelocity);
-    } else if (this.shakeLiftY > 0) {
-      // Shaking is done, but we need to go down
-      if (this.shakeEndTime === 0) {
-        // First frame of going down - reset the timer
-        this.shakeEndTime = this.shakeLiftTime;
-        this.shakeLiftTime = 0;
-      }
-
-      this.shakeLiftTime += this.deltaTime;
-      const downDuration = 0.2; // 200ms = 0.2 seconds
-      const downProgress = Math.min(this.shakeLiftTime / downDuration, 1);
-
-      this.shakeLiftY = 50 * (1 - downProgress);
-
-      // Reset everything when we're done going down
-      if (downProgress >= 1) {
-        this.shakeAngle = 0;
-        this.shakeVelocity = 0;
-        this.shakeTime = 0;
-        this.shakeLiftY = 0;
-        this.shakeLiftTime = 0;
-        this.shakeEndTime = 0;
-        this.shakeTimerTime = 0;
-      }
-    } else {
-      this.shakeAngle = 0;
-      this.shakeVelocity = 0;
-      this.shakeTime = 0;
-      this.shakeLiftY = 0;
-      this.shakeLiftTime = 0;
-      this.shakeEndTime = 0;
-      this.shakeTimerTime = 0;
-    }
-
-    // Update cooldown timer
-    if (this.dropCooldownTime > 0) {
-      this.dropCooldownTime -= this.deltaTime;
-    } else {
-      // Animate character when ready to drop
-      this.characterAnimationProgress = Math.min(1, this.characterAnimationProgress + this.deltaTime * 3); // 3 units per second
-    }
-
-    // Update physics
-    this.characterManager.updateCharacters();
-
-    // Check for character combinations
-    const scoreIncrease = await this.characterManager.checkCombinations();
-    if (scoreIncrease > 0) {
-      this.score += scoreIncrease;
-    }
-
-    // Update particles
-    this.characterManager.updateParticles(this.deltaTime);
-
-    // Check for game over
-    if (this.characterManager.checkGameOver()) {
-      this.endGame();
-    }
+  private async update(deltaTime: number): Promise<void> {
+    // Update all managers
+    this.shakeManager.update(deltaTime);
+    this.animationManager.update(deltaTime);
+    this.gameStateManager.update(deltaTime);
   }
 
   private draw(): void {
@@ -332,19 +169,21 @@ export class SuikaGame {
     this.renderer?.drawBox();
 
     // Draw current character preview and drop indicator
-    if (this.currentCharacter && !this.gameOver && this.shakeTimerTime === 0) {
+    const currentCharacter = this.gameStateManager.getCurrentCharacter();
+    if (currentCharacter && !this.gameStateManager.isGameOver() && !this.shakeManager.isShaking()) {
       const dropY = GAME_CONFIG.GAME_OVER_HEIGHT - 50;
 
       // Show drop indicator when character is fully animated and ready
       // On mobile, also show when dragging
-      if (this.characterAnimationProgress >= 1 && (this.isMobile ? this.isDragging : true)) {
-        this.renderer?.drawDropIndicator(this.mouseX, dropY);
+      if (this.animationManager.canDrop() && (this.inputManager.isMobile() ? this.inputManager.isDragging() : true)) {
+        this.renderer?.drawDropIndicator(this.inputManager.getCurrentMouseX(), dropY);
       }
 
       // Draw animated character preview
       // On mobile, show a different visual state when dragging
-      const animationProgress = this.isMobile && this.isDragging ? 1 : this.characterAnimationProgress;
-      this.renderer?.drawAnimatedMouseCursor(this.mouseX, dropY, this.currentCharacter, animationProgress, 1);
+      const animationProgress =
+        this.inputManager.isMobile() && this.inputManager.isDragging() ? 1 : this.animationManager.getCharacterAnimationProgress();
+      this.renderer?.drawAnimatedMouseCursor(this.inputManager.getCurrentMouseX(), dropY, currentCharacter, animationProgress, 1);
     }
 
     // Draw characters
@@ -358,33 +197,14 @@ export class SuikaGame {
     }
 
     // Restore canvas state if shake was applied
-    if (this.shakeAngle !== 0) {
+    if (this.shakeManager.getShakeAngle() !== 0) {
       this.renderer?.restoreShakeRotation();
     }
   }
 
-  private gameLoop(): void {
-    const currentTime = performance.now();
-
-    if (this.lastFrameTime === 0) {
-      this.lastFrameTime = currentTime;
-    }
-
-    this.deltaTime = (currentTime - this.lastFrameTime) / 1000; // Convert to seconds
-    this.lastFrameTime = currentTime;
-
-    this.update().then(() => {
-      this.draw();
-      requestAnimationFrame(() => this.gameLoop());
-    });
-  }
-
-  private endGame(): void {
-    this.gameOver = true;
-  }
-
+  // Public API methods
   public getScore(): number {
-    return this.score;
+    return this.gameStateManager.getScore();
   }
 
   public setVolume(volume: number): void {
@@ -412,36 +232,58 @@ export class SuikaGame {
   }
 
   public restart(): void {
-    this.score = 0;
-    this.currentCharacter = null;
-    this.gameOver = false;
-    this.dropCooldownTime = 0;
-    this.isDragging = false;
-    this.characterManager.clear();
-    this.generateNextCharacter();
+    this.gameStateManager.restart();
+    this.animationManager.reset();
+    this.inputManager.resetDragState();
+    this.inputManager.setCurrentCharacter(this.gameStateManager.getCurrentCharacter());
   }
 
   public shake(intensity: number = 20, duration: number = 3000): void {
-    this.shakeIntensity = intensity;
-    this.shakeDuration = duration / 1000; // Convert ms to seconds
-    this.shakeTimerTime = duration / 1000; // Convert ms to seconds
-    this.shakeTime = 0; // Reset shake time
-    this.shakeLiftTime = 0; // Reset lift time
+    this.shakeManager.shake(intensity, duration);
   }
 
   public getShakeAngle(): number {
-    return this.shakeAngle;
+    return this.shakeManager.getShakeAngle();
   }
 
   public getShakeLiftY(): number {
-    return this.shakeLiftY;
+    return this.shakeManager.getShakeLiftY();
   }
 
   public getIsMobile(): boolean {
-    return this.isMobile;
+    return this.inputManager.isMobile();
   }
 
   public getIsDragging(): boolean {
-    return this.isDragging;
+    return this.inputManager.isDragging();
+  }
+
+  // Getters for React components
+  public get hasStarted(): boolean {
+    return this.gameStateManager.hasStarted();
+  }
+
+  public get gameOver(): boolean {
+    return this.gameStateManager.isGameOver();
+  }
+
+  public get currentCharacter(): CharacterClass | null {
+    return this.gameStateManager.getCurrentCharacter();
+  }
+
+  public get nextCharacter(): CharacterClass | null {
+    return this.gameStateManager.getNextCharacter();
+  }
+
+  public get mouseX(): number {
+    return this.inputManager.getCurrentMouseX();
+  }
+
+  public get characterAnimationProgress(): number {
+    return this.animationManager.getCharacterAnimationProgress();
+  }
+
+  public get dropCooldownTime(): number {
+    return this.animationManager.getDropCooldownTime();
   }
 }
