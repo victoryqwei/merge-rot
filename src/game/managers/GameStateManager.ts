@@ -1,3 +1,4 @@
+import { makeAutoObservable } from "mobx";
 import { CharacterClass } from "../../types/GameTypes";
 import { CharacterManager } from "../CharacterManager";
 
@@ -21,6 +22,7 @@ export class GameStateManager {
   private characterManager: CharacterManager;
 
   constructor(characterManager: CharacterManager) {
+    makeAutoObservable(this);
     this.characterManager = characterManager;
   }
 

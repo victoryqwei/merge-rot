@@ -54,11 +54,6 @@ export class SuikaGame {
   }
 
   private setupManagerConnections(): void {
-    // Connect shake manager to physics engine
-    this.shakeManager.setOnShakeUpdate((angle, velocity) => {
-      this.physicsEngine.applyShake(angle, velocity);
-    });
-
     // Connect input manager drop callback
     this.inputManager.setOnDrop(this.handleDrop.bind(this));
   }
@@ -97,7 +92,7 @@ export class SuikaGame {
     });
   }
 
-  private async handleDrop(clientX: number): Promise<void> {
+  private async handleDrop(): Promise<void> {
     if (
       this.gameStateManager.isGameOver() ||
       !this.gameStateManager.getCurrentCharacter() ||
@@ -106,7 +101,8 @@ export class SuikaGame {
     )
       return;
 
-    const x = this.getMouseX(clientX);
+    // Use the current mouseX position from InputManager instead of recalculating
+    const x = this.inputManager.getCurrentMouseX();
     if (x === null) return;
 
     // Drop at fixed Y position (just above the game over line)
@@ -124,22 +120,6 @@ export class SuikaGame {
     this.gameStateManager.generateNextCharacter();
     this.animationManager.resetCharacterAnimation();
     this.inputManager.setCurrentCharacter(this.gameStateManager.getCurrentCharacter());
-  }
-
-  private getMouseX(clientX: number): number | null {
-    const rect = this.canvas?.getBoundingClientRect();
-    if (!rect) return null;
-
-    let mouseX = clientX - rect.left - GAME_CONFIG.PADDING;
-
-    // Constrain mouse position by character radius to prevent going past box boundaries
-    const currentCharacter = this.gameStateManager.getCurrentCharacter();
-    if (currentCharacter) {
-      const radius = currentCharacter.radius;
-      mouseX = Math.max(radius, Math.min(GAME_CONFIG.BOX_WIDTH - radius, mouseX));
-    }
-
-    return mouseX + GAME_CONFIG.PADDING;
   }
 
   private handleResize(): void {

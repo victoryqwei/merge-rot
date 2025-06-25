@@ -1,3 +1,5 @@
+import { makeAutoObservable } from "mobx";
+
 export interface ShakeState {
   intensity: number;
   duration: number;
@@ -12,6 +14,10 @@ export interface ShakeState {
 }
 
 export class ShakeManager {
+  constructor() {
+    makeAutoObservable(this);
+  }
+
   private state: ShakeState = {
     intensity: 0,
     duration: 0,

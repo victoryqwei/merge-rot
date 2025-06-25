@@ -249,17 +249,6 @@ export class Renderer {
     return this.imageManager.isLoaded();
   }
 
-  applyShakeRotation(angle: number): void {
-    if (angle !== 0) {
-      this.ctx.save();
-      const centerX = (GAME_CONFIG.CANVAS_WIDTH * this.pixelRatio) / 2;
-      const centerY = (GAME_CONFIG.CANVAS_HEIGHT * this.pixelRatio) / 2;
-      this.ctx.translate(centerX, centerY);
-      this.ctx.rotate(angle);
-      this.ctx.translate(-centerX, -centerY);
-    }
-  }
-
   restoreShakeRotation(): void {
     this.ctx.restore();
   }
