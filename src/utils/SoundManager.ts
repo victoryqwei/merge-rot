@@ -1,10 +1,13 @@
 import { Howl } from "howler";
 import { CharacterClass } from "../types/GameTypes";
 
+export enum Sound {
+  Pop = "pop",
+  BackgroundMusic = "background-music",
+}
+
 export class SoundManager {
   private sounds = new Map<string, Howl>();
-  private popSound: Howl | null = null;
-  private backgroundMusic: Howl | null = null;
   private loadedCount = 0;
   private totalCount = 0;
   private onLoadComplete?: () => void;
@@ -19,43 +22,40 @@ export class SoundManager {
 
   // Load all character, pop, and background music sounds
   private async loadAllSounds(): Promise<void> {
-    const characterNames = CharacterClass.getAllCharacters().map((c) => c.name);
-    this.totalCount = characterNames.length + 2; // +1 for pop, +1 for background music
+    // Get all sound names to load
+    const characterNames = CharacterClass.getAllCharacters()
+      .slice(1)
+      .map((c) => c.name);
+    const allSoundNames = [...characterNames, Sound.Pop, Sound.BackgroundMusic];
 
-    // Load character sounds
-    for (const name of characterNames) {
+    this.totalCount = allSoundNames.length;
+
+    // Load all sounds
+    for (const name of allSoundNames) {
       try {
         const soundModule = await import(`../assets/sounds/${name}.mp3`);
-        this.sounds.set(name, this.createHowl(soundModule.default, name));
+
+        // Special configuration for background music
+        if (name === Sound.BackgroundMusic) {
+          this.sounds.set(
+            name,
+            new Howl({
+              src: [soundModule.default],
+              preload: true,
+              volume: this.musicVolume,
+              loop: true,
+              onload: () => this.handleLoad(),
+              onloaderror: (_id, error) => this.handleLoadError(name, error),
+            })
+          );
+        } else {
+          // Regular configuration for other sounds
+          this.sounds.set(name, this.createHowl(soundModule.default, name));
+        }
       } catch (error) {
         console.warn(`Failed to load sound for ${name}:`, error);
         this.handleLoad();
       }
-    }
-
-    // Load pop sound
-    try {
-      const popModule = await import("../assets/sounds/pop.mp3");
-      this.popSound = this.createHowl(popModule.default, "pop");
-    } catch (error) {
-      console.warn("Failed to load pop sound:", error);
-      this.handleLoad();
-    }
-
-    // Load background music
-    try {
-      const bgMusicModule = await import("../assets/sounds/background-music.mp3");
-      this.backgroundMusic = new Howl({
-        src: [bgMusicModule.default],
-        preload: true,
-        volume: this.musicVolume,
-        loop: true, // Loop the background music
-        onload: () => this.handleLoad(),
-        onloaderror: (_id, error) => this.handleLoadError("background-music", error),
-      });
-    } catch (error) {
-      console.warn("Failed to load background music:", error);
-      this.handleLoad();
     }
   }
 
@@ -84,9 +84,18 @@ export class SoundManager {
     this.handleLoad();
   }
 
-  // Play a character's sound
-  playSound(characterName: string): void {
-    this.sounds.get(characterName)?.play();
+  // Unified playSound method that handles all sound types
+  play(soundName: Sound | string, volume = 1, pitch = 1): void {
+    const sound = this.sounds.get(soundName);
+    if (!sound) {
+      console.warn(`Sound ${soundName} not found`);
+      return;
+    }
+
+    sound.volume(volume);
+    sound.rate(pitch);
+
+    sound.play();
   }
 
   // Play a character's sound with global debouncing (prioritizes highest tier character)
@@ -110,36 +119,35 @@ export class SoundManager {
     // Set new timer
     this.characterDebounceTimer = window.setTimeout(() => {
       if (this.pendingCharacterSound) {
-        this.playSound(this.pendingCharacterSound);
+        this.play(this.pendingCharacterSound);
         this.pendingCharacterSound = null;
       }
       this.characterDebounceTimer = null;
     }, debounceMs);
   }
 
-  // Play the pop sound
+  // Convenience methods for specific sounds
   playPop(): void {
-    this.popSound?.play();
+    this.play(Sound.Pop);
   }
 
-  // Play background music
   playBackgroundMusic(): void {
-    this.backgroundMusic?.play();
+    this.play(Sound.BackgroundMusic);
   }
 
   // Pause background music (maintains position)
   pauseBackgroundMusic(): void {
-    this.backgroundMusic?.pause();
+    this.sounds.get(Sound.BackgroundMusic)?.pause();
   }
 
   // Resume background music (continues from where it was paused)
   resumeBackgroundMusic(): void {
-    this.backgroundMusic?.play();
+    this.play(Sound.BackgroundMusic);
   }
 
   // Stop background music
   stopBackgroundMusic(): void {
-    this.backgroundMusic?.stop();
+    this.sounds.get(Sound.BackgroundMusic)?.stop();
   }
 
   // Stop a character's sound
@@ -150,21 +158,23 @@ export class SoundManager {
   // Stop all sounds
   stopAllSounds(): void {
     this.sounds.forEach((sound) => sound.stop());
-    this.popSound?.stop();
-    this.backgroundMusic?.stop();
   }
 
   // Set volume for all sounds
   setVolume(volume: number): void {
     this.volume = Math.max(0, Math.min(1, volume));
-    this.sounds.forEach((sound) => sound.volume(this.volume));
-    this.popSound?.volume(this.volume);
+    this.sounds.forEach((sound, name) => {
+      // Don't change volume for background music (it has its own volume control)
+      if (name !== Sound.BackgroundMusic) {
+        sound.volume(this.volume);
+      }
+    });
   }
 
   // Set volume for background music
   setMusicVolume(volume: number): void {
     this.musicVolume = Math.max(0, Math.min(1, volume));
-    this.backgroundMusic?.volume(this.musicVolume);
+    this.sounds.get(Sound.BackgroundMusic)?.volume(this.musicVolume);
   }
 
   getVolume(): number {

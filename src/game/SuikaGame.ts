@@ -58,8 +58,11 @@ export class SuikaGame {
     this.generateNextCharacter();
     this.setupEventListeners();
     this.gameLoop();
+
     // Start background music
-    this.soundManager.playBackgroundMusic();
+    this.soundManager.setOnLoadComplete(() => {
+      this.soundManager.playBackgroundMusic();
+    });
   }
 
   private setupEventListeners(): void {

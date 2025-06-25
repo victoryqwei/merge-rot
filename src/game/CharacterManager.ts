@@ -2,7 +2,7 @@ import { Character, CharacterClass } from "../types/GameTypes";
 import type { Particle } from "../types/GameTypes";
 import { GAME_CONFIG } from "../constants/GameConstants";
 import { PhysicsEngine } from "../utils/PhysicsEngine";
-import { SoundManager } from "../utils/SoundManager";
+import { Sound, SoundManager } from "../utils/SoundManager";
 import { ImageManager } from "../utils/ImageManager";
 import { random } from "lodash";
 import * as Matter from "matter-js";
@@ -124,7 +124,10 @@ export class CharacterManager {
 
         // Play sound for the new merged character
         this.soundManager.playSoundDebounced(nextCharacterClass.name, 800);
-        this.soundManager.playPop();
+
+        // Adjust pitch based on the size of the character
+        const pitch = 1.2 - (nextCharacterClass.radius - 25) / 100; // Scale pitch based on character size
+        this.soundManager.play(Sound.Pop, 1, pitch);
 
         // Mark characters for removal
         charactersToRemove.push(character1.id, character2.id);
