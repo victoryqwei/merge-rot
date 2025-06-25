@@ -1,5 +1,6 @@
 import { Howl } from "howler";
 import { CharacterClass } from "../types/GameTypes";
+import { clamp } from "lodash";
 
 export enum Sound {
   Pop = "pop",
@@ -162,7 +163,7 @@ export class SoundManager {
 
   // Set volume for all sounds
   setVolume(volume: number): void {
-    this.volume = Math.max(0, Math.min(1, volume));
+    this.volume = clamp(volume, 0, 1);
     this.sounds.forEach((sound, name) => {
       // Don't change volume for background music (it has its own volume control)
       if (name !== Sound.BackgroundMusic) {
@@ -173,7 +174,7 @@ export class SoundManager {
 
   // Set volume for background music
   setMusicVolume(volume: number): void {
-    this.musicVolume = Math.max(0, Math.min(1, volume));
+    this.musicVolume = clamp(volume, 0, 1);
     this.sounds.get(Sound.BackgroundMusic)?.volume(this.musicVolume);
   }
 

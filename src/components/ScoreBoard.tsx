@@ -25,7 +25,7 @@ const ScoreBoard: React.FC = observer(() => {
       )}
 
       <Text color="white" fontWeight="bold" fontSize={"4xl"} textAlign="center" flex={1} px={2}>
-        {game.hasStarted ? `${game.score}` : "- Italian Brainrot -"}
+        {game.hasStarted ? `${game.getScore()}` : "- Italian Brainrot -"}
       </Text>
 
       {game.hasStarted && game.nextCharacter && nextCharacterImage && (

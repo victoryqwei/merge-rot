@@ -1,3 +1,4 @@
+import { clamp } from "lodash";
 import { GAME_CONFIG } from "../../constants/GameConstants";
 import { CharacterClass } from "../../types/GameTypes";
 
@@ -20,7 +21,7 @@ export class InputManager {
     isMobile: false,
   };
 
-  private onDrop?: (clientX: number) => Promise<void>;
+  private onDrop?: () => Promise<void>;
 
   constructor() {
     this.detectMobile();
@@ -35,7 +36,7 @@ export class InputManager {
     this.currentCharacter = character;
   }
 
-  setOnDrop(callback: (clientX: number) => Promise<void>): void {
+  setOnDrop(callback: () => Promise<void>): void {
     this.onDrop = callback;
   }
 
@@ -63,9 +64,9 @@ export class InputManager {
     });
 
     // Add character on click
-    this.canvas.addEventListener("click", async (e) => {
+    this.canvas.addEventListener("click", async () => {
       if (this.onDrop) {
-        await this.onDrop(e.clientX);
+        await this.onDrop();
       }
     });
   }
@@ -108,7 +109,7 @@ export class InputManager {
       async (e) => {
         e.preventDefault();
         if (this.state.isDragging && this.onDrop) {
-          await this.onDrop(this.state.mouseX + GAME_CONFIG.PADDING);
+          await this.onDrop();
           this.state.isDragging = false;
         }
       },
@@ -135,7 +136,7 @@ export class InputManager {
     // Constrain mouse position by character radius to prevent going past box boundaries
     if (this.currentCharacter) {
       const radius = this.currentCharacter.radius;
-      mouseX = Math.max(radius, Math.min(GAME_CONFIG.BOX_WIDTH - radius, mouseX));
+      mouseX = clamp(mouseX, radius, GAME_CONFIG.BOX_WIDTH - radius);
     }
 
     return mouseX + GAME_CONFIG.PADDING;
