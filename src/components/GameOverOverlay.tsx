@@ -21,7 +21,7 @@ const GameOverOverlay: React.FC<GameOverOverlayProps> = observer(({ onRestart })
           Game Over!
         </Text>
         <Text fontSize="xl" color="white">
-          Final Score: {game.score}
+          Final Score: {game.getScore()}
         </Text>
         <Button colorScheme="blue" size="lg" onClick={onRestart} _hover={{ transform: "translateY(-2px)" }} transition="all 0.3s">
           Play Again
