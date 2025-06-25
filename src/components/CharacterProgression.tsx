@@ -12,8 +12,8 @@ const CharacterProgression: React.FC = observer(() => {
   // Show "Touch to play" if game hasn't started yet
   if (!game.hasStarted) {
     return (
-      <Box textAlign="center" p={3} h="58px" display="flex" alignItems="center" justifyContent="center">
-        <Text color="white" fontSize="4xl" fontWeight="bold">
+      <Box textAlign="center" h="58px" display="flex" alignItems="center" justifyContent="center">
+        <Text color="white" fontSize="4xl" fontWeight="bold" whiteSpace="nowrap">
           TOUCH TO PLAY
         </Text>
       </Box>

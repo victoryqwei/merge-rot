@@ -38,7 +38,7 @@ const App: React.FC = observer(() => {
       </Box>
 
       {/* Character Progression - positioned at bottom */}
-      <Box position="absolute" bottom={10} left="50%" transform="translateX(-50%)" zIndex={10}>
+      <Box position="absolute" bottom={20} left="50%" transform="translateX(-50%)" zIndex={10}>
         <CharacterProgression />
       </Box>
 

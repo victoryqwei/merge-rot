@@ -22,6 +22,12 @@ export class SuikaGame {
   public characterAnimationProgress: number = 0; // 0 to 1 for animation
   public dropCooldownTime: number = 0; // Time-based cooldown in seconds
 
+  // Mobile drag and drop properties
+  public isDragging: boolean = false;
+  public dragStartX: number = 0;
+  public dragStartY: number = 0;
+  public isMobile: boolean = false;
+
   // Shake properties
   public shakeIntensity: number = 0;
   public shakeDuration: number = 0;
@@ -48,6 +54,11 @@ export class SuikaGame {
     if (canvas) this.setCanvas(canvas);
   }
 
+  private detectMobile(): void {
+    // Detect if the device supports touch events
+    this.isMobile = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+  }
+
   setCanvas(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.renderer = new Renderer(canvas);
@@ -55,6 +66,7 @@ export class SuikaGame {
   }
 
   private init(): void {
+    this.detectMobile();
     this.generateNextCharacter();
     this.setupEventListeners();
     this.gameLoop();
@@ -66,57 +78,11 @@ export class SuikaGame {
   }
 
   private setupEventListeners(): void {
-    // Track mouse movement
-    this.canvas?.addEventListener("mousemove", (e) => {
-      const rect = this.canvas?.getBoundingClientRect();
-      if (rect) {
-        let newMouseX = e.clientX - rect.left;
-
-        // Constrain mouse position by character radius to prevent going past box boundaries
-        if (this.currentCharacter) {
-          const radius = this.currentCharacter.radius;
-          newMouseX = Math.max(radius, Math.min(GAME_CONFIG.BOX_WIDTH - radius, newMouseX));
-        }
-
-        this.mouseX = newMouseX;
-      }
-    });
-
-    // Add character on click
-    this.canvas?.addEventListener("click", async (e) => {
-      if (
-        this.gameOver ||
-        !this.currentCharacter ||
-        this.dropCooldownTime > 0 ||
-        this.characterAnimationProgress < 1 ||
-        this.shakeTimerTime > 0
-      )
-        return;
-
-      const rect = this.canvas?.getBoundingClientRect();
-      if (rect) {
-        let x = e.clientX - rect.left;
-
-        // Constrain drop position by character radius to prevent going past box boundaries
-        const radius = this.currentCharacter.radius;
-        x = Math.max(radius, Math.min(GAME_CONFIG.BOX_WIDTH - radius, x));
-
-        // Drop at fixed Y position (just above the game over line)
-        const dropY = GAME_CONFIG.GAME_OVER_HEIGHT - 50;
-
-        // Create and add the character at the restricted position
-        const character = await this.characterManager.createCharacter(this.currentCharacter, x, dropY);
-        this.characterManager.addCharacter(character);
-
-        // Start cooldown timer (time-based)
-        this.dropCooldownTime = GAME_CONFIG.DROP_COOLDOWN_TIME / 1000; // Convert ms to seconds
-
-        this.setHasStarted(true);
-
-        // Generate next character
-        this.generateNextCharacter();
-      }
-    });
+    if (this.isMobile) {
+      this.setupMobileEvents();
+    } else {
+      this.setupDesktopEvents();
+    }
 
     // Handle window resize for high DPI displays
     window.addEventListener("resize", () => {
@@ -131,6 +97,119 @@ export class SuikaGame {
     window.addEventListener("focus", () => {
       this.soundManager.resumeBackgroundMusic();
     });
+  }
+
+  private setupDesktopEvents(): void {
+    // Track mouse movement
+    this.canvas?.addEventListener("mousemove", (e) => {
+      const mouseX = this.getMouseX(e.clientX);
+      if (mouseX !== null) {
+        this.mouseX = mouseX;
+      }
+    });
+
+    // Add character on click
+    this.canvas?.addEventListener("click", async (e) => {
+      await this.handleDrop(e.clientX);
+    });
+  }
+
+  private setupMobileEvents(): void {
+    // Track touch movement
+    this.canvas?.addEventListener(
+      "touchmove",
+      (e) => {
+        e.preventDefault(); // Prevent scrolling
+        if (e.touches.length > 0) {
+          const mouseX = this.getMouseX(e.touches[0].clientX);
+          if (mouseX !== null) {
+            this.mouseX = mouseX;
+          }
+        }
+      },
+      { passive: false }
+    );
+
+    // Start drag on touch start
+    this.canvas?.addEventListener(
+      "touchstart",
+      (e) => {
+        e.preventDefault();
+        if (e.touches.length > 0) {
+          this.dragStartX = e.touches[0].clientX;
+          this.dragStartY = e.touches[0].clientY;
+          this.isDragging = true;
+        }
+      },
+      { passive: false }
+    );
+
+    // End drag and drop on touch end
+    this.canvas?.addEventListener(
+      "touchend",
+      async (e) => {
+        e.preventDefault();
+        if (this.isDragging) {
+          await this.handleDrop(this.mouseX + GAME_CONFIG.PADDING); // Use current mouseX position
+          this.isDragging = false;
+        }
+      },
+      { passive: false }
+    );
+
+    // Handle touch cancel
+    this.canvas?.addEventListener(
+      "touchcancel",
+      (e) => {
+        e.preventDefault();
+        this.isDragging = false;
+      },
+      { passive: false }
+    );
+  }
+
+  private getMouseX(clientX: number): number | null {
+    const rect = this.canvas?.getBoundingClientRect();
+    if (!rect) return null;
+
+    let mouseX = clientX - rect.left - GAME_CONFIG.PADDING;
+
+    // Constrain mouse position by character radius to prevent going past box boundaries
+    if (this.currentCharacter) {
+      const radius = this.currentCharacter.radius;
+      mouseX = Math.max(radius, Math.min(GAME_CONFIG.BOX_WIDTH - radius, mouseX));
+    }
+
+    return mouseX + GAME_CONFIG.PADDING;
+  }
+
+  private async handleDrop(clientX: number): Promise<void> {
+    if (
+      this.gameOver ||
+      !this.currentCharacter ||
+      this.dropCooldownTime > 0 ||
+      this.characterAnimationProgress < 1 ||
+      this.shakeTimerTime > 0
+    )
+      return;
+
+    const x = this.getMouseX(clientX);
+    if (x === null) return;
+
+    // Drop at fixed Y position (just above the game over line)
+    const dropY = GAME_CONFIG.GAME_OVER_HEIGHT - 50;
+
+    // Create and add the character at the restricted position
+    const character = await this.characterManager.createCharacter(this.currentCharacter, x, dropY);
+    this.characterManager.addCharacter(character);
+
+    // Start cooldown timer (time-based)
+    this.dropCooldownTime = GAME_CONFIG.DROP_COOLDOWN_TIME / 1000; // Convert ms to seconds
+
+    this.setHasStarted(true);
+
+    // Generate next character
+    this.generateNextCharacter();
   }
 
   private handleResize(): void {
@@ -256,13 +335,16 @@ export class SuikaGame {
     if (this.currentCharacter && !this.gameOver && this.shakeTimerTime === 0) {
       const dropY = GAME_CONFIG.GAME_OVER_HEIGHT - 50;
 
-      // Only show drop indicator when character is fully animated and ready
-      if (this.characterAnimationProgress >= 1) {
+      // Show drop indicator when character is fully animated and ready
+      // On mobile, also show when dragging
+      if (this.characterAnimationProgress >= 1 && (this.isMobile ? this.isDragging : true)) {
         this.renderer?.drawDropIndicator(this.mouseX, dropY);
       }
 
       // Draw animated character preview
-      this.renderer?.drawAnimatedMouseCursor(this.mouseX, dropY, this.currentCharacter, this.characterAnimationProgress, 1);
+      // On mobile, show a different visual state when dragging
+      const animationProgress = this.isMobile && this.isDragging ? 1 : this.characterAnimationProgress;
+      this.renderer?.drawAnimatedMouseCursor(this.mouseX, dropY, this.currentCharacter, animationProgress, 1);
     }
 
     // Draw characters
@@ -334,6 +416,7 @@ export class SuikaGame {
     this.currentCharacter = null;
     this.gameOver = false;
     this.dropCooldownTime = 0;
+    this.isDragging = false;
     this.characterManager.clear();
     this.generateNextCharacter();
   }
@@ -352,5 +435,13 @@ export class SuikaGame {
 
   public getShakeLiftY(): number {
     return this.shakeLiftY;
+  }
+
+  public getIsMobile(): boolean {
+    return this.isMobile;
+  }
+
+  public getIsDragging(): boolean {
+    return this.isDragging;
   }
 }
