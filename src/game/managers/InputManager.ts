@@ -5,8 +5,6 @@ import { CharacterClass } from "../../types/GameTypes";
 export interface InputState {
   mouseX: number;
   isDragging: boolean;
-  dragStartX: number;
-  dragStartY: number;
   isMobile: boolean;
 }
 
@@ -16,8 +14,6 @@ export class InputManager {
   private state: InputState = {
     mouseX: GAME_CONFIG.BOX_WIDTH / 2,
     isDragging: false,
-    dragStartX: 0,
-    dragStartY: 0,
     isMobile: false,
   };
 
@@ -95,9 +91,12 @@ export class InputManager {
       (e) => {
         e.preventDefault();
         if (e.touches.length > 0) {
-          this.state.dragStartX = e.touches[0].clientX;
-          this.state.dragStartY = e.touches[0].clientY;
           this.state.isDragging = true;
+
+          const mouseX = this.getMouseX(e.touches[0].clientX);
+          if (mouseX !== null) {
+            this.state.mouseX = mouseX;
+          }
         }
       },
       { passive: false }

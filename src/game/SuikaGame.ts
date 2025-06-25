@@ -54,6 +54,11 @@ export class SuikaGame {
   }
 
   private setupManagerConnections(): void {
+    // Connect shake manager to physics engine
+    this.shakeManager.setOnShakeUpdate((angle, velocity) => {
+      this.physicsEngine.applyShake(angle, velocity);
+    });
+
     // Connect input manager drop callback
     this.inputManager.setOnDrop(this.handleDrop.bind(this));
   }
@@ -93,14 +98,19 @@ export class SuikaGame {
   }
 
   private async handleDrop(): Promise<void> {
-    if (
-      this.gameStateManager.isGameOver() ||
-      !this.gameStateManager.getCurrentCharacter() ||
-      !this.animationManager.canDrop() ||
-      this.shakeManager.isShaking()
-    )
-      return;
+    if (this.gameStateManager.isGameOver() || !this.gameStateManager.getCurrentCharacter() || this.shakeManager.isShaking()) return;
 
+    if (!this.animationManager.canDrop()) {
+      // Queue the drop for later execution
+      this.animationManager.queueDrop();
+      return;
+    }
+
+    // Execute the drop
+    await this.executeDrop();
+  }
+
+  private async executeDrop(): Promise<void> {
     // Use the current mouseX position from InputManager instead of recalculating
     const x = this.inputManager.getCurrentMouseX();
     if (x === null) return;
@@ -111,6 +121,9 @@ export class SuikaGame {
     // Create and add the character at the restricted position
     const character = await this.characterManager.createCharacter(this.gameStateManager.getCurrentCharacter()!, x, dropY);
     this.characterManager.addCharacter(character);
+
+    // Record the drop execution time
+    this.animationManager.recordDropExecution();
 
     // Start cooldown timer
     this.animationManager.startDropCooldown();
@@ -142,6 +155,12 @@ export class SuikaGame {
     this.shakeManager.update(deltaTime);
     this.animationManager.update(deltaTime);
     this.gameStateManager.update(deltaTime);
+
+    // Check for queued drops and execute them if ready
+    if (this.animationManager.isDropQueued() && this.animationManager.canDrop()) {
+      this.animationManager.clearDropQueue();
+      await this.executeDrop();
+    }
   }
 
   private draw(): void {
@@ -160,9 +179,7 @@ export class SuikaGame {
       }
 
       // Draw animated character preview
-      // On mobile, show a different visual state when dragging
-      const animationProgress =
-        this.inputManager.isMobile() && this.inputManager.isDragging() ? 1 : this.animationManager.getCharacterAnimationProgress();
+      const animationProgress = this.animationManager.getCharacterAnimationProgress();
       this.renderer?.drawAnimatedMouseCursor(this.inputManager.getCurrentMouseX(), dropY, currentCharacter, animationProgress, 1);
     }
 
@@ -265,5 +282,13 @@ export class SuikaGame {
 
   public get dropCooldownTime(): number {
     return this.animationManager.getDropCooldownTime();
+  }
+
+  public get isDropQueued(): boolean {
+    return this.animationManager.isDropQueued();
+  }
+
+  public get timeSinceLastDrop(): number {
+    return this.animationManager.getTimeSinceLastDrop();
   }
 }

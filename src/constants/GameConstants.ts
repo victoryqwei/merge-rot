@@ -20,5 +20,5 @@ export const GAME_CONFIG = {
   PARTICLE_COUNT: 8,
   PARTICLE_LIFE: 30,
   PARTICLE_SPEED: 10,
-  DROP_COOLDOWN_TIME: 0, // 600ms cooldown between drops
+  DROP_COOLDOWN_TIME: 400,
 };
