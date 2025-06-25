@@ -75,7 +75,7 @@ export class SuikaGame {
         // Constrain mouse position by character radius to prevent going past box boundaries
         if (this.currentCharacter) {
           const radius = this.currentCharacter.radius;
-          newMouseX = Math.max(radius, Math.min(GAME_CONFIG.BOX_WIDTH - radius, newMouseX)) + GAME_CONFIG.PADDING;
+          newMouseX = Math.max(radius, Math.min(GAME_CONFIG.BOX_WIDTH - radius, newMouseX));
         }
 
         this.mouseX = newMouseX;
@@ -99,7 +99,7 @@ export class SuikaGame {
 
         // Constrain drop position by character radius to prevent going past box boundaries
         const radius = this.currentCharacter.radius;
-        x = Math.max(radius, Math.min(GAME_CONFIG.BOX_WIDTH - radius, x)) + GAME_CONFIG.PADDING;
+        x = Math.max(radius, Math.min(GAME_CONFIG.BOX_WIDTH - radius, x));
 
         // Drop at fixed Y position (just above the game over line)
         const dropY = GAME_CONFIG.GAME_OVER_HEIGHT - 50;

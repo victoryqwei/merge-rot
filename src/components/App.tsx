@@ -31,37 +31,39 @@ const App: React.FC = observer(() => {
   };
 
   return (
-    <Center minH="100vh" bgGradient="linear(to-t,rgb(129, 205, 255), #3b82f6)" display="flex" justifyContent="center">
-      <VStack spacing={2} align="center">
-        {/* Score Board */}
+    <Center minH="100vh" bgGradient="linear(to-t,rgb(129, 205, 255), #3b82f6)" position="relative">
+      {/* Score Board - positioned at top */}
+      <Box position="absolute" top={10} left="50%" transform="translateX(-50%)" zIndex={10} w="100%">
         <ScoreBoard />
+      </Box>
 
-        {/* Game Canvas Container */}
-        <Box position="relative">
-          <GameCanvas />
-          <GameOverOverlay onRestart={handleRestart} />
-
-          {/* Controls */}
-          <VStack position="absolute" left="100%" top="50px" spacing={4} ml={4}>
-            {shakeAngle === 0 && game.hasStarted && (
-              <Button
-                colorScheme="green"
-                size="md"
-                onClick={handleShake}
-                _hover={{ transform: "scale(1.05)" }}
-                transition="all 0.2s"
-                leftIcon={<FaFilm />}
-                rightIcon={undefined}
-                border="2px solid white">
-                Shake!
-              </Button>
-            )}
-          </VStack>
-        </Box>
-
-        {/* Character Progression */}
+      {/* Character Progression - positioned at bottom */}
+      <Box position="absolute" bottom={10} left="50%" transform="translateX(-50%)" zIndex={10}>
         <CharacterProgression />
-      </VStack>
+      </Box>
+
+      {/* Game Canvas Container - centered */}
+      <Box position="relative">
+        <GameCanvas />
+        <GameOverOverlay onRestart={handleRestart} />
+
+        {/* Controls */}
+        <VStack position="absolute" left="100%" top="50px" spacing={4} ml={4}>
+          {shakeAngle === 0 && game.hasStarted && (
+            <Button
+              colorScheme="green"
+              size="md"
+              onClick={handleShake}
+              _hover={{ transform: "scale(1.05)" }}
+              transition="all 0.2s"
+              leftIcon={<FaFilm />}
+              rightIcon={undefined}
+              border="2px solid white">
+              Shake!
+            </Button>
+          )}
+        </VStack>
+      </Box>
     </Center>
   );
 });
