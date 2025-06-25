@@ -12,8 +12,8 @@ const CharacterProgression: React.FC = observer(() => {
   // Show "Touch to play" if game hasn't started yet
   if (!game.hasStarted) {
     return (
-      <Box textAlign="center" p={3}>
-        <Text color="white" fontSize="4xl" fontWeight="bold" height="40px">
+      <Box textAlign="center" p={3} h="58px" display="flex" alignItems="center" justifyContent="center">
+        <Text color="white" fontSize="4xl" fontWeight="bold">
           TOUCH TO PLAY
         </Text>
       </Box>
@@ -21,11 +21,13 @@ const CharacterProgression: React.FC = observer(() => {
   }
 
   return (
-    <HStack spacing={1} justify="center" flexWrap="wrap" bg="whiteAlpha.400" borderRadius="full" p={2}>
-      {allCharacters.map((character, index) => (
-        <CharacterItem key={character.name} character={character} index={index} totalCharacters={allCharacters.length} />
-      ))}
-    </HStack>
+    <Box maxW="100vw" overflow="hidden" px={8}>
+      <HStack spacing={1} justify="center" bg="whiteAlpha.400" borderRadius="full" p={2} maxW="100%" minW="fit-content">
+        {allCharacters.map((character, index) => (
+          <CharacterItem key={character.name} character={character} index={index} totalCharacters={allCharacters.length} />
+        ))}
+      </HStack>
+    </Box>
   );
 });
 
@@ -43,6 +45,9 @@ const CharacterItem: React.FC<CharacterItemProps> = ({ character, index, totalCh
   return (
     <Box
       h={isLastCharacter ? "50px" : "40px"}
+      w="auto"
+      minW="20px"
+      maxW="50px"
       overflow="hidden"
       display="flex"
       alignItems="center"
@@ -54,6 +59,8 @@ const CharacterItem: React.FC<CharacterItemProps> = ({ character, index, totalCh
           alt={character.displayName}
           maxW="100%"
           maxH="100%"
+          w="auto"
+          h="auto"
           objectFit="contain"
           onError={(e) => {
             // Fallback to colored circle if image fails to load

@@ -15,7 +15,7 @@ export class SuikaGame {
   public score: number = 0;
   public currentCharacter: CharacterClass | null = null;
   public nextCharacter: CharacterClass | null = null;
-  public mouseX: number = 0;
+  public mouseX: number = GAME_CONFIG.BOX_WIDTH / 2;
   public gameOver: boolean = false;
   public dropCooldown: number = 0;
   public hasStarted: boolean = false;
