@@ -10,22 +10,34 @@ export class ImageManager {
     this.loadImages();
   }
 
-  private loadImages(): void {
+  private async loadImages(): Promise<void> {
     const imageNames = CHARACTER_TYPES.map((character) => character.name);
 
     this.totalCount = imageNames.length;
 
-    imageNames.forEach((name) => {
-      const img = new Image();
-      img.onload = () => {
+    for (const name of imageNames) {
+      try {
+        const img = new Image();
+        img.onload = () => {
+          this.loadedCount++;
+          if (this.loadedCount === this.totalCount) {
+            this.onLoadComplete?.();
+          }
+        };
+
+        // Use dynamic import to get the correct URL for the build
+        const imageModule = await import(`../assets/characters/${name}.png`);
+        img.src = imageModule.default;
+        this.images.set(name, img);
+      } catch (error) {
+        console.error(`Failed to load image for ${name}:`, error);
+        // Still count as loaded to prevent infinite waiting
         this.loadedCount++;
         if (this.loadedCount === this.totalCount) {
           this.onLoadComplete?.();
         }
-      };
-      img.src = `/src/assets/characters/${name}.png`;
-      this.images.set(name, img);
-    });
+      }
+    }
   }
 
   getImage(name: string): HTMLImageElement | undefined {

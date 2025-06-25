@@ -18,27 +18,45 @@ export class SoundManager {
   }
 
   // Load all character, pop, and background music sounds
-  private loadAllSounds(): void {
+  private async loadAllSounds(): Promise<void> {
     const characterNames = CharacterClass.getAllCharacters().map((c) => c.name);
     this.totalCount = characterNames.length + 2; // +1 for pop, +1 for background music
 
     // Load character sounds
-    characterNames.forEach((name) => {
-      this.sounds.set(name, this.createHowl(`/src/assets/sounds/${name}.mp3`, name));
-    });
+    for (const name of characterNames) {
+      try {
+        const soundModule = await import(`../assets/sounds/${name}.mp3`);
+        this.sounds.set(name, this.createHowl(soundModule.default, name));
+      } catch (error) {
+        console.warn(`Failed to load sound for ${name}:`, error);
+        this.handleLoad();
+      }
+    }
 
     // Load pop sound
-    this.popSound = this.createHowl("/src/assets/sounds/pop.mp3", "pop");
+    try {
+      const popModule = await import("../assets/sounds/pop.mp3");
+      this.popSound = this.createHowl(popModule.default, "pop");
+    } catch (error) {
+      console.warn("Failed to load pop sound:", error);
+      this.handleLoad();
+    }
 
     // Load background music
-    this.backgroundMusic = new Howl({
-      src: ["/src/assets/sounds/background-music.mp3"],
-      preload: true,
-      volume: this.musicVolume,
-      loop: true, // Loop the background music
-      onload: () => this.handleLoad(),
-      onloaderror: (_id, error) => this.handleLoadError("background-music", error),
-    });
+    try {
+      const bgMusicModule = await import("../assets/sounds/background-music.mp3");
+      this.backgroundMusic = new Howl({
+        src: [bgMusicModule.default],
+        preload: true,
+        volume: this.musicVolume,
+        loop: true, // Loop the background music
+        onload: () => this.handleLoad(),
+        onloaderror: (_id, error) => this.handleLoadError("background-music", error),
+      });
+    } catch (error) {
+      console.warn("Failed to load background music:", error);
+      this.handleLoad();
+    }
   }
 
   // Helper to create a Howl instance with event handlers
