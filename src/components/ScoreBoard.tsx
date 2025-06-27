@@ -5,6 +5,7 @@ import { useGame } from "../game/useGame";
 import { useCharacterImage } from "../hooks/useCharacterImage";
 import { AiOutlineHome } from "react-icons/ai";
 import { GameMode } from "../constants/GameConstants";
+import ShakeButton from "./ShakeButton";
 
 const ScoreBoard: React.FC = observer(() => {
   const game = useGame();
@@ -41,31 +42,34 @@ const ScoreBoard: React.FC = observer(() => {
       </Text>
 
       {game.hasStarted && game.nextCharacter && nextCharacterImage && (
-        <VStack spacing={1} align="center" flexShrink={0}>
-          <Box
-            w={{ base: "40px", md: "60px" }}
-            h={{ base: "40px", md: "60px" }}
-            overflow="hidden"
-            display="flex"
-            alignItems="center"
-            justifyContent="center">
-            <Image
-              src={nextCharacterImage}
-              alt={game.nextCharacter.displayName}
-              maxW="100%"
-              maxH="100%"
-              objectFit="contain"
-              onError={(e) => {
-                // Fallback to colored circle if image fails to load
-                const target = e.target as HTMLImageElement;
-                target.style.display = "none";
-                target.parentElement!.style.backgroundColor = "#ff6b6b";
-              }}
-            />
-          </Box>
-          <Text color="white" fontWeight="bold" fontSize={{ base: "sm", md: "lg" }}>
-            Next
-          </Text>
+        <VStack spacing={2} align="center" flexShrink={0} transform={"translateY(40px)"}>
+          <VStack spacing={1} align="center">
+            <Box
+              w={{ base: "40px", md: "60px" }}
+              h={{ base: "40px", md: "60px" }}
+              overflow="hidden"
+              display="flex"
+              alignItems="center"
+              justifyContent="center">
+              <Image
+                src={nextCharacterImage}
+                alt={game.nextCharacter.displayName}
+                maxW="100%"
+                maxH="100%"
+                objectFit="contain"
+                onError={(e) => {
+                  // Fallback to colored circle if image fails to load
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = "none";
+                  target.parentElement!.style.backgroundColor = "#ff6b6b";
+                }}
+              />
+            </Box>
+            <Text color="white" fontWeight="bold" fontSize={{ base: "sm", md: "lg" }}>
+              Next
+            </Text>
+          </VStack>
+          <ShakeButton />
         </VStack>
       )}
     </HStack>

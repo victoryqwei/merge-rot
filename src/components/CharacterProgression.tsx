@@ -1,23 +1,32 @@
-import { Box, HStack, Image, Text } from "@chakra-ui/react";
+import { Box, Button, HStack, Image } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import React from "react";
+import { useGame } from "../game/useGame";
 import { useCharacterImage } from "../hooks/useCharacterImage";
 import { CharacterClass } from "../types/GameTypes";
-import { useGame } from "../game/useGame";
+import { BiJoystick } from "react-icons/bi";
 
-const CharacterProgression: React.FC = observer(() => {
+interface CharacterProgressionProps {
+  setShowModes: (showModes: boolean) => void;
+}
+
+const CharacterProgression: React.FC<CharacterProgressionProps> = observer(({ setShowModes }) => {
   const game = useGame();
   const currentGameMode = game.getGameMode();
   const allCharacters = CharacterClass.getAllCharacters(currentGameMode);
 
-  // Show "Touch to play" if game hasn't started yet
   if (!game.hasStarted) {
     return (
-      <Box textAlign="center" h="58px" display="flex" alignItems="center" justifyContent="center">
-        <Text color="white" fontSize="4xl" fontWeight="bold" whiteSpace="nowrap">
-          TOUCH TO PLAY
-        </Text>
-      </Box>
+      <Button
+        colorScheme="green"
+        size="md"
+        onClick={() => setShowModes(true)}
+        border="2px solid white"
+        iconSpacing={1}
+        paddingX={2}
+        leftIcon={<BiJoystick size={24} />}>
+        Modes
+      </Button>
     );
   }
 
