@@ -49,7 +49,7 @@ export class AnimationManager {
     const now = Date.now();
     const timeSinceLastDrop = now - this.state.lastDropTime;
 
-    if (this.state.dropQueued || timeSinceLastDrop < GAME_CONFIG.DROP_COOLDOWN_TIME - 200) {
+    if (this.state.dropQueued || timeSinceLastDrop < GAME_CONFIG.DROP_COOLDOWN_TIME - 100) {
       return false;
     }
 

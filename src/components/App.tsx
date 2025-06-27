@@ -33,12 +33,12 @@ const App: React.FC = observer(() => {
   return (
     <Center minH="100vh" bgGradient="linear(to-t,rgb(129, 205, 255), #3b82f6)" position="relative">
       {/* Score Board - positioned at top */}
-      <Box position="absolute" top={10} left="50%" transform="translateX(-50%)" zIndex={10} w="100%">
+      <Box position="absolute" top={5} left="50%" transform="translateX(-50%)" zIndex={10} w="100%">
         <ScoreBoard />
       </Box>
 
       {/* Character Progression - positioned at bottom */}
-      <Box position="absolute" bottom={10} left="50%" transform="translateX(-50%)" zIndex={10}>
+      <Box position="absolute" bottom={5} left="50%" transform="translateX(-50%)" zIndex={10}>
         <CharacterProgression />
       </Box>
 
