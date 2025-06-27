@@ -2,7 +2,7 @@ import { CharacterClass } from "../types/GameTypes";
 import { CharacterManager } from "./CharacterManager";
 import { Renderer } from "../utils/Renderer";
 import { PhysicsEngine } from "../utils/PhysicsEngine";
-import { SoundManager } from "../utils/SoundManager";
+import { SoundManager, Sound } from "../utils/SoundManager";
 import { GAME_CONFIG } from "../constants/GameConstants";
 import { makeAutoObservable } from "mobx";
 
@@ -133,6 +133,9 @@ export class SuikaGame {
     this.gameStateManager.generateNextCharacter();
     this.animationManager.resetCharacterAnimation();
     this.inputManager.setCurrentCharacter(this.gameStateManager.getCurrentCharacter());
+
+    // Play water drop sound
+    this.soundManager.play(Sound.WaterPlop, 10);
   }
 
   private handleResize(): void {

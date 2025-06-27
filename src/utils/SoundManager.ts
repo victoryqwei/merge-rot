@@ -4,6 +4,7 @@ import { clamp } from "lodash";
 
 export enum Sound {
   Pop = "pop",
+  WaterPlop = "water-plop",
   BackgroundMusic = "background-music",
 }
 
@@ -27,7 +28,7 @@ export class SoundManager {
     const characterNames = CharacterClass.getAllCharacters()
       .slice(1)
       .map((c) => c.name);
-    const allSoundNames = [...characterNames, Sound.Pop, Sound.BackgroundMusic];
+    const allSoundNames = [...characterNames, ...Object.values(Sound)];
 
     this.totalCount = allSoundNames.length;
 
@@ -125,11 +126,6 @@ export class SoundManager {
       }
       this.characterDebounceTimer = null;
     }, debounceMs);
-  }
-
-  // Convenience methods for specific sounds
-  playPop(): void {
-    this.play(Sound.Pop);
   }
 
   playBackgroundMusic(): void {

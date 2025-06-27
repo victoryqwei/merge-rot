@@ -30,6 +30,10 @@ const GameCanvas: React.FC = observer(() => {
         height={600}
         style={{
           display: "block",
+          maxHeight: "70vh",
+          width: "auto",
+          height: "auto",
+          objectFit: "contain",
         }}
       />
     </Box>

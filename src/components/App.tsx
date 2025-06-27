@@ -1,16 +1,17 @@
 import { Box, Button, Center, VStack } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
-import { FaFilm } from "react-icons/fa6";
 import { useGame } from "../game/useGame";
+import CharacterProgression from "./CharacterProgression";
 import GameCanvas from "./GameCanvas";
 import GameOverOverlay from "./GameOverOverlay";
 import ScoreBoard from "./ScoreBoard";
-import CharacterProgression from "./CharacterProgression";
+import { BiJoystick } from "react-icons/bi";
 
 const App: React.FC = observer(() => {
   const game = useGame();
   const [shakeAngle, setShakeAngle] = useState(0);
+  const [showModes, setShowModes] = useState(false);
 
   useEffect(() => {
     let animationFrame: number;
@@ -56,10 +57,25 @@ const App: React.FC = observer(() => {
               onClick={handleShake}
               _hover={{ transform: "scale(1.05)" }}
               transition="all 0.2s"
-              leftIcon={<FaFilm />}
+              // leftIcon={<FaFilm />}
               rightIcon={undefined}
               border="2px solid white">
               Shake!
+            </Button>
+          )}
+        </VStack>
+
+        <VStack position="absolute" left="100%" bottom="50px" spacing={4} ml={4}>
+          {!game.hasStarted && (
+            <Button
+              colorScheme="green"
+              size="md"
+              onClick={() => setShowModes(true)}
+              border="2px solid white"
+              iconSpacing={1}
+              paddingX={2}
+              leftIcon={<BiJoystick size={24} />}>
+              Modes
             </Button>
           )}
         </VStack>
