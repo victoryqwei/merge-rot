@@ -22,8 +22,8 @@ const CharacterProgression: React.FC = observer(() => {
   }
 
   return (
-    <Box maxW="100vw" overflow="hidden" px={8}>
-      <HStack spacing={1} justify="center" bg="whiteAlpha.400" borderRadius="full" p={2} maxW="100%" minW="fit-content">
+    <Box maxW="100vw" overflow="hidden">
+      <HStack spacing={1} justify="center" bg="whiteAlpha.400" borderRadius="full" px={2} maxW="100%" minW="fit-content">
         {allCharacters.map((character: CharacterClass, index: number) => (
           <CharacterItem key={character.name} character={character} index={index} totalCharacters={allCharacters.length} />
         ))}
@@ -38,14 +38,12 @@ interface CharacterItemProps {
   totalCharacters: number;
 }
 
-const CharacterItem: React.FC<CharacterItemProps> = ({ character, index, totalCharacters }) => {
+const CharacterItem: React.FC<CharacterItemProps> = ({ character }) => {
   const characterImage = useCharacterImage(character.name);
-
-  const isLastCharacter = index === totalCharacters - 1;
 
   return (
     <Box
-      h={isLastCharacter ? "50px" : "40px"}
+      h={"50px"}
       w="auto"
       minW="20px"
       maxW="50px"
