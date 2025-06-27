@@ -4,10 +4,22 @@ import { observer } from "mobx-react-lite";
 import { useGame } from "../game/useGame";
 import { useCharacterImage } from "../hooks/useCharacterImage";
 import { AiOutlineHome } from "react-icons/ai";
+import { GameMode } from "../constants/GameConstants";
 
 const ScoreBoard: React.FC = observer(() => {
   const game = useGame();
   const nextCharacterImage = useCharacterImage(game.nextCharacter?.name || null);
+
+  const getCurrentModeDisplayName = () => {
+    switch (game.getGameMode()) {
+      case GameMode.ITALIAN_BRAINROT:
+        return "Italian Brainrot";
+      case GameMode.CATS:
+        return "Cats";
+      default:
+        return "Unknown";
+    }
+  };
 
   return (
     <HStack maxW="500px" w="100%" justify="space-between" p={4} h="100px" px={10} mx="auto">
@@ -25,7 +37,7 @@ const ScoreBoard: React.FC = observer(() => {
       )}
 
       <Text color="white" fontWeight="bold" fontSize={"4xl"} textAlign="center" flex={1} px={2} whiteSpace="nowrap">
-        {game.hasStarted ? `${game.getScore()}` : "- Italian Brainrot -"}
+        {game.hasStarted ? `${game.getScore()}` : `- ${getCurrentModeDisplayName()} -`}
       </Text>
 
       {game.hasStarted && game.nextCharacter && nextCharacterImage && (
