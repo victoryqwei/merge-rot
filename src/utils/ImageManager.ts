@@ -1,4 +1,4 @@
-import { CHARACTER_TYPES } from "../constants/GameConstants";
+import { CharacterClass } from "../types/GameTypes";
 
 export class ImageManager {
   private images: Map<string, HTMLImageElement> = new Map();
@@ -11,11 +11,14 @@ export class ImageManager {
   }
 
   private async loadImages(): Promise<void> {
-    const imageNames = CHARACTER_TYPES.map((character) => character.name);
+    const imageData = CharacterClass.getAllCharactersAllModes().map((character) => ({
+      name: character.name,
+      mode: character.mode,
+    }));
 
-    this.totalCount = imageNames.length;
+    this.totalCount = imageData.length;
 
-    for (const name of imageNames) {
+    for (const data of imageData) {
       try {
         const img = new Image();
         img.onload = () => {
@@ -26,11 +29,11 @@ export class ImageManager {
         };
 
         // Use dynamic import to get the correct URL for the build
-        const imageModule = await import(`../assets/characters/${name}.png`);
+        const imageModule = await import(`../assets/characters/${data.mode}/${data.name}.png`);
         img.src = imageModule.default;
-        this.images.set(name, img);
+        this.images.set(data.name, img);
       } catch (error) {
-        console.error(`Failed to load image for ${name}:`, error);
+        console.error(`Failed to load image for ${data.name}:`, error);
         // Still count as loaded to prevent infinite waiting
         this.loadedCount++;
         if (this.loadedCount === this.totalCount) {

@@ -1,6 +1,6 @@
 import { Character, CharacterClass } from "../types/GameTypes";
 import type { Particle } from "../types/GameTypes";
-import { GAME_CONFIG } from "../constants/GameConstants";
+import { GAME_CONFIG, GameMode } from "../constants/GameConstants";
 import { PhysicsEngine } from "../utils/PhysicsEngine";
 import { Sound, SoundManager } from "../utils/SoundManager";
 import { ImageManager } from "../utils/ImageManager";
@@ -13,15 +13,25 @@ export class CharacterManager {
   private physicsEngine: PhysicsEngine;
   private soundManager: SoundManager;
   private imageManager: ImageManager;
+  private gameMode: GameMode;
 
-  constructor(physicsEngine: PhysicsEngine, soundManager: SoundManager) {
+  constructor(physicsEngine: PhysicsEngine, soundManager: SoundManager, gameMode: GameMode = GameMode.ITALIAN_BRAINROT) {
     this.physicsEngine = physicsEngine;
     this.soundManager = soundManager;
     this.imageManager = new ImageManager();
+    this.gameMode = gameMode;
+  }
+
+  setGameMode(gameMode: GameMode): void {
+    this.gameMode = gameMode;
+  }
+
+  getGameMode(): GameMode {
+    return this.gameMode;
   }
 
   generateRandomCharacter(): CharacterClass {
-    return CharacterClass.getRandom(4); // Start with smaller characters (tier 0-4)
+    return CharacterClass.getRandom(this.gameMode, 4); // Start with smaller characters (tier 0-4)
   }
 
   async createCharacter(characterType: CharacterClass, x: number, y: number): Promise<Character> {
@@ -99,7 +109,7 @@ export class CharacterManager {
         if (!this.physicsEngine.checkCollision(character1, character2)) continue;
 
         // Get the current character class and find the next one
-        const currentCharacterClass = CharacterClass.getByName(character1.name);
+        const currentCharacterClass = CharacterClass.getByName(character1.name, this.gameMode);
         if (!currentCharacterClass) continue;
 
         const nextCharacterClass = currentCharacterClass.getNextCharacter();
@@ -123,7 +133,9 @@ export class CharacterManager {
         Matter.Body.setAngularVelocity(newCharacter.body, extraRotation);
 
         // Play sound for the new merged character
-        this.soundManager.playSoundDebounced(nextCharacterClass.name, 800);
+        if (this.gameMode === GameMode.ITALIAN_BRAINROT) {
+          this.soundManager.playSoundDebounced(nextCharacterClass.name, 800);
+        }
 
         // Adjust pitch based on the size of the character
         const pitch = 1.2 - (nextCharacterClass.radius - 25) / 100; // Scale pitch based on character size

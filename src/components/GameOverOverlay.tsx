@@ -15,8 +15,8 @@ const GameOverOverlay: React.FC<GameOverOverlayProps> = observer(({ onRestart })
   }
 
   return (
-    <Center position="absolute" top={0} left={0} right={0} bottom={0} bg="blackAlpha.600">
-      <VStack spacing={4} p={8} bg="whiteAlpha.200" borderRadius="xl" backdropFilter="blur(5px)">
+    <Center position="absolute" top={0} left={0} right={0} bottom={0} bg="blackAlpha.800" zIndex={10}>
+      <VStack spacing={4} p={8} borderRadius="xl">
         <Text fontSize="3xl" fontWeight="bold" color="white">
           Game Over!
         </Text>

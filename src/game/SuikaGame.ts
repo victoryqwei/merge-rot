@@ -3,7 +3,7 @@ import { CharacterManager } from "./CharacterManager";
 import { Renderer } from "../utils/Renderer";
 import { PhysicsEngine } from "../utils/PhysicsEngine";
 import { SoundManager, Sound } from "../utils/SoundManager";
-import { GAME_CONFIG } from "../constants/GameConstants";
+import { GAME_CONFIG, GameMode } from "../constants/GameConstants";
 import { makeAutoObservable } from "mobx";
 
 // Import managers
@@ -19,6 +19,7 @@ export class SuikaGame {
   private physicsEngine: PhysicsEngine;
   private characterManager: CharacterManager;
   private soundManager: SoundManager;
+  private gameMode: GameMode;
 
   // Managers
   private inputManager: InputManager;
@@ -27,13 +28,15 @@ export class SuikaGame {
   private gameStateManager: GameStateManager;
   private gameLoop: GameLoop;
 
-  constructor(canvas: HTMLCanvasElement | null) {
+  constructor(canvas: HTMLCanvasElement | null, gameMode: GameMode = GameMode.ITALIAN_BRAINROT) {
     makeAutoObservable(this);
+
+    this.gameMode = gameMode;
 
     // Initialize core systems
     this.physicsEngine = new PhysicsEngine();
     this.soundManager = new SoundManager();
-    this.characterManager = new CharacterManager(this.physicsEngine, this.soundManager);
+    this.characterManager = new CharacterManager(this.physicsEngine, this.soundManager, this.gameMode);
 
     // Initialize managers
     this.inputManager = new InputManager();
@@ -293,5 +296,17 @@ export class SuikaGame {
 
   public get timeSinceLastDrop(): number {
     return this.animationManager.getTimeSinceLastDrop();
+  }
+
+  setGameMode(gameMode: GameMode): void {
+    this.gameMode = gameMode;
+    this.characterManager.setGameMode(gameMode);
+    // Clear current characters and regenerate for the new game mode
+    this.gameStateManager.clearCharacters();
+    this.gameStateManager.generateNextCharacter();
+  }
+
+  getGameMode(): GameMode {
+    return this.gameMode;
   }
 }

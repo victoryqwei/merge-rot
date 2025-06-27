@@ -6,8 +6,9 @@ import { CharacterClass } from "../types/GameTypes";
 import { useGame } from "../game/useGame";
 
 const CharacterProgression: React.FC = observer(() => {
-  const allCharacters = CharacterClass.getAllCharacters();
   const game = useGame();
+  const currentGameMode = game.getGameMode();
+  const allCharacters = CharacterClass.getAllCharacters(currentGameMode);
 
   // Show "Touch to play" if game hasn't started yet
   if (!game.hasStarted) {
@@ -23,7 +24,7 @@ const CharacterProgression: React.FC = observer(() => {
   return (
     <Box maxW="100vw" overflow="hidden" px={8}>
       <HStack spacing={1} justify="center" bg="whiteAlpha.400" borderRadius="full" p={2} maxW="100%" minW="fit-content">
-        {allCharacters.map((character, index) => (
+        {allCharacters.map((character: CharacterClass, index: number) => (
           <CharacterItem key={character.name} character={character} index={index} totalCharacters={allCharacters.length} />
         ))}
       </HStack>

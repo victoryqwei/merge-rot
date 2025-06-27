@@ -1,6 +1,7 @@
 import { Howl } from "howler";
-import { CharacterClass } from "../types/GameTypes";
 import { clamp } from "lodash";
+import { CharacterClass } from "../types/GameTypes";
+import { GameMode } from "../constants/GameConstants";
 
 export enum Sound {
   Pop = "pop",
@@ -25,9 +26,10 @@ export class SoundManager {
   // Load all character, pop, and background music sounds
   private async loadAllSounds(): Promise<void> {
     // Get all sound names to load
-    const characterNames = CharacterClass.getAllCharacters()
+    const characterNames = CharacterClass.getAllCharactersAllModes()
       .slice(1)
-      .map((c) => c.name);
+      .map((c: CharacterClass) => (c.mode === GameMode.ITALIAN_BRAINROT ? c.name : null))
+      .filter((name): name is string => name !== null);
     const allSoundNames = [...characterNames, ...Object.values(Sound)];
 
     this.totalCount = allSoundNames.length;
@@ -108,9 +110,9 @@ export class SoundManager {
     }
 
     // Check if this character is higher tier than the currently pending one
-    const currentCharacterIndex = CharacterClass.getAllCharacters().findIndex((c) => c.name === characterName);
+    const currentCharacterIndex = CharacterClass.getAllCharactersAllModes().findIndex((c) => c.name === characterName);
     const pendingCharacterIndex = this.pendingCharacterSound
-      ? CharacterClass.getAllCharacters().findIndex((c) => c.name === this.pendingCharacterSound)
+      ? CharacterClass.getAllCharactersAllModes().findIndex((c) => c.name === this.pendingCharacterSound)
       : -1;
 
     // Only update if this character is higher tier (lower index = higher tier)

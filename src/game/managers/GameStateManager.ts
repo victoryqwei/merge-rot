@@ -56,6 +56,11 @@ export class GameStateManager {
     this.state.nextCharacter = this.characterManager.generateRandomCharacter();
   }
 
+  clearCharacters(): void {
+    this.state.currentCharacter = null;
+    this.state.nextCharacter = null;
+  }
+
   setHasStarted(hasStarted: boolean): void {
     this.state.hasStarted = hasStarted;
   }
