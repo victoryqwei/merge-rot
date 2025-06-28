@@ -42,7 +42,7 @@ export class ShapeDetector {
   /**
    * Detects the shape of an image by analyzing non-transparent pixels
    */
-  private static async detectImageShape(image: HTMLImageElement, radius: number): Promise<Matter.Vector[]> {
+  static async detectImageShape(image: HTMLImageElement, radius: number): Promise<Matter.Vector[]> {
     return new Promise((resolve) => {
       // Create temporary canvas for analysis
       const canvas = document.createElement("canvas");

@@ -4,6 +4,7 @@ import { GAME_CONFIG, GameMode } from "../constants/GameConstants";
 import { PhysicsEngine } from "../utils/PhysicsEngine";
 import { Sound, SoundManager } from "../utils/SoundManager";
 import { ImageManager } from "../utils/ImageManager";
+import { BodyCache } from "../utils/BodyCache";
 import { random } from "lodash";
 import * as Matter from "matter-js";
 
@@ -13,12 +14,14 @@ export class CharacterManager {
   private physicsEngine: PhysicsEngine;
   private soundManager: SoundManager;
   private imageManager: ImageManager;
+  private bodyCache: BodyCache;
   private gameMode: GameMode;
 
   constructor(physicsEngine: PhysicsEngine, soundManager: SoundManager, gameMode: GameMode = GameMode.ITALIAN_BRAINROT) {
     this.physicsEngine = physicsEngine;
     this.soundManager = soundManager;
     this.imageManager = new ImageManager();
+    this.bodyCache = new BodyCache(physicsEngine, this.imageManager);
     this.gameMode = gameMode;
   }
 
@@ -30,23 +33,20 @@ export class CharacterManager {
     return this.gameMode;
   }
 
+  /**
+   * Get body cache statistics for debugging
+   */
+  getBodyCacheStats(): { size: number; keys: string[] } {
+    return this.bodyCache.getStats();
+  }
+
   generateRandomCharacter(): CharacterClass {
     return CharacterClass.getRandom(this.gameMode, 4); // Start with smaller characters (tier 0-4)
   }
 
   async createCharacter(characterType: CharacterClass, x: number, y: number): Promise<Character> {
-    let body: Matter.Body;
-
-    // Try to get the character image
-    const image = this.imageManager.getImage(characterType.name);
-
-    if (image && image.complete) {
-      // Use image-based physics body
-      body = await this.physicsEngine.createCharacterBodyFromImage(image, characterType.radius, x, y);
-    } else {
-      // Fallback to circle physics body
-      body = this.physicsEngine.createCharacterBody(characterType.radius, x, y);
-    }
+    // Use cached body creation for better performance
+    const body = await this.bodyCache.getBody(characterType, x, y);
 
     // Add some initial angular velocity for rotation
     Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.1); // Random rotation between -0.05 and 0.05
@@ -213,5 +213,6 @@ export class CharacterManager {
     this.physicsEngine.clear();
     this.characters.clear();
     this.particles = [];
+    this.bodyCache.clear();
   }
 }

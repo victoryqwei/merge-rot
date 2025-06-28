@@ -301,6 +301,7 @@ export class SuikaGame {
   setGameMode(gameMode: GameMode): void {
     this.gameMode = gameMode;
     this.characterManager.setGameMode(gameMode);
+
     // Clear current characters and regenerate for the new game mode
     this.gameStateManager.clearCharacters();
     this.gameStateManager.generateNextCharacter();
