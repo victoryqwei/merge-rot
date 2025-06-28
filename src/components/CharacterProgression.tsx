@@ -70,7 +70,7 @@ interface CharacterItemProps {
 const CharacterItem: React.FC<CharacterItemProps> = ({ character, index }) => {
   const characterImage = useCharacterImage(character.name);
 
-  const size = `${clamp(2 + character.tier * 0.1, 2, 3)}em`;
+  const size = `${clamp(2 + character.tier * 0.1, 2, 3.5)}em`;
 
   return (
     <Box display="flex" alignItems="center" justifyContent="center" position="relative" flexShrink={0}>

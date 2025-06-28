@@ -23,7 +23,6 @@ export class SoundManager {
   constructor() {
     // Initialize with default values - will be updated when sounds are loaded
     const defaultSettings = SettingsManager.getSettings();
-    console.log("defaultSettings", defaultSettings);
     this.sfxVolume = defaultSettings.sfxVolume;
     this.musicVolume = defaultSettings.musicVolume;
 

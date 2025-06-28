@@ -1,3 +1,5 @@
+import type { ThemeTypings } from "@chakra-ui/react";
+
 export const PHYSICS = {
   GRAVITY: 0.5,
   BOUNCE: 0.7,
@@ -24,8 +26,23 @@ export enum GameMode {
   CAPYBARA = "capybara",
 }
 
-export const GAME_MODE_LABELS = {
-  [GameMode.ITALIAN_BRAINROT]: "Italian Brainrot",
-  [GameMode.CATS]: "Cats",
-  [GameMode.CAPYBARA]: "Capybara",
+export const GAME_MODE_LABELS: Record<
+  GameMode,
+  {
+    label: string;
+    colorScheme: ThemeTypings["colorSchemes"];
+  }
+> = {
+  [GameMode.ITALIAN_BRAINROT]: {
+    label: "Italian Brainrot",
+    colorScheme: "purple",
+  },
+  [GameMode.CATS]: {
+    label: "Cats",
+    colorScheme: "teal",
+  },
+  [GameMode.CAPYBARA]: {
+    label: "Capybara",
+    colorScheme: "yellow",
+  },
 };

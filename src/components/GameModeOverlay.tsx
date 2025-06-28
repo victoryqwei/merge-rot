@@ -28,12 +28,12 @@ const GameModeOverlay: React.FC<GameModeOverlayProps> = observer(({ setShowModes
         </Text>
 
         <VStack spacing={4} w="100%">
-          {Object.entries(GAME_MODE_LABELS).map(([mode, label]) => {
+          {Object.entries(GAME_MODE_LABELS).map(([mode, { label, colorScheme }]) => {
             return (
               <Button
                 key={mode}
                 w="100%"
-                colorScheme={"purple"}
+                colorScheme={colorScheme}
                 size="lg"
                 _hover={{ transform: "translateY(-2px)" }}
                 transition="all 0.3s"
