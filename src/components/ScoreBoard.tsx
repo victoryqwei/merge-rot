@@ -6,8 +6,13 @@ import { useCharacterImage } from "../hooks/useCharacterImage";
 import { AiOutlineHome } from "react-icons/ai";
 import { GameMode } from "../constants/GameConstants";
 import ShakeButton from "./ShakeButton";
+import { BiCog } from "react-icons/bi";
 
-const ScoreBoard: React.FC = observer(() => {
+interface ScoreBoardProps {
+  setShowSettings: (showSettings: boolean) => void;
+}
+
+const ScoreBoard: React.FC<ScoreBoardProps> = observer(({ setShowSettings }) => {
   const game = useGame();
   const nextCharacterImage = useCharacterImage(game.nextCharacter?.name || null);
 
@@ -25,16 +30,28 @@ const ScoreBoard: React.FC = observer(() => {
   return (
     <HStack maxW="500px" w="100%" justify="space-between" p={4} h="100px" px={10} mx="auto">
       {game.hasStarted && (
-        <Button
-          variant="unstyled"
-          color="white"
-          fontWeight="bold"
-          onClick={() => (window.location.href = "/")}
-          _hover={{ color: "whiteAlpha.800" }}
-          transition="color 0.2s"
-          flexShrink={0}>
-          <AiOutlineHome size={32} />
-        </Button>
+        <HStack>
+          <Button
+            variant="unstyled"
+            color="white"
+            fontWeight="bold"
+            onClick={() => (window.location.href = "/")}
+            _hover={{ color: "whiteAlpha.800" }}
+            transition="color 0.2s"
+            flexShrink={0}>
+            <AiOutlineHome size={32} />
+          </Button>
+          <Button
+            variant="unstyled"
+            color="white"
+            fontWeight="bold"
+            onClick={() => setShowSettings(true)}
+            _hover={{ color: "whiteAlpha.800" }}
+            transition="color 0.2s"
+            flexShrink={0}>
+            <BiCog size={32} />
+          </Button>
+        </HStack>
       )}
 
       <Text color="white" fontWeight="bold" fontSize={"4xl"} textAlign="center" flex={1} px={2} whiteSpace="nowrap">

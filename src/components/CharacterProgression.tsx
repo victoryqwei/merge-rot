@@ -1,33 +1,46 @@
 import { Box, Button, HStack, Image } from "@chakra-ui/react";
+import { clamp } from "lodash";
 import { observer } from "mobx-react-lite";
 import React from "react";
+import { BiCog, BiJoystick } from "react-icons/bi";
 import { useGame } from "../game/useGame";
 import { useCharacterImage } from "../hooks/useCharacterImage";
 import { CharacterClass } from "../types/GameTypes";
-import { BiJoystick } from "react-icons/bi";
-import { clamp } from "lodash";
 
 interface CharacterProgressionProps {
   setShowModes: (showModes: boolean) => void;
+  setShowSettings: (showSettings: boolean) => void;
 }
 
-const CharacterProgression: React.FC<CharacterProgressionProps> = observer(({ setShowModes }) => {
+const CharacterProgression: React.FC<CharacterProgressionProps> = observer(({ setShowModes, setShowSettings }) => {
   const game = useGame();
   const currentGameMode = game.getGameMode();
   const allCharacters = CharacterClass.getAllCharacters(currentGameMode);
 
   if (!game.hasStarted) {
     return (
-      <Button
-        colorScheme="green"
-        size="md"
-        onClick={() => setShowModes(true)}
-        border="2px solid white"
-        iconSpacing={1}
-        paddingX={2}
-        leftIcon={<BiJoystick size={24} />}>
-        Modes
-      </Button>
+      <HStack>
+        <Button
+          colorScheme="green"
+          size="md"
+          onClick={() => setShowModes(true)}
+          border="2px solid white"
+          iconSpacing={1}
+          paddingX={2}
+          leftIcon={<BiJoystick size={24} />}>
+          Modes
+        </Button>
+        <Button
+          paddingX={2}
+          border="2px solid white"
+          colorScheme="yellow"
+          size="md"
+          onClick={() => setShowSettings(true)}
+          iconSpacing={1}
+          leftIcon={<BiCog size={24} />}>
+          Settings
+        </Button>
+      </HStack>
     );
   }
 

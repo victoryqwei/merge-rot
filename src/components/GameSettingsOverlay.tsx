@@ -1,0 +1,96 @@
+import React, { useState, useEffect } from "react";
+import { Center, VStack, Text, Button, Slider, SliderTrack, SliderFilledTrack, SliderThumb, HStack } from "@chakra-ui/react";
+import { observer } from "mobx-react-lite";
+import { useGame } from "../game/useGame";
+
+interface SettingsOverlayProps {
+  setShowSettings: (showSettings: boolean) => void;
+}
+
+interface VolumeControlProps {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+}
+
+const VolumeControl: React.FC<VolumeControlProps> = ({ label, value, onChange }) => (
+  <VStack spacing={3} w="100%">
+    <Text fontSize="lg" color="white" fontWeight="semibold">
+      {label}
+    </Text>
+    <HStack w="100%" spacing={4}>
+      <Text fontSize="sm" color="white" minW="40px">
+        0%
+      </Text>
+      <Slider value={value} onChange={onChange} min={0} max={1} step={0.01} colorScheme="purple" size="lg">
+        <SliderTrack bg="whiteAlpha.300">
+          <SliderFilledTrack bg="purple.400" />
+        </SliderTrack>
+        <SliderThumb bg="purple.500" border="2px solid white" />
+      </Slider>
+      <Text fontSize="sm" color="white" minW="40px">
+        {Math.round(value * 100)}%
+      </Text>
+    </HStack>
+  </VStack>
+);
+
+const GameSettingsOverlay: React.FC<SettingsOverlayProps> = observer(({ setShowSettings }) => {
+  const game = useGame();
+  const [musicVolume, setMusicVolume] = useState(game.getMusicVolume());
+  const [sfxVolume, setSfxVolume] = useState(game.getVolume());
+
+  useEffect(() => {
+    setMusicVolume(game.getMusicVolume());
+    setSfxVolume(game.getVolume());
+  }, [game]);
+
+  const volumeControls = [
+    {
+      label: "Music Volume",
+      value: musicVolume,
+      onChange: (value: number) => {
+        setMusicVolume(value);
+        game.setMusicVolume(value);
+      },
+    },
+    {
+      label: "SFX Volume",
+      value: sfxVolume,
+      onChange: (value: number) => {
+        setSfxVolume(value);
+        game.setVolume(value);
+      },
+    },
+  ];
+
+  return (
+    <Center position="absolute" top={0} left={0} right={0} bottom={0} bg="blackAlpha.800" zIndex={10}>
+      <VStack spacing={8} p={8} borderRadius="xl" maxW="400px" w="100%">
+        <Text fontSize="3xl" fontWeight="bold" color="white" textAlign="center">
+          Settings
+        </Text>
+
+        <VStack spacing={6} w="100%">
+          {volumeControls.map((control) => (
+            <VolumeControl key={control.label} {...control} />
+          ))}
+        </VStack>
+
+        <Button
+          colorScheme="gray"
+          size="lg"
+          _hover={{ transform: "translateY(-2px)" }}
+          transition="all 0.3s"
+          onClick={() => setShowSettings(false)}
+          variant="outline"
+          borderColor="white"
+          color="white">
+          Back
+        </Button>
+      </VStack>
+    </Center>
+  );
+});
+
+export default GameSettingsOverlay;
