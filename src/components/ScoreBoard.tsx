@@ -7,6 +7,7 @@ import { AiOutlineHome } from "react-icons/ai";
 import { GameMode } from "../constants/GameConstants";
 import ShakeButton from "./ShakeButton";
 import { BiCog } from "react-icons/bi";
+import { BiBug } from "react-icons/bi";
 
 interface ScoreBoardProps {
   setShowSettings: (showSettings: boolean) => void;
@@ -51,6 +52,18 @@ const ScoreBoard: React.FC<ScoreBoardProps> = observer(({ setShowSettings }) => 
             flexShrink={0}>
             <BiCog size={32} />
           </Button>
+          {import.meta.env.MODE === "development" && (
+            <Button
+              variant="unstyled"
+              color={game.isDebugMode() ? "yellow.400" : "white"}
+              fontWeight="bold"
+              onClick={() => game.toggleDebugMode()}
+              _hover={{ color: "whiteAlpha.800" }}
+              transition="color 0.2s"
+              flexShrink={0}>
+              <BiBug size={32} />
+            </Button>
+          )}
         </HStack>
       )}
 
