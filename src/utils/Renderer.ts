@@ -252,4 +252,52 @@ export class Renderer {
   restoreShakeRotation(): void {
     this.ctx.restore();
   }
+
+  drawCharacterPolygon(character: Character): void {
+    const body = character.body;
+    const vertices = body.vertices;
+
+    if (!vertices || vertices.length === 0) {
+      return;
+    }
+
+    // Save context state
+    this.ctx.save();
+
+    // Set polygon style
+    this.ctx.strokeStyle = "rgba(255, 0, 0, 0.8)";
+    this.ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
+    this.ctx.lineWidth = 2 * this.pixelRatio;
+
+    // Draw polygon
+    this.ctx.beginPath();
+
+    // Move to first vertex
+    const firstVertex = vertices[0];
+    this.ctx.moveTo(firstVertex.x * this.pixelRatio, firstVertex.y * this.pixelRatio);
+
+    // Draw lines to all other vertices
+    for (let i = 1; i < vertices.length; i++) {
+      const vertex = vertices[i];
+      this.ctx.lineTo(vertex.x * this.pixelRatio, vertex.y * this.pixelRatio);
+    }
+
+    // Close the path
+    this.ctx.closePath();
+
+    // Fill and stroke the polygon
+    this.ctx.fill();
+    this.ctx.stroke();
+
+    // Draw vertex points
+    this.ctx.fillStyle = "rgba(255, 255, 0, 0.8)";
+    for (const vertex of vertices) {
+      this.ctx.beginPath();
+      this.ctx.arc(vertex.x * this.pixelRatio, vertex.y * this.pixelRatio, 3 * this.pixelRatio, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
+
+    // Restore context state
+    this.ctx.restore();
+  }
 }
