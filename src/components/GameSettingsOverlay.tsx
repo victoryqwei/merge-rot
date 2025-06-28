@@ -38,11 +38,11 @@ const VolumeControl: React.FC<VolumeControlProps> = ({ label, value, onChange })
 const GameSettingsOverlay: React.FC<SettingsOverlayProps> = observer(({ setShowSettings }) => {
   const game = useGame();
   const [musicVolume, setMusicVolume] = useState(game.getMusicVolume());
-  const [sfxVolume, setSfxVolume] = useState(game.getVolume());
+  const [sfxVolume, setSfxVolume] = useState(game.getSFXVolume());
 
   useEffect(() => {
     setMusicVolume(game.getMusicVolume());
-    setSfxVolume(game.getVolume());
+    setSfxVolume(game.getSFXVolume());
   }, [game]);
 
   const volumeControls = [
@@ -59,7 +59,7 @@ const GameSettingsOverlay: React.FC<SettingsOverlayProps> = observer(({ setShowS
       value: sfxVolume,
       onChange: (value: number) => {
         setSfxVolume(value);
-        game.setVolume(value);
+        game.setSFXVolume(value);
       },
     },
   ];

@@ -2,6 +2,7 @@ import { Howl } from "howler";
 import { clamp } from "lodash";
 import { CharacterClass } from "../types/GameTypes";
 import { GameMode } from "../constants/GameConstants";
+import { SettingsManager } from "./SettingsManager";
 
 export enum Sound {
   Pop = "pop",
@@ -14,12 +15,18 @@ export class SoundManager {
   private loadedCount = 0;
   private totalCount = 0;
   private onLoadComplete?: () => void;
-  private volume = 0.8; // Default volume
-  private musicVolume = 0.2; // Lower volume for background music
+  private sfxVolume: number;
+  private musicVolume: number;
   private characterDebounceTimer: number | null = null; // Global debounce timer
   private pendingCharacterSound: string | null = null; // Track highest tier character to play
 
   constructor() {
+    // Initialize with default values - will be updated when sounds are loaded
+    const defaultSettings = SettingsManager.getSettings();
+    console.log("defaultSettings", defaultSettings);
+    this.sfxVolume = defaultSettings.sfxVolume;
+    this.musicVolume = defaultSettings.musicVolume;
+
     this.loadAllSounds();
   }
 
@@ -38,6 +45,11 @@ export class SoundManager {
     data.push(...Object.values(Sound));
 
     this.totalCount = data.length;
+
+    // Get current settings to apply to sounds
+    const currentSettings = SettingsManager.getSettings();
+    this.sfxVolume = currentSettings.sfxVolume;
+    this.musicVolume = currentSettings.musicVolume;
 
     // Load all sounds
     for (const item of data) {
@@ -64,10 +76,10 @@ export class SoundManager {
           );
         } else if (typeof item === "string") {
           // Regular configuration for other sounds
-          this.sounds.set(item, this.createHowl(soundModule.default, item));
+          this.sounds.set(item, this.createHowl(soundModule.default, item, this.sfxVolume));
         } else {
           // Regular configuration for other sounds
-          this.sounds.set(item.name, this.createHowl(soundModule.default, item.name));
+          this.sounds.set(item.name, this.createHowl(soundModule.default, item.name, this.sfxVolume));
         }
       } catch (error) {
         console.warn(`Failed to load sound for ${item}:`, error);
@@ -77,11 +89,11 @@ export class SoundManager {
   }
 
   // Helper to create a Howl instance with event handlers
-  private createHowl(src: string, name: string): Howl {
+  private createHowl(src: string, name: string, volume: number): Howl {
     return new Howl({
       src: [src],
       preload: true,
-      volume: this.volume,
+      volume: volume,
       onload: () => this.handleLoad(),
       onloaderror: (_id, error) => this.handleLoadError(name, error),
     });
@@ -117,6 +129,10 @@ export class SoundManager {
 
   // Play a character's sound with global debouncing (prioritizes highest tier character)
   playSoundDebounced(characterName: string, debounceMs: number = 800): void {
+    if (this.sfxVolume === 0) {
+      return;
+    }
+
     // Clear existing timer
     if (this.characterDebounceTimer) {
       clearTimeout(this.characterDebounceTimer);
@@ -136,15 +152,25 @@ export class SoundManager {
     // Set new timer
     this.characterDebounceTimer = window.setTimeout(() => {
       if (this.pendingCharacterSound) {
-        this.play(this.pendingCharacterSound);
+        this.play(this.pendingCharacterSound, this.sfxVolume);
         this.pendingCharacterSound = null;
       }
       this.characterDebounceTimer = null;
     }, debounceMs);
   }
 
+  playPop(soundName: Sound, pitch = 1): void {
+    if (this.sfxVolume === 0) {
+      return;
+    }
+
+    const volume = this.sfxVolume;
+
+    this.play(soundName, volume, pitch);
+  }
+
   playBackgroundMusic(): void {
-    this.play(Sound.BackgroundMusic);
+    this.play(Sound.BackgroundMusic, this.musicVolume);
   }
 
   // Pause background music (maintains position)
@@ -154,7 +180,7 @@ export class SoundManager {
 
   // Resume background music (continues from where it was paused)
   resumeBackgroundMusic(): void {
-    this.play(Sound.BackgroundMusic);
+    this.play(Sound.BackgroundMusic, this.musicVolume);
   }
 
   // Stop background music
@@ -172,25 +198,31 @@ export class SoundManager {
     this.sounds.forEach((sound) => sound.stop());
   }
 
-  // Set volume for all sounds
-  setVolume(volume: number): void {
-    this.volume = clamp(volume, 0, 1);
+  // Set volume for SFX
+  setSFXVolume(volume: number): void {
+    this.sfxVolume = clamp(volume, 0, 1);
     this.sounds.forEach((sound, name) => {
       // Don't change volume for background music (it has its own volume control)
       if (name !== Sound.BackgroundMusic) {
-        sound.volume(this.volume);
+        sound.volume(this.sfxVolume);
       }
     });
+
+    // Save to localStorage
+    SettingsManager.updateSettings({ sfxVolume: this.sfxVolume });
   }
 
   // Set volume for background music
   setMusicVolume(volume: number): void {
     this.musicVolume = clamp(volume, 0, 1);
     this.sounds.get(Sound.BackgroundMusic)?.volume(this.musicVolume);
+
+    // Save to localStorage
+    SettingsManager.updateSettings({ musicVolume: this.musicVolume });
   }
 
-  getVolume(): number {
-    return this.volume;
+  getSFXVolume(): number {
+    return this.sfxVolume;
   }
 
   getMusicVolume(): number {

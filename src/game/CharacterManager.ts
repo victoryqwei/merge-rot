@@ -139,7 +139,7 @@ export class CharacterManager {
 
         // Adjust pitch based on the size of the character
         const pitch = 1.2 - (nextCharacterClass.radius - 25) / 100; // Scale pitch based on character size
-        this.soundManager.play(Sound.Pop, 1, pitch);
+        this.soundManager.playPop(Sound.Pop, pitch);
 
         // Mark characters for removal
         charactersToRemove.push(character1.id, character2.id);

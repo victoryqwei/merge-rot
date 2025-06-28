@@ -210,12 +210,12 @@ export class SuikaGame {
     return this.gameStateManager.getScore();
   }
 
-  public setVolume(volume: number): void {
-    this.soundManager.setVolume(volume);
+  public setSFXVolume(volume: number): void {
+    this.soundManager.setSFXVolume(volume);
   }
 
-  public getVolume(): number {
-    return this.soundManager.getVolume();
+  public getSFXVolume(): number {
+    return this.soundManager.getSFXVolume();
   }
 
   public setMusicVolume(volume: number): void {
