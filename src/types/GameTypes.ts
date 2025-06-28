@@ -4,6 +4,7 @@ import { GameMode } from "../constants/GameConstants";
 export class CharacterClass {
   private static nextId = 1; // Static counter for unique IDs
   public readonly points: number;
+  public hasSound: boolean = true;
 
   constructor(
     public readonly mode: GameMode,
@@ -58,6 +59,20 @@ export class CharacterClass {
           new CatsCharacterClass("cat8", 65, "Cat 8", 8),
           new CatsCharacterClass("cat9", 70, "Cat 9", 9),
         ];
+      case GameMode.CAPYBARA:
+        return [
+          new CapybaraCharacterClass("capy1", 25, "Capybara 1", 0),
+          new CapybaraCharacterClass("capy2", 30, "Capybara 2", 1),
+          new CapybaraCharacterClass("capy3", 35, "Capybara 3", 2),
+          new CapybaraCharacterClass("capy4", 40, "Capybara 4", 3),
+          new CapybaraCharacterClass("capy5", 45, "Capybara 5", 4),
+          new CapybaraCharacterClass("capy6", 50, "Capybara 6", 5),
+          new CapybaraCharacterClass("capy7", 55, "Capybara 7", 6),
+          new CapybaraCharacterClass("capy8", 60, "Capybara 8", 7),
+          new CapybaraCharacterClass("capy9", 65, "Capybara 9", 8),
+          new CapybaraCharacterClass("capy10", 70, "Capybara 10", 9),
+          new CapybaraCharacterClass("capy11", 75, "Capybara 11", 10),
+        ];
       default:
         return [];
     }
@@ -65,7 +80,7 @@ export class CharacterClass {
 
   // Static method to get all characters from all game modes (for backward compatibility)
   static getAllCharactersAllModes(): CharacterClass[] {
-    return [...this.getAllCharacters(GameMode.ITALIAN_BRAINROT), ...this.getAllCharacters(GameMode.CATS)];
+    return Object.values(GameMode).flatMap((mode) => this.getAllCharacters(mode));
   }
 
   // Static method to get a character by name within a specific game mode
@@ -137,5 +152,12 @@ export class ItalianBrainrotCharacterClass extends CharacterClass {
 export class CatsCharacterClass extends CharacterClass {
   constructor(name: string, radius: number, displayName: string, tier: number) {
     super(GameMode.CATS, name, radius, displayName, tier);
+  }
+}
+
+export class CapybaraCharacterClass extends CharacterClass {
+  constructor(name: string, radius: number, displayName: string, tier: number) {
+    super(GameMode.CAPYBARA, name, radius, displayName, tier);
+    this.hasSound = false;
   }
 }

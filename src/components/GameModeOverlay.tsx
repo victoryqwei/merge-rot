@@ -2,7 +2,7 @@ import React from "react";
 import { Center, VStack, Text, Button } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import { useGame } from "../game/useGame";
-import { GameMode } from "../constants/GameConstants";
+import { GameMode, GAME_MODE_LABELS } from "../constants/GameConstants";
 
 interface GameModeOverlayProps {
   setShowModes: (showModes: boolean) => void;
@@ -28,10 +28,7 @@ const GameModeOverlay: React.FC<GameModeOverlayProps> = observer(({ setShowModes
         </Text>
 
         <VStack spacing={4} w="100%">
-          {[
-            { mode: GameMode.ITALIAN_BRAINROT, label: "Italian Brainrot" },
-            { mode: GameMode.CATS, label: "Cats" },
-          ].map(({ mode, label }) => {
+          {Object.entries(GAME_MODE_LABELS).map(([mode, label]) => {
             return (
               <Button
                 key={mode}
@@ -40,7 +37,7 @@ const GameModeOverlay: React.FC<GameModeOverlayProps> = observer(({ setShowModes
                 size="lg"
                 _hover={{ transform: "translateY(-2px)" }}
                 transition="all 0.3s"
-                onClick={() => handleModeClick(mode)}
+                onClick={() => handleModeClick(mode as GameMode)}
                 borderColor="white"
                 color="white">
                 {label}

@@ -133,7 +133,9 @@ export class CharacterManager {
         Matter.Body.setAngularVelocity(newCharacter.body, extraRotation);
 
         // Play sound for the new merged character
-        this.soundManager.playSoundDebounced(nextCharacterClass.name, 800);
+        if (nextCharacterClass.hasSound) {
+          this.soundManager.playSoundDebounced(nextCharacterClass.name, 800);
+        }
 
         // Adjust pitch based on the size of the character
         const pitch = 1.2 - (nextCharacterClass.radius - 25) / 100; // Scale pitch based on character size

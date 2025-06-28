@@ -21,4 +21,11 @@ export const GAME_CONFIG = {
 export enum GameMode {
   ITALIAN_BRAINROT = "italian-brainrot",
   CATS = "cats",
+  CAPYBARA = "capybara",
 }
+
+export const GAME_MODE_LABELS = {
+  [GameMode.ITALIAN_BRAINROT]: "Italian Brainrot",
+  [GameMode.CATS]: "Cats",
+  [GameMode.CAPYBARA]: "Capybara",
+};

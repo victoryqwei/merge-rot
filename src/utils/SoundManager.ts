@@ -27,7 +27,7 @@ export class SoundManager {
   private async loadAllSounds(): Promise<void> {
     // Get all sound names to load
     const data: ({ name: string; mode: GameMode } | string)[] = CharacterClass.getAllCharactersAllModes()
-      .filter((c) => c.tier > 0)
+      .filter((c) => c.tier > 0 && c.hasSound)
       .map((c) => {
         return {
           name: c.name,
