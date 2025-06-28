@@ -1,12 +1,12 @@
-import React from "react";
-import { HStack, Text, Box, Image, VStack, Button } from "@chakra-ui/react";
+import { Box, Button, HStack, Image, Text, VStack } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
+import React from "react";
+import { AiOutlineHome } from "react-icons/ai";
+import { BiBug, BiCog } from "react-icons/bi";
+import { GAME_MODE_LABELS } from "../constants/GameConstants";
 import { useGame } from "../game/useGame";
 import { useCharacterImage } from "../hooks/useCharacterImage";
-import { AiOutlineHome } from "react-icons/ai";
-import { GameMode } from "../constants/GameConstants";
 import ShakeButton from "./ShakeButton";
-import { BiCog } from "react-icons/bi";
 
 interface ScoreBoardProps {
   setShowSettings: (showSettings: boolean) => void;
@@ -16,21 +16,12 @@ const ScoreBoard: React.FC<ScoreBoardProps> = observer(({ setShowSettings }) => 
   const game = useGame();
   const nextCharacterImage = useCharacterImage(game.nextCharacter?.name || null);
 
-  const getCurrentModeDisplayName = () => {
-    switch (game.getGameMode()) {
-      case GameMode.ITALIAN_BRAINROT:
-        return "Italian Brainrot";
-      case GameMode.CATS:
-        return "Cats";
-      default:
-        return "Unknown";
-    }
-  };
+  const displayName = GAME_MODE_LABELS[game.getGameMode()].label;
 
   return (
-    <HStack maxW="500px" w="100%" justify="space-between" p={4} h="100px" px={10} mx="auto">
+    <Box position="relative" maxW="500px" w="100%" p={4} h="100px" px={10} mx="auto">
       {game.hasStarted && (
-        <HStack>
+        <HStack position="absolute" left={10} top="50%" transform="translateY(-50%)" zIndex={1}>
           <Button
             variant="unstyled"
             color="white"
@@ -51,15 +42,46 @@ const ScoreBoard: React.FC<ScoreBoardProps> = observer(({ setShowSettings }) => 
             flexShrink={0}>
             <BiCog size={32} />
           </Button>
+          {import.meta.env.MODE === "development" && (
+            <Button
+              variant="unstyled"
+              color={game.isDebugMode() ? "yellow.400" : "white"}
+              fontWeight="bold"
+              onClick={() => game.toggleDebugMode()}
+              _hover={{ color: "whiteAlpha.800" }}
+              transition="color 0.2s"
+              flexShrink={0}>
+              <BiBug size={32} />
+            </Button>
+          )}
         </HStack>
       )}
 
-      <Text color="white" fontWeight="bold" fontSize={"4xl"} textAlign="center" flex={1} px={2} whiteSpace="nowrap">
-        {game.hasStarted ? `${game.getScore()}` : `- ${getCurrentModeDisplayName()} -`}
+      <Text
+        color="white"
+        fontWeight="bold"
+        fontSize={"4xl"}
+        textAlign="center"
+        position="absolute"
+        left="50%"
+        top="50%"
+        transform="translate(-50%, -50%)"
+        whiteSpace="nowrap"
+        w="100%"
+        px={2}>
+        {game.hasStarted ? `${game.getScore()}` : `- ${displayName} -`}
       </Text>
 
       {game.hasStarted && game.nextCharacter && nextCharacterImage && (
-        <VStack spacing={2} align="center" flexShrink={0} transform={"translateY(40px)"}>
+        <VStack
+          position="absolute"
+          right={10}
+          top="50%"
+          transform="translateY(calc(-50% + 28px))"
+          spacing={2}
+          align="center"
+          flexShrink={0}
+          zIndex={1}>
           <VStack spacing={1} align="center">
             <Box
               w={{ base: "40px", md: "60px" }}
@@ -82,14 +104,11 @@ const ScoreBoard: React.FC<ScoreBoardProps> = observer(({ setShowSettings }) => 
                 }}
               />
             </Box>
-            <Text color="white" fontWeight="bold" fontSize={{ base: "sm", md: "lg" }}>
-              Next
-            </Text>
           </VStack>
           <ShakeButton />
         </VStack>
       )}
-    </HStack>
+    </Box>
   );
 });
 

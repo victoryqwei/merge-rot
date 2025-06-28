@@ -7,7 +7,7 @@ export class SettingsManager {
   private static readonly STORAGE_KEY = "suika-game-settings";
   private static readonly DEFAULT_SETTINGS: GameSettings = {
     sfxVolume: 0.8,
-    musicVolume: 0.2,
+    musicVolume: 0.5,
   };
 
   static getSettings(): GameSettings {

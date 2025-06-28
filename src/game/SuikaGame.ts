@@ -20,6 +20,7 @@ export class SuikaGame {
   private characterManager: CharacterManager;
   private soundManager: SoundManager;
   private gameMode: GameMode;
+  private debugMode: boolean = false;
 
   // Managers
   private inputManager: InputManager;
@@ -192,6 +193,11 @@ export class SuikaGame {
     // Draw characters
     for (const character of this.characterManager.getCharacters()) {
       this.renderer?.drawCharacter(character);
+
+      // Draw debug polygons if debug mode is enabled
+      if (this.debugMode) {
+        this.renderer?.drawCharacterPolygon(character);
+      }
     }
 
     // Draw particles
@@ -309,5 +315,13 @@ export class SuikaGame {
 
   getGameMode(): GameMode {
     return this.gameMode;
+  }
+
+  public toggleDebugMode(): void {
+    this.debugMode = !this.debugMode;
+  }
+
+  public isDebugMode(): boolean {
+    return this.debugMode;
   }
 }
