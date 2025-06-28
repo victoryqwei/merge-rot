@@ -29,7 +29,7 @@ export class ImageManager {
         };
 
         // Use dynamic import to get the correct URL for the build
-        const imageModule = await import(`../assets/characters/${data.mode}/${data.name}.png`);
+        const imageModule = await import(`../assets/characters/${data.mode}/${data.name}.webp`);
         img.src = imageModule.default;
         this.images.set(data.name, img);
       } catch (error) {
