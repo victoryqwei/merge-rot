@@ -4,7 +4,7 @@ export class ShapeDetector {
   private static readonly CANVAS_SIZE = 100; // Size of temporary canvas for analysis
   private static readonly SAMPLE_RATE = 4; // Sample every Nth pixel for performance
   private static readonly MIN_POINTS = 8; // Minimum points for polygon
-  private static readonly MAX_POINTS = 16; // Maximum points for polygon
+  private static readonly MAX_POINTS = 48; // Maximum points for polygon
 
   /**
    * Detects the shape of a character image and creates a physics body

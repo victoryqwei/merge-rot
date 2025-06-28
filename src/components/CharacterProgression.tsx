@@ -5,6 +5,7 @@ import { useGame } from "../game/useGame";
 import { useCharacterImage } from "../hooks/useCharacterImage";
 import { CharacterClass } from "../types/GameTypes";
 import { BiJoystick } from "react-icons/bi";
+import { clamp } from "lodash";
 
 interface CharacterProgressionProps {
   setShowModes: (showModes: boolean) => void;
@@ -53,8 +54,10 @@ interface CharacterItemProps {
   totalCharacters: number;
 }
 
-const CharacterItem: React.FC<CharacterItemProps> = ({ character }) => {
+const CharacterItem: React.FC<CharacterItemProps> = ({ character, index }) => {
   const characterImage = useCharacterImage(character.name);
+
+  const size = `${clamp(2 + character.tier * 0.1, 2, 3)}em`;
 
   return (
     <Box display="flex" alignItems="center" justifyContent="center" position="relative" flexShrink={0}>
@@ -62,7 +65,9 @@ const CharacterItem: React.FC<CharacterItemProps> = ({ character }) => {
         <Image
           src={characterImage}
           alt={character.displayName}
-          h="2.5em"
+          h={size}
+          w={index === 0 ? size : "auto"}
+          objectFit="contain"
           onError={(e) => {
             // Fallback to colored circle if image fails to load
             const target = e.target as HTMLImageElement;
