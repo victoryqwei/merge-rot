@@ -31,13 +31,19 @@ const CharacterProgression: React.FC<CharacterProgressionProps> = observer(({ se
   }
 
   return (
-    <Box maxW="100vw" overflow="hidden">
-      <HStack spacing={1} justify="center" bg="whiteAlpha.400" borderRadius="full" px={2} maxW="100%" minW="fit-content">
-        {allCharacters.map((character: CharacterClass, index: number) => (
-          <CharacterItem key={character.name} character={character} index={index} totalCharacters={allCharacters.length} />
-        ))}
-      </HStack>
-    </Box>
+    <HStack
+      spacing={1}
+      justify="flex-start"
+      bg="whiteAlpha.400"
+      borderRadius="full"
+      p={4}
+      w="min(90vw, 500px)"
+      overflowX="scroll"
+      flexWrap="nowrap">
+      {allCharacters.map((character: CharacterClass, index: number) => (
+        <CharacterItem key={character.name} character={character} index={index} totalCharacters={allCharacters.length} />
+      ))}
+    </HStack>
   );
 });
 
@@ -51,25 +57,12 @@ const CharacterItem: React.FC<CharacterItemProps> = ({ character }) => {
   const characterImage = useCharacterImage(character.name);
 
   return (
-    <Box
-      h={"50px"}
-      w="auto"
-      minW="20px"
-      maxW="50px"
-      overflow="hidden"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      position="relative">
+    <Box display="flex" alignItems="center" justifyContent="center" position="relative" flexShrink={0}>
       {characterImage ? (
         <Image
           src={characterImage}
           alt={character.displayName}
-          maxW="100%"
-          maxH="100%"
-          w="auto"
-          h="auto"
-          objectFit="contain"
+          h="2.5em"
           onError={(e) => {
             // Fallback to colored circle if image fails to load
             const target = e.target as HTMLImageElement;
