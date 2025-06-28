@@ -24,6 +24,7 @@ export enum GameMode {
   ITALIAN_BRAINROT = "italian-brainrot",
   CATS = "cats",
   CAPYBARA = "capybara",
+  GIGA = "giga",
 }
 
 export const GAME_MODE_LABELS: Record<
@@ -44,5 +45,9 @@ export const GAME_MODE_LABELS: Record<
   [GameMode.CAPYBARA]: {
     label: "Capybara",
     colorScheme: "yellow",
+  },
+  [GameMode.GIGA]: {
+    label: "Giga Chad",
+    colorScheme: "red",
   },
 };
