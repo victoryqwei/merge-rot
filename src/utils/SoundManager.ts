@@ -26,38 +26,51 @@ export class SoundManager {
   // Load all character, pop, and background music sounds
   private async loadAllSounds(): Promise<void> {
     // Get all sound names to load
-    const characterNames = CharacterClass.getAllCharactersAllModes()
-      .slice(1)
-      .map((c: CharacterClass) => (c.mode === GameMode.ITALIAN_BRAINROT ? c.name : null))
-      .filter((name): name is string => name !== null);
-    const allSoundNames = [...characterNames, ...Object.values(Sound)];
+    const data: ({ name: string; mode: GameMode } | string)[] = CharacterClass.getAllCharactersAllModes()
+      .filter((c) => c.tier > 0)
+      .map((c) => {
+        return {
+          name: c.name,
+          mode: c.mode,
+        };
+      });
 
-    this.totalCount = allSoundNames.length;
+    data.push(...Object.values(Sound));
+
+    this.totalCount = data.length;
 
     // Load all sounds
-    for (const name of allSoundNames) {
+    for (const item of data) {
       try {
-        const soundModule = await import(`../assets/sounds/${name}.mp3`);
+        let soundModule;
+        if (typeof item === "string") {
+          soundModule = await import(`../assets/sounds/${item}.mp3`);
+        } else {
+          soundModule = await import(`../assets/sounds/${item.mode}/${item.name}.mp3`);
+        }
 
         // Special configuration for background music
-        if (name === Sound.BackgroundMusic) {
+        if (item === Sound.BackgroundMusic) {
           this.sounds.set(
-            name,
+            item,
             new Howl({
               src: [soundModule.default],
               preload: true,
               volume: this.musicVolume,
               loop: true,
               onload: () => this.handleLoad(),
-              onloaderror: (_id, error) => this.handleLoadError(name, error),
+              onloaderror: (_id, error) => this.handleLoadError(item, error),
             })
           );
+        } else if (typeof item === "string") {
+          // Regular configuration for other sounds
+          this.sounds.set(item, this.createHowl(soundModule.default, item));
         } else {
           // Regular configuration for other sounds
-          this.sounds.set(name, this.createHowl(soundModule.default, name));
+          this.sounds.set(item.name, this.createHowl(soundModule.default, item.name));
         }
       } catch (error) {
-        console.warn(`Failed to load sound for ${name}:`, error);
+        console.warn(`Failed to load sound for ${item}:`, error);
         this.handleLoad();
       }
     }
