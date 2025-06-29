@@ -35,7 +35,7 @@ const ScoreBoard: React.FC<ScoreBoardProps> = observer(({ setShowSettings }) => 
               variant="unstyled"
               color="white"
               fontWeight="bold"
-              onClick={() => (window.location.href = "/")}
+              onClick={() => game.restart()}
               _hover={{ color: "whiteAlpha.800" }}
               transition="color 0.2s"
               flexShrink={0}>
