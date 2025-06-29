@@ -4,6 +4,7 @@ import { Renderer } from "../utils/Renderer";
 import { PhysicsEngine } from "../utils/PhysicsEngine";
 import { SoundManager, Sound } from "../utils/SoundManager";
 import { GAME_CONFIG, GameMode } from "../constants/GameConstants";
+import { SettingsManager } from "../utils/SettingsManager";
 import { makeAutoObservable } from "mobx";
 
 // Import managers
@@ -32,7 +33,9 @@ export class SuikaGame {
   constructor(canvas: HTMLCanvasElement | null, gameMode: GameMode = GameMode.ITALIAN_BRAINROT) {
     makeAutoObservable(this);
 
-    this.gameMode = gameMode;
+    // Load the last played gamemode from settings, fallback to provided gameMode
+    const settings = SettingsManager.getSettings();
+    this.gameMode = settings.lastPlayedGameMode || gameMode;
 
     // Initialize core systems
     this.physicsEngine = new PhysicsEngine();
@@ -307,6 +310,9 @@ export class SuikaGame {
   setGameMode(gameMode: GameMode): void {
     this.gameMode = gameMode;
     this.characterManager.setGameMode(gameMode);
+
+    // Save the selected gamemode to settings
+    SettingsManager.updateSettings({ lastPlayedGameMode: gameMode });
 
     // Clear current characters and regenerate for the new game mode
     this.gameStateManager.clearCharacters();

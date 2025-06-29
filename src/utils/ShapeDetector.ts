@@ -7,39 +7,6 @@ export class ShapeDetector {
   private static readonly MAX_POINTS = 48; // Maximum points for polygon
 
   /**
-   * Detects the shape of a character image and creates a physics body
-   */
-  static async createCharacterBodyFromImage(image: HTMLImageElement, x: number, y: number, radius: number): Promise<Matter.Body> {
-    const points = await this.detectImageShape(image, radius);
-
-    if (points.length < 3) {
-      // Fallback to circle if shape detection fails
-      return Matter.Bodies.circle(x, y, radius, {
-        restitution: 0.7,
-        friction: 0.8,
-        density: 0.001,
-      });
-    }
-
-    // Create polygon body
-    const body = Matter.Bodies.fromVertices(
-      x,
-      y,
-      [points],
-      {
-        restitution: 0.7,
-        friction: 0.8,
-        density: 0.001,
-      },
-      true,
-      0.01,
-      10
-    );
-
-    return body;
-  }
-
-  /**
    * Detects the shape of an image by analyzing non-transparent pixels
    */
   static async detectImageShape(image: HTMLImageElement, radius: number): Promise<Matter.Vector[]> {
