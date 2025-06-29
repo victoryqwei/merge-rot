@@ -45,7 +45,7 @@ export class SuikaGame {
     // Initialize managers
     this.inputManager = new InputManager();
     this.shakeManager = new ShakeManager();
-    this.animationManager = new AnimationManager();
+    this.animationManager = new AnimationManager(this);
     this.gameStateManager = new GameStateManager(this.characterManager);
 
     // Set up manager connections

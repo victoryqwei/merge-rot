@@ -1,4 +1,5 @@
 import { GAME_CONFIG } from "../../constants/GameConstants";
+import type { SuikaGame } from "../SuikaGame";
 
 export interface AnimationState {
   characterAnimationProgress: number;
@@ -14,6 +15,8 @@ export class AnimationManager {
     dropQueued: false,
     lastDropTime: 0,
   };
+
+  constructor(private game: SuikaGame) {}
 
   update(deltaTime: number): void {
     // Update cooldown timer
@@ -42,7 +45,7 @@ export class AnimationManager {
   }
 
   canDrop(): boolean {
-    return this.state.dropCooldownTime <= 0 && this.state.characterAnimationProgress >= 1;
+    return (this.state.dropCooldownTime <= 0 && this.state.characterAnimationProgress >= 1) || this.game.isDebugMode();
   }
 
   queueDrop(): boolean {

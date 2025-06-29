@@ -75,17 +75,17 @@ export class CharacterClass {
         ];
       case GameMode.GIGA:
         return [
-          new GigaCharacterClass("nerd", 25, "Nerd", 0),
-          new GigaCharacterClass("skull", 30, "Skull", 1),
-          new GigaCharacterClass("doge", 35, "Doge", 2),
-          new GigaCharacterClass("blobfish", 40, "Blobfish", 3),
-          new GigaCharacterClass("monkey", 45, "Monkey", 4),
-          new GigaCharacterClass("tiger", 50, "Tiger", 5),
-          new GigaCharacterClass("pig", 55, "Pig", 6),
-          new GigaCharacterClass("stone", 60, "Stone", 7),
-          new GigaCharacterClass("man", 65, "Man", 8),
-          new GigaCharacterClass("big-chungus", 70, "Big Chungus", 9),
-          new GigaCharacterClass("giga", 75, "Giga Chad", 10),
+          new GigaCharacterClass("nerd", 20, "Nerd", 0),
+          new GigaCharacterClass("skull", 25, "Skull", 1),
+          new GigaCharacterClass("doge", 30, "Doge", 2),
+          new GigaCharacterClass("blobfish", 35, "Blobfish", 3),
+          new GigaCharacterClass("monkey", 40, "Monkey", 4),
+          new GigaCharacterClass("tiger", 45, "Tiger", 5),
+          new GigaCharacterClass("pig", 50, "Pig", 6),
+          new GigaCharacterClass("stone", 55, "Stone", 7),
+          new GigaCharacterClass("man", 60, "Man", 8),
+          new GigaCharacterClass("big-chungus", 65, "Big Chungus", 9),
+          new GigaCharacterClass("giga", 70, "Giga Chad", 10),
         ];
       default:
         return [];
