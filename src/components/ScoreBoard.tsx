@@ -7,6 +7,7 @@ import { GAME_MODE_LABELS } from "../constants/GameConstants";
 import { useGame } from "../game/useGame";
 import { useCharacterImage } from "../hooks/useCharacterImage";
 import ShakeButton from "./ShakeButton";
+import { FaFire } from "react-icons/fa";
 
 interface ScoreBoardProps {
   setShowSettings: (showSettings: boolean) => void;
@@ -67,8 +68,26 @@ const ScoreBoard: React.FC<ScoreBoardProps> = observer(({ setShowSettings }) => 
       )}
 
       {game.hasStarted && game.isComboDisplayVisible() && game.getComboMultiplier() > 1 && (
-        <Text position="absolute" left={10} top="50%" transform="translateY(calc(50% + 20px))" color="white" fontSize="xl" zIndex={1}>
+        <Text
+          position="absolute"
+          left={10}
+          top="50%"
+          transform="translateY(calc(50% + 20px))"
+          color={
+            game.getComboMultiplier() > 4
+              ? "red.400"
+              : game.getComboMultiplier() > 3
+              ? "orange.400"
+              : game.getComboMultiplier() > 2
+              ? "yellow.400"
+              : "white"
+          }
+          fontSize="xl"
+          zIndex={1}
+          display="flex"
+          alignItems="center">
           Combo x{game.getComboMultiplier()}
+          {game.getComboMultiplier() > 2 ? <FaFire style={{ marginLeft: "4px" }} /> : null}
         </Text>
       )}
 
