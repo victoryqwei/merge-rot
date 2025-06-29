@@ -52,7 +52,7 @@ const App: React.FC = observer(() => {
             position="absolute"
             top="50%"
             left="50%"
-            transform="translate(-50%, -50%)"
+            transform="translate(-50%, calc(-50% + 20px))"
             pointerEvents={"none"}>
             <Text color="white" fontSize="4xl" fontWeight="bold" whiteSpace="nowrap">
               TOUCH TO PLAY
