@@ -15,7 +15,7 @@ export class PhysicsEngine {
     this.world = this.engine.world;
 
     // Set up world properties
-    this.world.gravity.y = 0.5;
+    this.world.gravity.y = 0.3;
 
     // Create collision detector
     this.collisionDetector = Matter.Detector.create({
@@ -63,9 +63,28 @@ export class PhysicsEngine {
 
   createCharacterBody(radius: number, x: number, y: number): Matter.Body {
     const body = Matter.Bodies.circle(x, y, radius, {
-      restitution: 0.7,
-      friction: 0.8,
-      density: 0.001,
+      restitution: 0.3,
+      friction: 0.9,
+      density: 0.0005,
+      frictionAir: 0.05,
+    });
+
+    this.bodies.push(body);
+    Matter.World.add(this.world, body);
+
+    // Add body to collision detector
+    this.collisionDetector.bodies.push(body);
+
+    return body;
+  }
+
+  createSquishyCharacterBody(radius: number, x: number, y: number): Matter.Body {
+    const body = Matter.Bodies.circle(x, y, radius, {
+      restitution: 0.2,
+      friction: 0.95,
+      density: 0.0003,
+      frictionAir: 0.08,
+      slop: 1,
     });
 
     this.bodies.push(body);

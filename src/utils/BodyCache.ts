@@ -19,12 +19,6 @@ export class BodyCache {
    */
   async getBody(characterType: CharacterClass, x: number, y: number): Promise<Matter.Body> {
     const image = this.imageManager.getImage(characterType.name);
-    const isImageBased = !!(image && image.complete);
-
-    if (!isImageBased) {
-      // Fallback to circle physics body (no caching needed)
-      return this.physicsEngine.createCharacterBody(characterType.radius, x, y);
-    }
 
     const cacheKey = this.getCacheKey(characterType);
 
@@ -51,7 +45,7 @@ export class BodyCache {
   private createBodyFromVertices(vertices: Matter.Vector[], x: number, y: number): Matter.Body {
     if (vertices.length < 3) {
       // Fallback to circle if shape detection failed
-      return this.physicsEngine.createCharacterBody(25, x, y); // Default radius
+      return this.physicsEngine.createSquishyCharacterBody(25, x, y); // Default radius
     }
 
     // Create polygon body from cached vertices, translated to the new position

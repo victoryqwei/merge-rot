@@ -1,4 +1,4 @@
-import { Box, Button, HStack, Image } from "@chakra-ui/react";
+import { Box, Button, HStack, Image, Tooltip } from "@chakra-ui/react";
 import { clamp } from "lodash";
 import { observer } from "mobx-react-lite";
 import React from "react";
@@ -73,25 +73,27 @@ const CharacterItem: React.FC<CharacterItemProps> = ({ character, index }) => {
   const size = `${clamp(2 + character.tier * 0.1, 2, 3.5)}em`;
 
   return (
-    <Box display="flex" alignItems="center" justifyContent="center" position="relative" flexShrink={0}>
-      {characterImage ? (
-        <Image
-          src={characterImage}
-          alt={character.displayName}
-          h={size}
-          w={index === 0 ? size : "auto"}
-          objectFit="contain"
-          onError={(e) => {
-            // Fallback to colored circle if image fails to load
-            const target = e.target as HTMLImageElement;
-            target.style.display = "none";
-            target.parentElement!.style.backgroundColor = "#ff6b6b";
-          }}
-        />
-      ) : (
-        <Box w="30px" h="30px" borderRadius="full" bg="whiteAlpha.300" />
-      )}
-    </Box>
+    <Tooltip label={character.displayName}>
+      <Box display="flex" alignItems="center" justifyContent="center" position="relative" flexShrink={0}>
+        {characterImage ? (
+          <Image
+            src={characterImage}
+            alt={character.displayName}
+            h={size}
+            w={index === 0 ? size : "auto"}
+            objectFit="contain"
+            onError={(e) => {
+              // Fallback to colored circle if image fails to load
+              const target = e.target as HTMLImageElement;
+              target.style.display = "none";
+              target.parentElement!.style.backgroundColor = "#ff6b6b";
+            }}
+          />
+        ) : (
+          <Box w="30px" h="30px" borderRadius="full" bg="whiteAlpha.300" />
+        )}
+      </Box>
+    </Tooltip>
   );
 };
 
