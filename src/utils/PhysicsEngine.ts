@@ -67,23 +67,6 @@ export class PhysicsEngine {
       friction: 0.9,
       density: 0.0005,
       frictionAir: 0.05,
-    });
-
-    this.bodies.push(body);
-    Matter.World.add(this.world, body);
-
-    // Add body to collision detector
-    this.collisionDetector.bodies.push(body);
-
-    return body;
-  }
-
-  createSquishyCharacterBody(radius: number, x: number, y: number): Matter.Body {
-    const body = Matter.Bodies.circle(x, y, radius, {
-      restitution: 0.2,
-      friction: 0.95,
-      density: 0.0003,
-      frictionAir: 0.08,
       slop: 1,
     });
 

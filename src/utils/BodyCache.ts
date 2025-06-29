@@ -43,11 +43,6 @@ export class BodyCache {
    * Create a body using cached vertices
    */
   private createBodyFromVertices(vertices: Matter.Vector[], x: number, y: number): Matter.Body {
-    if (vertices.length < 3) {
-      // Fallback to circle if shape detection failed
-      return this.physicsEngine.createSquishyCharacterBody(25, x, y); // Default radius
-    }
-
     // Create polygon body from cached vertices, translated to the new position
     const translatedVertices = vertices.map((vertex) => ({
       x: vertex.x + x,

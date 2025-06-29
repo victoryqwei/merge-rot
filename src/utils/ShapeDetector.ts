@@ -1,47 +1,73 @@
 import * as Matter from "matter-js";
 
 export class ShapeDetector {
-  private static readonly CANVAS_SIZE = 100; // Size of temporary canvas for analysis
+  private static readonly MIN_CANVAS_SIZE = 50; // Minimum canvas size for analysis
+  private static readonly MAX_CANVAS_SIZE = 200; // Maximum canvas size for analysis
   private static readonly SAMPLE_RATE = 1; // Sample every Nth pixel for performance
   private static readonly MIN_POINTS = 8; // Minimum points for polygon
   private static readonly MAX_POINTS = 48; // Maximum points for polygon
+  private static readonly ALPHA_THRESHOLD = 128; // Alpha threshold for non-transparent pixels
+  private static readonly EDGE_DETECTION_THRESHOLD = 64; // Threshold for edge detection
 
   /**
    * Detects the shape of an image by analyzing non-transparent pixels
    */
   static async detectImageShape(image: HTMLImageElement, radius: number): Promise<Matter.Vector[]> {
     return new Promise((resolve) => {
+      // First, detect the content bounds of the image
+      const bounds = this.detectContentBounds(image);
+
+      if (!bounds) {
+        // Fallback: create a simple circle if no content detected
+        resolve(this.createFallbackShape(radius));
+        return;
+      }
+
+      // Calculate optimal canvas size based on content
+      const contentWidth = bounds.right - bounds.left;
+      const contentHeight = bounds.bottom - bounds.top;
+      const maxDimension = Math.max(contentWidth, contentHeight);
+
+      // Scale canvas size based on content size, but keep within bounds
+      const canvasSize = Math.max(this.MIN_CANVAS_SIZE, Math.min(this.MAX_CANVAS_SIZE, maxDimension * 2));
+
       // Create temporary canvas for analysis
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d")!;
 
-      canvas.width = this.CANVAS_SIZE;
-      canvas.height = this.CANVAS_SIZE;
+      canvas.width = canvasSize;
+      canvas.height = canvasSize;
 
-      // Draw image scaled to canvas
-      ctx.drawImage(image, 0, 0, this.CANVAS_SIZE, this.CANVAS_SIZE);
+      // Calculate scaling and offset to fit content in canvas
+      const scale = Math.min(canvasSize / contentWidth, canvasSize / contentHeight);
+
+      const offsetX = (canvasSize - contentWidth * scale) / 2;
+      const offsetY = (canvasSize - contentHeight * scale) / 2;
+
+      // Clear canvas and draw only the content area
+      ctx.clearRect(0, 0, canvasSize, canvasSize);
+      ctx.drawImage(
+        image,
+        bounds.left,
+        bounds.top,
+        contentWidth,
+        contentHeight,
+        offsetX,
+        offsetY,
+        contentWidth * scale,
+        contentHeight * scale
+      );
 
       // Get image data
-      const imageData = ctx.getImageData(0, 0, this.CANVAS_SIZE, this.CANVAS_SIZE);
+      const imageData = ctx.getImageData(0, 0, canvasSize, canvasSize);
       const data = imageData.data;
 
-      // Find non-transparent pixels
-      const points: { x: number; y: number }[] = [];
-
-      for (let y = 0; y < this.CANVAS_SIZE; y += this.SAMPLE_RATE) {
-        for (let x = 0; x < this.CANVAS_SIZE; x += this.SAMPLE_RATE) {
-          const index = (y * this.CANVAS_SIZE + x) * 4;
-          const alpha = data[index + 3]; // Alpha channel
-
-          if (alpha > 128) {
-            // Non-transparent pixel
-            points.push({ x, y });
-          }
-        }
-      }
+      // Find non-transparent pixels with edge detection
+      const points = this.detectEdgePoints(data, canvasSize);
 
       if (points.length === 0) {
-        resolve([]);
+        // Fallback: create a simple circle if no points detected
+        resolve(this.createFallbackShape(radius));
         return;
       }
 
@@ -53,12 +79,151 @@ export class ShapeDetector {
 
       // Convert to Matter.js vectors and scale back to original size
       const scaledPoints = simplified.map((point) => ({
-        x: ((point.x - this.CANVAS_SIZE / 2) * (radius * 2)) / this.CANVAS_SIZE,
-        y: ((point.y - this.CANVAS_SIZE / 2) * (radius * 2)) / this.CANVAS_SIZE,
+        x: ((point.x - canvasSize / 2) * (radius * 2)) / canvasSize,
+        y: ((point.y - canvasSize / 2) * (radius * 2)) / canvasSize,
       }));
 
       resolve(scaledPoints);
     });
+  }
+
+  /**
+   * Detects the bounds of non-transparent content in the image
+   */
+  private static detectContentBounds(image: HTMLImageElement): { left: number; top: number; right: number; bottom: number } | null {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d")!;
+
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+
+    ctx.drawImage(image, 0, 0);
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    let left = canvas.width;
+    let top = canvas.height;
+    let right = 0;
+    let bottom = 0;
+    let hasContent = false;
+
+    for (let y = 0; y < canvas.height; y++) {
+      for (let x = 0; x < canvas.width; x++) {
+        const index = (y * canvas.width + x) * 4;
+        const alpha = data[index + 3];
+
+        if (alpha > this.ALPHA_THRESHOLD) {
+          hasContent = true;
+          left = Math.min(left, x);
+          top = Math.min(top, y);
+          right = Math.max(right, x);
+          bottom = Math.max(bottom, y);
+        }
+      }
+    }
+
+    if (!hasContent) {
+      return null;
+    }
+
+    // Add small padding to ensure we capture the full shape
+    const padding = Math.max(2, Math.min(canvas.width, canvas.height) * 0.02);
+
+    return {
+      left: Math.max(0, left - padding),
+      top: Math.max(0, top - padding),
+      right: Math.min(canvas.width - 1, right + padding),
+      bottom: Math.min(canvas.height - 1, bottom + padding),
+    };
+  }
+
+  /**
+   * Detects edge points from image data using gradient analysis
+   */
+  private static detectEdgePoints(data: Uint8ClampedArray, canvasSize: number): { x: number; y: number }[] {
+    const points: { x: number; y: number }[] = [];
+    const visited = new Set<string>();
+
+    for (let y = 1; y < canvasSize - 1; y += this.SAMPLE_RATE) {
+      for (let x = 1; x < canvasSize - 1; x += this.SAMPLE_RATE) {
+        const index = (y * canvasSize + x) * 4;
+        const alpha = data[index + 3];
+
+        if (alpha > this.ALPHA_THRESHOLD) {
+          // Check if this is an edge pixel by looking at neighbors
+          const isEdge = this.isEdgePixel(data, x, y, canvasSize);
+
+          if (isEdge) {
+            const key = `${x},${y}`;
+            if (!visited.has(key)) {
+              visited.add(key);
+              points.push({ x, y });
+            }
+          }
+        }
+      }
+    }
+
+    // If we don't have enough edge points, fall back to all non-transparent pixels
+    if (points.length < this.MIN_POINTS) {
+      points.length = 0;
+      visited.clear();
+
+      for (let y = 0; y < canvasSize; y += this.SAMPLE_RATE) {
+        for (let x = 0; x < canvasSize; x += this.SAMPLE_RATE) {
+          const index = (y * canvasSize + x) * 4;
+          const alpha = data[index + 3];
+
+          if (alpha > this.ALPHA_THRESHOLD) {
+            const key = `${x},${y}`;
+            if (!visited.has(key)) {
+              visited.add(key);
+              points.push({ x, y });
+            }
+          }
+        }
+      }
+    }
+
+    return points;
+  }
+
+  /**
+   * Determines if a pixel is on the edge of the shape
+   */
+  private static isEdgePixel(data: Uint8ClampedArray, x: number, y: number, canvasSize: number): boolean {
+    const centerIndex = (y * canvasSize + x) * 4;
+    const centerAlpha = data[centerIndex + 3];
+
+    // Check 8 neighbors
+    const neighbors = [
+      [-1, -1],
+      [-1, 0],
+      [-1, 1],
+      [0, -1],
+      [0, 1],
+      [1, -1],
+      [1, 0],
+      [1, 1],
+    ];
+
+    for (const [dx, dy] of neighbors) {
+      const nx = x + dx;
+      const ny = y + dy;
+
+      if (nx >= 0 && nx < canvasSize && ny >= 0 && ny < canvasSize) {
+        const neighborIndex = (ny * canvasSize + nx) * 4;
+        const neighborAlpha = data[neighborIndex + 3];
+
+        // If neighbor is significantly more transparent, this is an edge
+        if (Math.abs(centerAlpha - neighborAlpha) > this.EDGE_DETECTION_THRESHOLD) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -192,5 +357,52 @@ export class ShapeDetector {
     const dy = point.y - yy;
 
     return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  /**
+   * Creates a fallback circular shape when detection fails
+   */
+  private static createFallbackShape(radius: number): Matter.Vector[] {
+    const segments = 16;
+    const points: Matter.Vector[] = [];
+
+    for (let i = 0; i < segments; i++) {
+      const angle = (i / segments) * 2 * Math.PI;
+      points.push({
+        x: Math.cos(angle) * radius * 0.8,
+        y: Math.sin(angle) * radius * 0.8,
+      });
+    }
+
+    return points;
+  }
+
+  /**
+   * Alternative point detection method for difficult cases
+   */
+  private static detectAlternativePoints(data: Uint8ClampedArray, canvasSize: number): { x: number; y: number }[] {
+    const points: { x: number; y: number }[] = [];
+    const visited = new Set<string>();
+
+    // Use a more aggressive sampling approach
+    const sampleRate = Math.max(1, Math.floor(canvasSize / 50));
+
+    for (let y = 0; y < canvasSize; y += sampleRate) {
+      for (let x = 0; x < canvasSize; x += sampleRate) {
+        const index = (y * canvasSize + x) * 4;
+        const alpha = data[index + 3];
+
+        if (alpha > this.ALPHA_THRESHOLD * 0.5) {
+          // Lower threshold
+          const key = `${x},${y}`;
+          if (!visited.has(key)) {
+            visited.add(key);
+            points.push({ x, y });
+          }
+        }
+      }
+    }
+
+    return points;
   }
 }
