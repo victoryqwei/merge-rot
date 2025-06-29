@@ -35,9 +35,9 @@ export class CharacterClass {
         return [
           new ItalianBrainrotCharacterClass("shrimp-cat", 25, "Trippi Troppi", 0),
           new ItalianBrainrotCharacterClass("capuccino", 30, "Capuccino Assassino", 1),
-          new ItalianBrainrotCharacterClass("capybara-coconut", 35, "Burbaloni Lulilolli", 2),
+          new ItalianBrainrotCharacterClass("frog-tire", 35, "Boneca Ambalabu", 2),
           new ItalianBrainrotCharacterClass("monkey-banana", 35, "Chimpanzini Bananini", 3),
-          new ItalianBrainrotCharacterClass("frog-tire", 35, "Boneca Ambalabu", 4),
+          new ItalianBrainrotCharacterClass("capybara-coconut", 35, "Burbaloni Lulilolli", 4),
           new ItalianBrainrotCharacterClass("camel-fridge", 45, "Frigo Camelo", 5),
           new ItalianBrainrotCharacterClass("elephant", 50, "Lirili Larila", 6),
           new ItalianBrainrotCharacterClass("cow", 55, "La Vaca Saturno Saturnita", 7),
