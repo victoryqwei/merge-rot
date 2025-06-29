@@ -21,40 +21,55 @@ const ScoreBoard: React.FC<ScoreBoardProps> = observer(({ setShowSettings }) => 
   return (
     <Box position="relative" maxW="500px" w="100%" p={4} h="100px" px={10} mx="auto">
       {game.hasStarted && (
-        <HStack position="absolute" left={10} top="50%" transform="translateY(-50%)" zIndex={1}>
-          <Button
-            variant="unstyled"
-            color="white"
-            fontWeight="bold"
-            onClick={() => (window.location.href = "/")}
-            _hover={{ color: "whiteAlpha.800" }}
-            transition="color 0.2s"
-            flexShrink={0}>
-            <AiOutlineHome size={32} />
-          </Button>
-          <Button
-            variant="unstyled"
-            color="white"
-            fontWeight="bold"
-            onClick={() => setShowSettings(true)}
-            _hover={{ color: "whiteAlpha.800" }}
-            transition="color 0.2s"
-            flexShrink={0}>
-            <BiCog size={32} />
-          </Button>
-          {import.meta.env.MODE === "development" && (
+        <VStack
+          position="absolute"
+          left={10}
+          top="50%"
+          transform="translateY(-50%)"
+          zIndex={1}
+          justifyContent="flex-start"
+          textAlign="left">
+          <HStack>
             <Button
               variant="unstyled"
-              color={game.isDebugMode() ? "yellow.400" : "white"}
+              color="white"
               fontWeight="bold"
-              onClick={() => game.toggleDebugMode()}
+              onClick={() => (window.location.href = "/")}
               _hover={{ color: "whiteAlpha.800" }}
               transition="color 0.2s"
               flexShrink={0}>
-              <BiBug size={32} />
+              <AiOutlineHome size={32} />
             </Button>
-          )}
-        </HStack>
+            <Button
+              variant="unstyled"
+              color="white"
+              fontWeight="bold"
+              onClick={() => setShowSettings(true)}
+              _hover={{ color: "whiteAlpha.800" }}
+              transition="color 0.2s"
+              flexShrink={0}>
+              <BiCog size={32} />
+            </Button>
+            {import.meta.env.MODE === "development" && (
+              <Button
+                variant="unstyled"
+                color={game.isDebugMode() ? "yellow.400" : "white"}
+                fontWeight="bold"
+                onClick={() => game.toggleDebugMode()}
+                _hover={{ color: "whiteAlpha.800" }}
+                transition="color 0.2s"
+                flexShrink={0}>
+                <BiBug size={32} />
+              </Button>
+            )}
+          </HStack>
+        </VStack>
+      )}
+
+      {game.hasStarted && game.isComboDisplayVisible() && game.getComboMultiplier() > 1 && (
+        <Text position="absolute" left={10} top="50%" transform="translateY(calc(50% + 20px))" color="white" fontSize="xl" zIndex={1}>
+          Combo x{game.getComboMultiplier()}
+        </Text>
       )}
 
       <Text

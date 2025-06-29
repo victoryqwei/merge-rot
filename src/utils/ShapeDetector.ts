@@ -39,7 +39,8 @@ export class ShapeDetector {
       canvas.height = canvasSize;
 
       // Calculate scaling and offset to fit content in canvas
-      const scale = Math.min(canvasSize / contentWidth, canvasSize / contentHeight);
+      const ratio = 0.9;
+      const scale = Math.min((canvasSize * ratio) / contentWidth, (canvasSize * ratio) / contentHeight);
 
       const offsetX = (canvasSize - contentWidth * scale) / 2;
       const offsetY = (canvasSize - contentHeight * scale) / 2;
@@ -372,35 +373,6 @@ export class ShapeDetector {
         x: Math.cos(angle) * radius * 0.8,
         y: Math.sin(angle) * radius * 0.8,
       });
-    }
-
-    return points;
-  }
-
-  /**
-   * Alternative point detection method for difficult cases
-   */
-  private static detectAlternativePoints(data: Uint8ClampedArray, canvasSize: number): { x: number; y: number }[] {
-    const points: { x: number; y: number }[] = [];
-    const visited = new Set<string>();
-
-    // Use a more aggressive sampling approach
-    const sampleRate = Math.max(1, Math.floor(canvasSize / 50));
-
-    for (let y = 0; y < canvasSize; y += sampleRate) {
-      for (let x = 0; x < canvasSize; x += sampleRate) {
-        const index = (y * canvasSize + x) * 4;
-        const alpha = data[index + 3];
-
-        if (alpha > this.ALPHA_THRESHOLD * 0.5) {
-          // Lower threshold
-          const key = `${x},${y}`;
-          if (!visited.has(key)) {
-            visited.add(key);
-            points.push({ x, y });
-          }
-        }
-      }
     }
 
     return points;

@@ -68,6 +68,9 @@ export class SuikaGame {
 
     // Connect input manager drop callback
     this.inputManager.setOnDrop(this.handleDrop.bind(this));
+
+    // Connect animation manager to character manager for combo system
+    this.characterManager.setAnimationManager(this.animationManager);
   }
 
   setCanvas(canvas: HTMLCanvasElement): void {
@@ -305,6 +308,15 @@ export class SuikaGame {
 
   public get timeSinceLastDrop(): number {
     return this.animationManager.getTimeSinceLastDrop();
+  }
+
+  // Combo system methods
+  public getComboMultiplier(): number {
+    return this.animationManager.getComboMultiplier();
+  }
+
+  public isComboDisplayVisible(): boolean {
+    return this.animationManager.isComboDisplayVisible();
   }
 
   setGameMode(gameMode: GameMode): void {

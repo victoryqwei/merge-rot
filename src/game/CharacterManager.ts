@@ -5,6 +5,7 @@ import { PhysicsEngine } from "../utils/PhysicsEngine";
 import { Sound, SoundManager } from "../utils/SoundManager";
 import { ImageManager } from "../utils/ImageManager";
 import { BodyCache } from "../utils/BodyCache";
+import { AnimationManager } from "./managers/AnimationManager";
 import { random } from "lodash";
 import * as Matter from "matter-js";
 
@@ -16,6 +17,7 @@ export class CharacterManager {
   private imageManager: ImageManager;
   private bodyCache: BodyCache;
   private gameMode: GameMode;
+  private animationManager?: AnimationManager;
 
   constructor(physicsEngine: PhysicsEngine, soundManager: SoundManager, gameMode: GameMode = GameMode.ITALIAN_BRAINROT) {
     this.physicsEngine = physicsEngine;
@@ -150,6 +152,14 @@ export class CharacterManager {
         // Add score
         scoreIncrease += nextCharacterClass.points * 10;
 
+        // Record merge for combo system
+        if (this.animationManager) {
+          this.animationManager.recordMerge();
+          // Apply combo multiplier to score
+          const comboMultiplier = this.animationManager.getComboMultiplier();
+          scoreIncrease = scoreIncrease * comboMultiplier;
+        }
+
         // Add explosion effect
         this.createExplosion(newCharacter.body.position.x, newCharacter.body.position.y);
 
@@ -214,5 +224,9 @@ export class CharacterManager {
     this.characters.clear();
     this.particles = [];
     this.bodyCache.clear();
+  }
+
+  setAnimationManager(animationManager: AnimationManager): void {
+    this.animationManager = animationManager;
   }
 }
