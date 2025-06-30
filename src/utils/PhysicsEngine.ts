@@ -80,7 +80,11 @@ export class PhysicsEngine {
   }
 
   update(deltaTime: number): void {
-    Matter.Engine.update(this.engine, deltaTime);
+    // Cap delta time to prevent large jumps when window regains focus
+    const maxDeltaTime = 1000 / 30; // Cap to 30 FPS equivalent in milliseconds
+    const clampedDeltaTime = Math.min(deltaTime, maxDeltaTime);
+
+    Matter.Engine.update(this.engine, clampedDeltaTime);
   }
 
   getBodyPosition(body: Matter.Body): { x: number; y: number } {

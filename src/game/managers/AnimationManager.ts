@@ -29,17 +29,21 @@ export class AnimationManager {
   constructor(private game: SuikaGame) {}
 
   update(deltaTime: number): void {
+    // Cap delta time to prevent large jumps when window regains focus
+    const maxDeltaTime = 1 / 30; // Cap to 30 FPS equivalent
+    const clampedDeltaTime = Math.min(deltaTime, maxDeltaTime);
+
     // Update cooldown timer
     if (this.state.dropCooldownTime > 0) {
-      this.state.dropCooldownTime -= deltaTime;
+      this.state.dropCooldownTime -= clampedDeltaTime;
     } else {
       // Animate character when ready to drop
-      this.state.characterAnimationProgress = Math.min(1, this.state.characterAnimationProgress + deltaTime * 3); // 3 units per second
+      this.state.characterAnimationProgress = Math.min(1, this.state.characterAnimationProgress + clampedDeltaTime * 3); // 3 units per second
     }
 
     // Update combo display timer
     if (this.state.comboDisplayTimer > 0) {
-      this.state.comboDisplayTimer -= deltaTime;
+      this.state.comboDisplayTimer -= clampedDeltaTime;
       if (this.state.comboDisplayTimer <= 0) {
         this.state.comboDisplayVisible = false;
       }

@@ -38,10 +38,14 @@ export class ShakeManager {
   }
 
   update(deltaTime: number): void {
+    // Cap delta time to prevent large jumps when window regains focus
+    const maxDeltaTime = 1 / 30; // Cap to 30 FPS equivalent
+    const clampedDeltaTime = Math.min(deltaTime, maxDeltaTime);
+
     if (this.state.timerTime > 0) {
-      this.state.timerTime -= deltaTime;
-      this.state.time += deltaTime * 6; // 6 radians per second oscillation speed
-      this.state.liftTime += deltaTime; // Lift animation speed in seconds
+      this.state.timerTime -= clampedDeltaTime;
+      this.state.time += clampedDeltaTime * 6; // 6 radians per second oscillation speed
+      this.state.liftTime += clampedDeltaTime; // Lift animation speed in seconds
       const progress = this.state.timerTime / this.state.duration;
       const intensity = this.state.intensity * progress;
 
@@ -74,7 +78,7 @@ export class ShakeManager {
         this.state.liftTime = 0;
       }
 
-      this.state.liftTime += deltaTime;
+      this.state.liftTime += clampedDeltaTime;
       const downDuration = 0.2; // 200ms = 0.2 seconds
       const downProgress = Math.min(this.state.liftTime / downDuration, 1);
 

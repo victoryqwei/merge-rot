@@ -199,11 +199,15 @@ export class CharacterManager {
   }
 
   updateParticles(deltaTime: number = 1 / 60): void {
+    // Cap delta time to prevent large jumps when window regains focus
+    const maxDeltaTime = 1 / 30; // Cap to 30 FPS equivalent
+    const clampedDeltaTime = Math.min(deltaTime, maxDeltaTime);
+
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const particle = this.particles[i];
-      particle.x += particle.vx * deltaTime * 60; // Scale to maintain same speed at 60fps
-      particle.y += particle.vy * deltaTime * 60;
-      particle.life -= deltaTime * 60; // Scale to maintain same lifetime at 60fps
+      particle.x += particle.vx * clampedDeltaTime * 60; // Scale to maintain same speed at 60fps
+      particle.y += particle.vy * clampedDeltaTime * 60;
+      particle.life -= clampedDeltaTime * 60; // Scale to maintain same lifetime at 60fps
 
       if (particle.life <= 0) {
         this.particles.splice(i, 1);
