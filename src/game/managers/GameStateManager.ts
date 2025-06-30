@@ -30,7 +30,7 @@ export class GameStateManager {
     if (this.state.gameOver) return false;
 
     // Update physics
-    this.characterManager.updateCharacters();
+    this.characterManager.updateCharacters(deltaTime);
 
     // Check for character combinations
     this.characterManager.checkCombinations().then((scoreIncrease) => {

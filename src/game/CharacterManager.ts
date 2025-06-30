@@ -74,8 +74,8 @@ export class CharacterManager {
     return Array.from(this.characters.values());
   }
 
-  updateCharacters(): void {
-    this.physicsEngine.update();
+  updateCharacters(deltaTime: number): void {
+    this.physicsEngine.update(deltaTime * 1000);
 
     // Update character rotations based on physics body rotation
     for (const character of this.characters.values()) {

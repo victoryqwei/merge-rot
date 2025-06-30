@@ -1,6 +1,6 @@
 import * as Matter from "matter-js";
 import type { Character } from "../types/GameTypes";
-import { GAME_CONFIG } from "../constants/GameConstants";
+import { GAME_CONFIG, PHYSICS } from "../constants/GameConstants";
 
 export class PhysicsEngine {
   private engine: Matter.Engine;
@@ -15,7 +15,7 @@ export class PhysicsEngine {
     this.world = this.engine.world;
 
     // Set up world properties
-    this.world.gravity.y = 0.3;
+    this.world.gravity.y = PHYSICS.GRAVITY;
 
     // Create collision detector
     this.collisionDetector = Matter.Detector.create({
@@ -79,8 +79,8 @@ export class PhysicsEngine {
     return body;
   }
 
-  update(): void {
-    Matter.Engine.update(this.engine, 1000 / 60);
+  update(deltaTime: number): void {
+    Matter.Engine.update(this.engine, deltaTime);
   }
 
   getBodyPosition(body: Matter.Body): { x: number; y: number } {
