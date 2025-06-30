@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "release": "./release.sh",
+    "ios": "./ios-dev.sh",
     "optimize-images": "npm run build:cli && node dist/optimize-images.js"
   },
   "dependencies": {

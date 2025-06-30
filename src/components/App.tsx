@@ -9,11 +9,13 @@ import GameModeOverlay from "./GameModeOverlay";
 import GameOverOverlay from "./GameOverOverlay";
 import ScoreBoard from "./ScoreBoard";
 import GameSettingsOverlay from "./GameSettingsOverlay";
+import { usePlatformInfo } from "../hooks/usePlatformInfo";
 
 const App: React.FC = observer(() => {
   const game = useGame();
   const [showModes, setShowModes] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const { isIOS } = usePlatformInfo();
 
   const handleRestart = () => {
     game.restart();
@@ -25,7 +27,7 @@ const App: React.FC = observer(() => {
   return (
     <Center minH="100vh" bgGradient="linear(to-t,rgb(129, 205, 255), #3b82f6)" position="relative">
       {/* Score Board - positioned at top */}
-      <Box position="absolute" top={5} left="50%" transform="translateX(-50%)" zIndex={10} w="100%">
+      <Box position="absolute" top={isIOS ? 10 : 5} left="50%" transform="translateX(-50%)" zIndex={10} w="100%">
         <ScoreBoard setShowSettings={setShowSettings} />
       </Box>
 
