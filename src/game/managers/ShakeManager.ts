@@ -1,4 +1,5 @@
 import { makeAutoObservable } from "mobx";
+import { GAME_CONFIG } from "../../constants/GameConstants";
 
 export interface ShakeState {
   intensity: number;
@@ -39,8 +40,7 @@ export class ShakeManager {
 
   update(deltaTime: number): void {
     // Cap delta time to prevent large jumps when window regains focus
-    const maxDeltaTime = 1 / 30; // Cap to 30 FPS equivalent
-    const clampedDeltaTime = Math.min(deltaTime, maxDeltaTime);
+    const clampedDeltaTime = Math.min(deltaTime, GAME_CONFIG.MAX_DELTA_TIME);
 
     if (this.state.timerTime > 0) {
       this.state.timerTime -= clampedDeltaTime;

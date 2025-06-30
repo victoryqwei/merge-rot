@@ -81,8 +81,7 @@ export class PhysicsEngine {
 
   update(deltaTime: number): void {
     // Cap delta time to prevent large jumps when window regains focus
-    const maxDeltaTime = 1000 / 30; // Cap to 30 FPS equivalent in milliseconds
-    const clampedDeltaTime = Math.min(deltaTime, maxDeltaTime);
+    const clampedDeltaTime = Math.min(deltaTime, GAME_CONFIG.MAX_DELTA_TIME * 1000);
 
     Matter.Engine.update(this.engine, clampedDeltaTime);
   }

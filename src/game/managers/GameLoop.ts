@@ -9,7 +9,6 @@ export class GameLoop {
   private deltaTime: number = 0;
   private isRunning: boolean = false;
   private isPageVisible: boolean = true;
-  private maxDeltaTime: number = 1 / 30; // Cap delta time to 30 FPS equivalent
 
   constructor(callbacks: GameLoopCallbacks) {
     this.callbacks = callbacks;
@@ -58,11 +57,6 @@ export class GameLoop {
     }
 
     this.deltaTime = (currentTime - this.lastFrameTime) / 1000; // Convert to seconds
-
-    // Cap delta time to prevent large jumps when window regains focus
-    if (this.deltaTime > this.maxDeltaTime) {
-      this.deltaTime = this.maxDeltaTime;
-    }
 
     this.lastFrameTime = currentTime;
 

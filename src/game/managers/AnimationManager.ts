@@ -30,8 +30,7 @@ export class AnimationManager {
 
   update(deltaTime: number): void {
     // Cap delta time to prevent large jumps when window regains focus
-    const maxDeltaTime = 1 / 30; // Cap to 30 FPS equivalent
-    const clampedDeltaTime = Math.min(deltaTime, maxDeltaTime);
+    const clampedDeltaTime = Math.min(deltaTime, GAME_CONFIG.MAX_DELTA_TIME);
 
     // Update cooldown timer
     if (this.state.dropCooldownTime > 0) {

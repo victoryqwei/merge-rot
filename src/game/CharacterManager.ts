@@ -200,8 +200,7 @@ export class CharacterManager {
 
   updateParticles(deltaTime: number = 1 / 60): void {
     // Cap delta time to prevent large jumps when window regains focus
-    const maxDeltaTime = 1 / 30; // Cap to 30 FPS equivalent
-    const clampedDeltaTime = Math.min(deltaTime, maxDeltaTime);
+    const clampedDeltaTime = Math.min(deltaTime, GAME_CONFIG.MAX_DELTA_TIME);
 
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const particle = this.particles[i];
