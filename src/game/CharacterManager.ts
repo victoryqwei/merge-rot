@@ -232,4 +232,8 @@ export class CharacterManager {
   setAnimationManager(animationManager: AnimationManager): void {
     this.animationManager = animationManager;
   }
+
+  getImageManager(): ImageManager {
+    return this.imageManager;
+  }
 }

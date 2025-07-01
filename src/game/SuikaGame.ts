@@ -23,6 +23,10 @@ export class SuikaGame {
   private gameMode: GameMode;
   private debugMode: boolean = false;
 
+  // Loading state
+  public isLoading: boolean = true;
+  public loadingProgress: number = 0;
+
   // Managers
   private inputManager: InputManager;
   private shakeManager: ShakeManager;
@@ -57,7 +61,36 @@ export class SuikaGame {
       draw: this.draw.bind(this),
     });
 
+    // Set up loading progress tracking
+    this.setupLoadingProgress();
+
     if (canvas) this.setCanvas(canvas);
+  }
+
+  private setupLoadingProgress(): void {
+    // Update progress every 100ms to show real-time loading
+    const progressInterval = setInterval(() => {
+      const soundProgress = this.soundManager.getLoadingProgress();
+      const imageProgress = this.characterManager.getImageManager().getLoadingProgress();
+
+      // Weight sounds and images equally (50% each)
+      this.loadingProgress = (soundProgress + imageProgress) / 2;
+
+      if (this.loadingProgress >= 100) {
+        this.isLoading = false;
+        clearInterval(progressInterval);
+      }
+    }, 100);
+
+    // Track sound loading completion
+    this.soundManager.setOnLoadComplete(() => {
+      this.soundManager.playBackgroundMusic();
+    });
+
+    // Track image loading completion
+    this.characterManager.getImageManager().setOnLoadComplete(() => {
+      // Images are loaded
+    });
   }
 
   private setupManagerConnections(): void {

@@ -9,6 +9,7 @@ import GameModeOverlay from "./GameModeOverlay";
 import GameOverOverlay from "./GameOverOverlay";
 import ScoreBoard from "./ScoreBoard";
 import GameSettingsOverlay from "./GameSettingsOverlay";
+import LoadingOverlay from "./LoadingOverlay";
 import { usePlatformInfo } from "../hooks/usePlatformInfo";
 
 const App: React.FC = observer(() => {
@@ -26,6 +27,9 @@ const App: React.FC = observer(() => {
 
   return (
     <Center minH="100vh" bgGradient="linear(to-t,rgb(129, 205, 255), #3b82f6)" position="relative">
+      {/* Loading Overlay */}
+      <LoadingOverlay progress={game.loadingProgress} isVisible={game.isLoading} />
+
       {/* Score Board - positioned at top */}
       <Box position="absolute" top={isIOS ? 10 : 5} left="50%" transform="translateX(-50%)" zIndex={10} w="100%">
         <ScoreBoard setShowSettings={setShowSettings} />
@@ -44,7 +48,7 @@ const App: React.FC = observer(() => {
       <Box position="relative">
         <GameCanvas />
 
-        {!game.hasStarted && (
+        {!game.hasStarted && !game.isLoading && (
           <VStack
             textAlign="center"
             h="58px"

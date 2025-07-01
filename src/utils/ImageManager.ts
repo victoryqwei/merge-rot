@@ -54,4 +54,10 @@ export class ImageManager {
   isLoaded(): boolean {
     return this.loadedCount === this.totalCount;
   }
+
+  // Get loading progress as percentage (0-100)
+  getLoadingProgress(): number {
+    if (this.totalCount === 0) return 0;
+    return (this.loadedCount / this.totalCount) * 100;
+  }
 }
