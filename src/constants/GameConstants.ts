@@ -18,7 +18,7 @@ export const GAME_CONFIG = {
   PARTICLE_LIFE: 30,
   PARTICLE_SPEED: 10,
   DROP_COOLDOWN_TIME: 400,
-  MAX_DELTA_TIME: 1 / 10,
+  MAX_DELTA_TIME: 1 / 60,
 };
 
 export enum GameMode {
