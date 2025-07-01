@@ -1,7 +1,7 @@
 import type { ThemeTypings } from "@chakra-ui/react";
 
 export const PHYSICS = {
-  GRAVITY: 1,
+  GRAVITY: 0.5,
   BOUNCE: 0.7,
   FRICTION: 0.98,
   MIN_VELOCITY: 0.5,
