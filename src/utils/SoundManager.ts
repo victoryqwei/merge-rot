@@ -115,16 +115,39 @@ export class SoundManager {
 
   // Unified playSound method that handles all sound types
   play(soundName: Sound | string, volume = 1, pitch = 1): void {
+    // Early exit if SFX volume is 0 and this isn't background music
+    if (this.sfxVolume === 0 && soundName !== Sound.BackgroundMusic) {
+      return;
+    }
+
     const sound = this.sounds.get(soundName);
     if (!sound) {
       console.warn(`Sound ${soundName} not found`);
       return;
     }
 
-    sound.volume(volume);
-    sound.rate(pitch);
+    // Use requestAnimationFrame to make audio operations non-blocking
+    requestAnimationFrame(() => {
+      try {
+        // Only set volume/rate if they're different from current values
+        // This avoids unnecessary audio context synchronization
+        const currentVolume = sound.volume() as number;
+        const currentRate = sound.rate() as number;
 
-    sound.play();
+        if (Math.abs(currentVolume - volume) > 0.001) {
+          sound.volume(volume);
+        }
+
+        if (Math.abs(currentRate - pitch) > 0.001) {
+          sound.rate(pitch);
+        }
+
+        // Play the sound
+        sound.play();
+      } catch (error) {
+        console.warn(`Error playing sound ${soundName}:`, error);
+      }
+    });
   }
 
   // Play a character's sound with global debouncing (prioritizes highest tier character)
@@ -160,13 +183,26 @@ export class SoundManager {
   }
 
   playPop(soundName: Sound, pitch = 1): void {
-    if (this.sfxVolume === 0) {
-      return;
-    }
+    // SFX volume check is now handled in the play method
+    this.play(soundName, this.sfxVolume, pitch);
+  }
 
-    const volume = this.sfxVolume;
+  // Fast playback for frequently used sounds (like WaterPlop)
+  // Avoids parameter passing and uses cached volume
+  playWaterPlop(): void {
+    if (this.sfxVolume === 0) return;
 
-    this.play(soundName, volume, pitch);
+    const sound = this.sounds.get(Sound.WaterPlop);
+    if (!sound) return;
+
+    // Use requestAnimationFrame for non-blocking playback
+    requestAnimationFrame(() => {
+      try {
+        sound.play();
+      } catch (error) {
+        console.warn(`Error playing water plop sound:`, error);
+      }
+    });
   }
 
   playBackgroundMusic(): void {
