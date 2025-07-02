@@ -218,8 +218,8 @@ export class CharacterManager {
     return this.particles;
   }
 
-  checkGameOver(): boolean {
-    return this.physicsEngine.checkGameOver();
+  checkGameOver(deltaTime: number): boolean {
+    return this.physicsEngine.checkGameOver(deltaTime);
   }
 
   clear(): void {

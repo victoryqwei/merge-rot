@@ -7,7 +7,7 @@ export class PhysicsEngine {
   private world: Matter.World;
   private bodies: Matter.Body[] = [];
   private gameOverTimer: number = 0;
-  private gameOverDelay: number = 120; // 2 seconds at 60fps
+  private gameOverDelay: number = 2;
   private collisionDetector: Matter.Detector;
 
   constructor() {
@@ -65,9 +65,8 @@ export class PhysicsEngine {
     const body = Matter.Bodies.circle(x, y, radius, {
       restitution: 0.3,
       friction: 0.9,
-      density: 0.0005,
+      density: 0.005,
       frictionAir: 0.05,
-      slop: 1,
     });
 
     this.bodies.push(body);
@@ -151,14 +150,17 @@ export class PhysicsEngine {
     return this.engine;
   }
 
-  checkGameOver(): boolean {
+  checkGameOver(deltaTime: number): boolean {
     // Check if any character is too high
-    const characterAboveLine = this.bodies.some((body) => body.position.y - body.circleRadius! < GAME_CONFIG.GAME_OVER_HEIGHT);
+    const characterAboveLine = this.bodies.filter((body) => body.position.y - body.circleRadius! < GAME_CONFIG.GAME_OVER_HEIGHT);
 
-    if (characterAboveLine) {
+    if (characterAboveLine.length > 0) {
+      const body = characterAboveLine[0];
+      const velocity = Math.sqrt(body.velocity.x * body.velocity.x + body.velocity.y * body.velocity.y);
+
       // Only trigger game over if all characters have stopped moving AND timer has elapsed
-      if (this.allCharactersStopped()) {
-        this.gameOverTimer++;
+      if (velocity < 0.5) {
+        this.gameOverTimer += deltaTime;
         if (this.gameOverTimer >= this.gameOverDelay) {
           return true;
         }
@@ -174,17 +176,18 @@ export class PhysicsEngine {
     return false;
   }
 
-  private allCharactersStopped(): boolean {
-    const velocityThreshold = 0.5; // Minimum velocity to consider "stopped"
+  // private allCharactersStopped(): boolean {
+  //   const velocityThreshold = 0.5; // Minimum velocity to consider "stopped"
 
-    for (const body of this.bodies) {
-      const velocity = Math.sqrt(body.velocity.x * body.velocity.x + body.velocity.y * body.velocity.y);
-      if (velocity > velocityThreshold) {
-        return false; // At least one character is still moving
-      }
-    }
-    return true; // All characters have stopped moving
-  }
+  //   for (const body of this.bodies) {
+  //     const velocity = Math.sqrt(body.velocity.x * body.velocity.x + body.velocity.y * body.velocity.y);
+  //     if (velocity > velocityThreshold) {
+  //       console.log("velocity", velocity);
+  //       return false; // At least one character is still moving
+  //     }
+  //   }
+  //   return true; // All characters have stopped moving
+  // }
 
   clear(): void {
     for (const body of this.bodies) {
