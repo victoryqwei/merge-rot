@@ -130,7 +130,8 @@ export class Character {
     public readonly points: number,
     public readonly displayName: string,
     public readonly body: Body,
-    public rotation: number = 0
+    public rotation: number = 0,
+    public characterType: CharacterClass
   ) {}
 }
 

@@ -3,6 +3,7 @@ import { CharacterClass } from "../types/GameTypes";
 import { PhysicsEngine } from "./PhysicsEngine";
 import { ImageManager } from "./ImageManager";
 import { ShapeDetector } from "./ShapeDetector";
+import { GameMode } from "../constants/GameConstants";
 
 export class BodyCache {
   private cache = new Map<string, Promise<Matter.Vector[]>>();
@@ -12,6 +13,22 @@ export class BodyCache {
   constructor(physicsEngine: PhysicsEngine, imageManager: ImageManager) {
     this.physicsEngine = physicsEngine;
     this.imageManager = imageManager;
+  }
+
+  async preload() {
+    // Preload all characters from all game modes
+    const allGameModes = Object.values(GameMode);
+    for (const gameMode of allGameModes) {
+      const characters = CharacterClass.getAllCharacters(gameMode);
+      console.log(`Preloading ${characters.length} characters for game mode ${gameMode}`);
+      for (const character of characters) {
+        const image = this.imageManager.getImage(character.name);
+        if (image) {
+          const cacheKey = this.getCacheKey(character);
+          this.cache.set(cacheKey, ShapeDetector.detectImageShape(image, character.radius));
+        }
+      }
+    }
   }
 
   /**
@@ -26,11 +43,11 @@ export class BodyCache {
     let shapePromise = this.cache.get(cacheKey);
     if (!shapePromise) {
       // Cache the detectImageShape function call
-      console.debug(`BodyCache: Cache miss for ${cacheKey}, calling detectImageShape`);
+      console.info(`BodyCache: Cache miss for ${cacheKey}, calling detectImageShape`);
       shapePromise = ShapeDetector.detectImageShape(image!, characterType.radius);
       this.cache.set(cacheKey, shapePromise);
     } else {
-      console.debug(`BodyCache: Cache hit for ${cacheKey}, using cached detectImageShape result`);
+      console.info(`BodyCache: Cache hit for ${cacheKey}, using cached detectImageShape result`);
     }
 
     // Wait for the shape detection to complete

@@ -27,6 +27,10 @@ export class CharacterManager {
     this.gameMode = gameMode;
   }
 
+  getBodyCache(): BodyCache {
+    return this.bodyCache;
+  }
+
   setGameMode(gameMode: GameMode): void {
     this.gameMode = gameMode;
   }
@@ -60,7 +64,8 @@ export class CharacterManager {
       characterType.points,
       characterType.displayName,
       body,
-      0 // Initial rotation
+      0, // Initial rotation
+      characterType
     );
 
     return newCharacter;

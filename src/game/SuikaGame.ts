@@ -61,9 +61,6 @@ export class SuikaGame {
       draw: this.draw.bind(this),
     });
 
-    // Set up loading progress tracking
-    this.setupLoadingProgress();
-
     if (canvas) this.setCanvas(canvas);
   }
 
@@ -85,6 +82,7 @@ export class SuikaGame {
     // Track image loading completion
     this.characterManager.getImageManager().setOnLoadComplete(() => {
       // Images are loaded
+      this.characterManager.getBodyCache().preload();
     });
   }
 
@@ -117,6 +115,9 @@ export class SuikaGame {
     this.soundManager.setOnLoadComplete(() => {
       this.soundManager.playBackgroundMusic();
     });
+
+    // Set up loading progress tracking
+    this.setupLoadingProgress();
   }
 
   private setupWindowEvents(): void {

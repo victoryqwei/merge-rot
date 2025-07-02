@@ -3,7 +3,7 @@ import * as Matter from "matter-js";
 export class ShapeDetector {
   private static readonly MIN_CANVAS_SIZE = 100; // Minimum canvas size for analysis
   private static readonly MAX_CANVAS_SIZE = 200; // Maximum canvas size for analysis
-  private static readonly SAMPLE_RATE = 1; // Sample every Nth pixel for performance
+  private static readonly SAMPLE_RATE = 4; // Sample every Nth pixel for performance
   private static readonly MIN_POINTS = 8; // Minimum points for polygon
   private static readonly MAX_POINTS = 48; // Maximum points for polygon
   private static readonly ALPHA_THRESHOLD = 128; // Alpha threshold for non-transparent pixels
