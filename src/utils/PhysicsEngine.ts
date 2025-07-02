@@ -67,6 +67,7 @@ export class PhysicsEngine {
       friction: 0.9,
       density: 0.005,
       frictionAir: 0.05,
+      slop: 0.01,
     });
 
     this.bodies.push(body);

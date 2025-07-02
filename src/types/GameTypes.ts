@@ -38,13 +38,13 @@ export class CharacterClass {
           new ItalianBrainrotCharacterClass("capuccino", 30, "Capuccino Assassino", 2),
           new ItalianBrainrotCharacterClass("monkey-banana", 35, "Chimpanzini Bananini", 3),
           new ItalianBrainrotCharacterClass("capybara-coconut", 35, "Burbaloni Lulilolli", 4),
-          new ItalianBrainrotCharacterClass("camel-fridge", 45, "Frigo Camelo", 5),
+          new ItalianBrainrotCharacterClass("camel-fridge", 40, "Frigo Camelo", 5),
           new ItalianBrainrotCharacterClass("elephant", 45, "Lirili Larila", 6),
           new ItalianBrainrotCharacterClass("cow", 50, "La Vaca Saturno Saturnita", 7),
           new ItalianBrainrotCharacterClass("baseball-bat", 55, "Tung Tung Tung Sahur", 8),
           new ItalianBrainrotCharacterClass("shark", 60, "Tralalero Tralala", 9),
           new ItalianBrainrotCharacterClass("crocodile", 65, "Bombardino Crocodilo", 10),
-          new ItalianBrainrotCharacterClass("big-feet", 70, "Brr Brr Patapim", 11),
+          new ItalianBrainrotCharacterClass("big-feet", 65, "Brr Brr Patapim", 11),
         ];
       case GameMode.CATS:
         return [
