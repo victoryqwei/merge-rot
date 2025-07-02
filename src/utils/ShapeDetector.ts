@@ -103,29 +103,68 @@ export class ShapeDetector {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
 
+    // For large images, use sampling to speed up detection
+    const maxDimension = Math.max(canvas.width, canvas.height);
+    const sampleRate = maxDimension > 500 ? Math.ceil(maxDimension / 500) : 1;
+
     let left = canvas.width;
     let top = canvas.height;
     let right = 0;
     let bottom = 0;
     let hasContent = false;
 
-    for (let y = 0; y < canvas.height; y++) {
-      for (let x = 0; x < canvas.width; x++) {
+    // Optimized scanning: use early termination and sampling
+    // Scan from edges inward to find bounds more efficiently
+
+    // Find top bound
+    outerTop: for (let y = 0; y < canvas.height; y += sampleRate) {
+      for (let x = 0; x < canvas.width; x += sampleRate) {
         const index = (y * canvas.width + x) * 4;
         const alpha = data[index + 3];
-
         if (alpha > this.ALPHA_THRESHOLD) {
+          top = y;
           hasContent = true;
-          left = Math.min(left, x);
-          top = Math.min(top, y);
-          right = Math.max(right, x);
-          bottom = Math.max(bottom, y);
+          break outerTop;
         }
       }
     }
 
-    if (!hasContent) {
-      return null;
+    if (!hasContent) return null;
+
+    // Find bottom bound (scan from bottom up)
+    outerBottom: for (let y = canvas.height - 1; y >= top; y -= sampleRate) {
+      for (let x = 0; x < canvas.width; x += sampleRate) {
+        const index = (y * canvas.width + x) * 4;
+        const alpha = data[index + 3];
+        if (alpha > this.ALPHA_THRESHOLD) {
+          bottom = y;
+          break outerBottom;
+        }
+      }
+    }
+
+    // Find left bound (scan from left to right, within top-bottom range)
+    outerLeft: for (let x = 0; x < canvas.width; x += sampleRate) {
+      for (let y = top; y <= bottom; y += sampleRate) {
+        const index = (y * canvas.width + x) * 4;
+        const alpha = data[index + 3];
+        if (alpha > this.ALPHA_THRESHOLD) {
+          left = x;
+          break outerLeft;
+        }
+      }
+    }
+
+    // Find right bound (scan from right to left, within top-bottom range)
+    outerRight: for (let x = canvas.width - 1; x >= left; x -= sampleRate) {
+      for (let y = top; y <= bottom; y += sampleRate) {
+        const index = (y * canvas.width + x) * 4;
+        const alpha = data[index + 3];
+        if (alpha > this.ALPHA_THRESHOLD) {
+          right = x;
+          break outerRight;
+        }
+      }
     }
 
     // Add small padding to ensure we capture the full shape
