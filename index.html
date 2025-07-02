@@ -6,6 +6,31 @@
   <link rel="icon" type="image/png" href="/favicon.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MERGE ROT</title>
+
+  <!-- AdinPlay Ads -->
+  <script>
+    window.aiptag = window.aiptag || {};
+    aiptag.cmd = aiptag.cmd || [];
+    aiptag.cmd.display = aiptag.cmd.display || [];
+    aiptag.cmd.player = aiptag.cmd.player || [];
+
+    //CMP tool settings
+    aiptag.cmp = {
+      show: false,
+      position: "centered", //centered or bottom
+      button: true,
+      buttonText: "Privacy settings",
+      buttonPosition: "bottom-left", //bottom-left, bottom-right, top-left, top-right
+    };
+
+    // disable adinplay console banner by temporarily unbinding console.log
+    window.tempConsoleLog = window.console.log;
+    window.console.log = function () { };
+  </script>
+  <script src="//api.adinplay.com/libs/aiptag/pub/BLC/blockcraft.online/tag.min.js"></script>
+  <script>
+    window.console.log = window.tempConsoleLog;
+  </script>
 </head>
 
 <body>
