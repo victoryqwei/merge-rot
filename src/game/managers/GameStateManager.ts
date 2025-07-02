@@ -43,7 +43,7 @@ export class GameStateManager {
     this.characterManager.updateParticles(deltaTime);
 
     // Check for game over
-    if (this.characterManager.checkGameOver()) {
+    if (this.characterManager.checkGameOver(deltaTime)) {
       this.endGame();
       return false;
     }
