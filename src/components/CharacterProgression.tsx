@@ -1,7 +1,7 @@
 import { Box, Button, HStack, Image, Tooltip } from "@chakra-ui/react";
 import { clamp } from "lodash";
 import { observer } from "mobx-react-lite";
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { BiCog, BiJoystick } from "react-icons/bi";
 import { useGame } from "../game/useGame";
 import { useCharacterImage } from "../hooks/useCharacterImage";
@@ -69,12 +69,63 @@ interface CharacterItemProps {
 
 const CharacterItem: React.FC<CharacterItemProps> = ({ character, index }) => {
   const characterImage = useCharacterImage(character.name);
+  const game = useGame();
+  const isMobile = game.getIsMobile();
+  const [showTooltip, setShowTooltip] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const size = `${clamp(2 + character.tier * 0.1, 2, 3.5)}em`;
 
+  const handleClick = (e: React.MouseEvent) => {
+    if (isMobile) {
+      e.stopPropagation();
+      setShowTooltip(!showTooltip);
+    }
+  };
+
+  const handleTooltipClose = () => {
+    if (isMobile) {
+      setShowTooltip(false);
+    }
+  };
+
+  // Handle click away to close tooltip on mobile
+  useEffect(() => {
+    if (!isMobile || !showTooltip) return;
+
+    const handleClickAway = (event: MouseEvent | TouchEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setShowTooltip(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickAway as EventListener);
+    document.addEventListener("touchstart", handleClickAway as EventListener);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickAway as EventListener);
+      document.removeEventListener("touchstart", handleClickAway as EventListener);
+    };
+  }, [isMobile, showTooltip]);
+
   return (
-    <Tooltip label={character.displayName}>
-      <Box display="flex" alignItems="center" justifyContent="center" position="relative" flexShrink={0}>
+    <Tooltip label={character.displayName} isOpen={isMobile ? showTooltip : undefined} onClose={handleTooltipClose}>
+      <Box
+        ref={containerRef}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        position="relative"
+        flexShrink={0}
+        onClick={handleClick}
+        cursor={isMobile ? "pointer" : "default"}
+        sx={{
+          WebkitTapHighlightColor: "transparent",
+          "&:focus": {
+            outline: "none",
+            boxShadow: "none",
+          },
+        }}>
         {characterImage ? (
           <Image
             src={characterImage}
@@ -82,6 +133,13 @@ const CharacterItem: React.FC<CharacterItemProps> = ({ character, index }) => {
             h={size}
             w={index === 0 ? size : "auto"}
             objectFit="contain"
+            sx={{
+              WebkitTapHighlightColor: "transparent",
+              "&:focus": {
+                outline: "none",
+                boxShadow: "none",
+              },
+            }}
             onError={(e) => {
               // Fallback to colored circle if image fails to load
               const target = e.target as HTMLImageElement;
