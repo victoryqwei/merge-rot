@@ -19,6 +19,7 @@ export class SoundManager {
   private musicVolume: number;
   private characterDebounceTimer: number | null = null; // Global debounce timer
   private pendingCharacterSound: string | null = null; // Track highest tier character to play
+  private isBackgroundMusicPaused = false;
 
   constructor() {
     // Initialize with default values - will be updated when sounds are loaded
@@ -175,11 +176,15 @@ export class SoundManager {
   // Pause background music (maintains position)
   pauseBackgroundMusic(): void {
     this.sounds.get(Sound.BackgroundMusic)?.pause();
+    this.isBackgroundMusicPaused = true;
   }
 
   // Resume background music (continues from where it was paused)
   resumeBackgroundMusic(): void {
-    this.play(Sound.BackgroundMusic, this.musicVolume);
+    if (this.isBackgroundMusicPaused) {
+      this.play(Sound.BackgroundMusic, this.musicVolume);
+      this.isBackgroundMusicPaused = false;
+    }
   }
 
   // Stop background music

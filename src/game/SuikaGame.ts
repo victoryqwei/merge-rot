@@ -82,11 +82,6 @@ export class SuikaGame {
       }
     }, 100);
 
-    // Track sound loading completion
-    this.soundManager.setOnLoadComplete(() => {
-      this.soundManager.playBackgroundMusic();
-    });
-
     // Track image loading completion
     this.characterManager.getImageManager().setOnLoadComplete(() => {
       // Images are loaded
