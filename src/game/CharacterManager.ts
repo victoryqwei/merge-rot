@@ -90,97 +90,109 @@ export class CharacterManager {
 
   async checkCombinations(): Promise<number> {
     let scoreIncrease = 0;
-    const charactersToRemove: number[] = [];
+    const charactersToRemove = new Set<number>(); // Use Set for O(1) lookups
     const charactersToAdd: Character[] = [];
 
-    // Convert map to array for easier iteration
-    const characterArray = Array.from(this.characters.values());
+    // Get all current collision pairs from physics engine once
+    const allCollisionPairs = this.physicsEngine.getAllCollisionPairs();
 
-    // Check all character pairs for combinations
-    for (let i = 0; i < characterArray.length; i++) {
-      for (let j = i + 1; j < characterArray.length; j++) {
-        const character1 = characterArray[i];
-        const character2 = characterArray[j];
+    // Group characters by type for efficient pairing
+    const charactersByType = new Map<string, Character[]>();
+    for (const character of this.characters.values()) {
+      if (!charactersByType.has(character.name)) {
+        charactersByType.set(character.name, []);
+      }
+      charactersByType.get(character.name)!.push(character);
+    }
 
-        if (character1.id === character2.id) continue;
+    // Only process character types that have multiple instances
+    for (const [, charactersOfType] of charactersByType) {
+      if (charactersOfType.length < 2) continue;
 
-        // Skip if either character is already marked for removal
-        if (charactersToRemove.includes(character1.id) || charactersToRemove.includes(character2.id)) {
-          continue;
+      // Check combinations within this character type
+      for (let i = 0; i < charactersOfType.length; i++) {
+        const character1 = charactersOfType[i];
+
+        // Skip if already marked for removal
+        if (charactersToRemove.has(character1.id)) continue;
+
+        for (let j = i + 1; j < charactersOfType.length; j++) {
+          const character2 = charactersOfType[j];
+
+          // Skip if already marked for removal
+          if (charactersToRemove.has(character2.id)) continue;
+
+          // Check if these two characters are colliding using pre-computed pairs
+          if (!this.areCharactersColliding(character1, character2, allCollisionPairs)) continue;
+
+          // Get the current character class and find the next one
+          const currentCharacterClass = CharacterClass.getByName(character1.name, this.gameMode);
+          if (!currentCharacterClass) continue;
+
+          const nextCharacterClass = currentCharacterClass.getNextCharacter();
+          if (!nextCharacterClass) continue; // Can't merge if it's the highest tier
+
+          // Calculate new position and velocity
+          const pos1 = this.physicsEngine.getBodyPosition(character1.body);
+          const pos2 = this.physicsEngine.getBodyPosition(character2.body);
+          const vel1 = this.physicsEngine.getBodyVelocity(character1.body);
+          const vel2 = this.physicsEngine.getBodyVelocity(character2.body);
+
+          // Create new merged character
+          const newCharacter = await this.createCharacter(nextCharacterClass, (pos1.x + pos2.x) / 2, (pos1.y + pos2.y) / 2);
+
+          // Set velocity
+          newCharacter.body.velocity.x = (vel1.x + vel2.x) / 2;
+          newCharacter.body.velocity.y = (vel1.y + vel2.y) / 2;
+
+          // Add some extra angular velocity for the merged character
+          const extraRotation = (Math.random() - 0.5) * 0.2; // Extra rotation for merged characters
+          Matter.Body.setAngularVelocity(newCharacter.body, extraRotation);
+
+          // Play sound for the new merged character
+          if (nextCharacterClass.hasSound) {
+            this.soundManager.playSoundDebounced(nextCharacterClass.name, 800);
+          }
+
+          // Adjust pitch based on the size of the character
+          const pitch = 1.2 - (nextCharacterClass.radius - 25) / 100; // Scale pitch based on character size
+          this.soundManager.playPop(Sound.Pop, pitch);
+
+          // Mark characters for removal using Set
+          charactersToRemove.add(character1.id);
+          charactersToRemove.add(character2.id);
+
+          // Add new character to the list
+          charactersToAdd.push(newCharacter);
+
+          // Add score
+          scoreIncrease += nextCharacterClass.points * 10;
+
+          // Record merge for combo system
+          if (this.animationManager) {
+            this.animationManager.recordMerge();
+            // Apply combo multiplier to score
+            const comboMultiplier = this.animationManager.getComboMultiplier();
+            scoreIncrease = scoreIncrease * comboMultiplier;
+          }
+
+          // Add explosion effect
+          this.createExplosion(newCharacter.body.position.x, newCharacter.body.position.y);
+
+          // Break out of inner loop since we've found a combination for character1
+          break;
         }
-
-        // Only process same-type characters
-        if (character1.name !== character2.name) continue;
-
-        // Only check collision for same-type characters
-        if (!this.physicsEngine.checkCollision(character1, character2)) continue;
-
-        // Get the current character class and find the next one
-        const currentCharacterClass = CharacterClass.getByName(character1.name, this.gameMode);
-        if (!currentCharacterClass) continue;
-
-        const nextCharacterClass = currentCharacterClass.getNextCharacter();
-        if (!nextCharacterClass) continue; // Can't merge if it's the highest tier
-
-        // Calculate new position and velocity
-        const pos1 = this.physicsEngine.getBodyPosition(character1.body);
-        const pos2 = this.physicsEngine.getBodyPosition(character2.body);
-        const vel1 = this.physicsEngine.getBodyVelocity(character1.body);
-        const vel2 = this.physicsEngine.getBodyVelocity(character2.body);
-
-        // Create new merged character
-        const newCharacter = await this.createCharacter(nextCharacterClass, (pos1.x + pos2.x) / 2, (pos1.y + pos2.y) / 2);
-
-        // Set velocity
-        newCharacter.body.velocity.x = (vel1.x + vel2.x) / 2;
-        newCharacter.body.velocity.y = (vel1.y + vel2.y) / 2;
-
-        // Add some extra angular velocity for the merged character
-        const extraRotation = (Math.random() - 0.5) * 0.2; // Extra rotation for merged characters
-        Matter.Body.setAngularVelocity(newCharacter.body, extraRotation);
-
-        // Play sound for the new merged character
-        if (nextCharacterClass.hasSound) {
-          this.soundManager.playSoundDebounced(nextCharacterClass.name, 800);
-        }
-
-        // Adjust pitch based on the size of the character
-        const pitch = 1.2 - (nextCharacterClass.radius - 25) / 100; // Scale pitch based on character size
-        this.soundManager.playPop(Sound.Pop, pitch);
-
-        // Mark characters for removal
-        charactersToRemove.push(character1.id, character2.id);
-
-        // Add new character to the list
-        charactersToAdd.push(newCharacter);
-
-        // Add score
-        scoreIncrease += nextCharacterClass.points * 10;
-
-        // Record merge for combo system
-        if (this.animationManager) {
-          this.animationManager.recordMerge();
-          // Apply combo multiplier to score
-          const comboMultiplier = this.animationManager.getComboMultiplier();
-          scoreIncrease = scoreIncrease * comboMultiplier;
-        }
-
-        // Add explosion effect
-        this.createExplosion(newCharacter.body.position.x, newCharacter.body.position.y);
-
-        // Break out of inner loop since we've found a combination
-        break;
       }
     }
 
     // Remove old characters and their physics bodies
-    charactersToRemove.forEach((id) => {
+    for (const id of charactersToRemove) {
       const character = this.characters.get(id);
       if (character) {
         this.physicsEngine.removeBody(character.body);
         this.characters.delete(id);
       }
-    });
+    }
 
     // Add new characters
     charactersToAdd.forEach((character) => {
@@ -188,6 +200,25 @@ export class CharacterManager {
     });
 
     return scoreIncrease;
+  }
+
+  /**
+   * Check if two characters are colliding using pre-computed collision pairs
+   */
+  private areCharactersColliding(
+    character1: Character,
+    character2: Character,
+    collisionPairs: Array<{ bodyA: Matter.Body; bodyB: Matter.Body }>
+  ): boolean {
+    for (const pair of collisionPairs) {
+      if (
+        (pair.bodyA.id === character1.body.id && pair.bodyB.id === character2.body.id) ||
+        (pair.bodyA.id === character2.body.id && pair.bodyB.id === character1.body.id)
+      ) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private createExplosion(x: number, y: number): void {

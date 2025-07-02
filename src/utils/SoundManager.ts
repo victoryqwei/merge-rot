@@ -122,7 +122,6 @@ export class SoundManager {
 
     const sound = this.sounds.get(soundName);
     if (!sound) {
-      console.warn(`Sound ${soundName} not found`);
       return;
     }
 
@@ -196,13 +195,7 @@ export class SoundManager {
     if (!sound) return;
 
     // Use requestAnimationFrame for non-blocking playback
-    requestAnimationFrame(() => {
-      try {
-        sound.play();
-      } catch (error) {
-        console.warn(`Error playing water plop sound:`, error);
-      }
-    });
+    sound.play();
   }
 
   playBackgroundMusic(): void {
