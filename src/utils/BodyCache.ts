@@ -43,11 +43,11 @@ export class BodyCache {
     let shapePromise = this.cache.get(cacheKey);
     if (!shapePromise) {
       // Cache the detectImageShape function call
-      console.info(`BodyCache: Cache miss for ${cacheKey}, calling detectImageShape`);
+      console.debug(`BodyCache: Cache miss for ${cacheKey}, calling detectImageShape`);
       shapePromise = ShapeDetector.detectImageShape(image!, characterType.radius);
       this.cache.set(cacheKey, shapePromise);
     } else {
-      console.info(`BodyCache: Cache hit for ${cacheKey}, using cached detectImageShape result`);
+      console.debug(`BodyCache: Cache hit for ${cacheKey}, using cached detectImageShape result`);
     }
 
     // Wait for the shape detection to complete

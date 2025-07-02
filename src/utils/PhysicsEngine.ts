@@ -120,6 +120,13 @@ export class PhysicsEngine {
     return false;
   }
 
+  /**
+   * Get all current collision pairs for efficient batch processing
+   */
+  getAllCollisionPairs(): Array<{ bodyA: Matter.Body; bodyB: Matter.Body }> {
+    return Matter.Detector.collisions(this.collisionDetector);
+  }
+
   removeBody(body: Matter.Body): void {
     Matter.World.remove(this.world, body);
 
