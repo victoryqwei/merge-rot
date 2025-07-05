@@ -192,11 +192,6 @@ export class InputManager {
     };
   }
 
-  private getMouseX(clientX: number): number | null {
-    const mousePos = this.getMousePosition(clientX, 0);
-    return mousePos ? mousePos.x : null;
-  }
-
   getCurrentMouseX(): number {
     return this.state.mouseX;
   }
