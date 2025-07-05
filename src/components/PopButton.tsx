@@ -1,44 +1,51 @@
 import { Button } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useGame } from "../game/useGame";
 
 const PopButton: React.FC = observer(() => {
   const game = useGame();
 
-  const [popCooldown, setPopCooldown] = useState(0);
-
   const handlePop = () => {
-    if (game.canPop()) {
+    if (game.isPopMode()) {
+      // Cancel pop mode if it's currently active
+      game.cancelPopMode();
+    } else if (game.canPop()) {
+      // Start pop mode if it's not active and cooldown is finished
       game.startPopMode();
-      setPopCooldown(15);
     }
   };
 
-  // Handle shake cooldown timer
-  useEffect(() => {
-    if (popCooldown > 0) {
-      const timer = setTimeout(() => {
-        setPopCooldown((prev) => Math.max(0, prev - 1));
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [popCooldown]);
-
+  // Use the actual game cooldown instead of local state
+  const popCooldown = game.getPopCooldown();
+  const isPopMode = game.isPopMode();
   const isPopDisabled = popCooldown > 0 || !game.hasStarted;
+
+  // Determine button appearance based on state
+  const getButtonColor = () => {
+    if (popCooldown > 0) return "gray";
+    if (isPopMode) return "orange"; // Different color when pop mode is active
+    return "red";
+  };
+
+  const getButtonText = () => {
+    if (popCooldown > 0) return `${popCooldown}s`;
+    if (isPopMode) return "Cancel";
+    return "Pop!";
+  };
 
   return (
     <Button
-      colorScheme={popCooldown > 0 ? "gray" : "red"}
+      colorScheme={getButtonColor()}
       w="80px"
       h="40px"
       size="md"
       onClick={handlePop}
       disabled={isPopDisabled}
-      _hover={{ transform: popCooldown > 0 ? "none" : "scale(1.05)" }}
+      _hover={{ transform: isPopDisabled ? "none" : "scale(1.05)" }}
       transition="all 0.2s"
       border="2px solid white">
-      {popCooldown > 0 ? `${popCooldown}s` : "Pop!"}
+      {getButtonText()}
     </Button>
   );
 });
