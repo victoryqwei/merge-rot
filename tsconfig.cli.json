@@ -16,6 +16,6 @@
     "declaration": false,
     "types": ["node"]
   },
-  "include": ["src/optimize-images.ts"],
+  "include": ["src/optimize-images.ts", "src/optimize-mp3.ts"],
   "exclude": ["node_modules", "dist"]
 }
