@@ -135,13 +135,7 @@ const ScoreBoard: React.FC<ScoreBoardProps> = observer(({ setShowSettings, setSh
           flexShrink={0}
           zIndex={1}>
           <VStack spacing={1} align="center">
-            <Box
-              w={{ base: "40px", md: "60px" }}
-              h={{ base: "40px", md: "60px" }}
-              overflow="hidden"
-              display="flex"
-              alignItems="center"
-              justifyContent="center">
+            <Box w="60px" h="60px" overflow="hidden" display="flex" alignItems="center" justifyContent="center">
               <Image
                 src={nextCharacterImage}
                 alt={game.nextCharacter.displayName}
