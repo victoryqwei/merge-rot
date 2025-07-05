@@ -20,7 +20,7 @@ export class BodyCache {
     const allGameModes = Object.values(GameMode);
     for (const gameMode of allGameModes) {
       const characters = CharacterClass.getAllCharacters(gameMode);
-      console.log(`Preloading ${characters.length} characters for game mode ${gameMode}`);
+      console.info(`Preloading ${characters.length} characters for game mode ${gameMode}`);
       for (const character of characters) {
         const image = this.imageManager.getImage(character.name);
         if (image) {

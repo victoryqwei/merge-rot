@@ -2,7 +2,7 @@ import { CharacterClass } from "../types/GameTypes";
 import { CharacterManager } from "./CharacterManager";
 import { Renderer } from "../utils/Renderer";
 import { PhysicsEngine } from "../utils/PhysicsEngine";
-import { SoundManager } from "../utils/SoundManager";
+import { SoundManager, Sound } from "../utils/SoundManager";
 import { GAME_CONFIG, GameMode } from "../constants/GameConstants";
 import { SettingsManager } from "../utils/SettingsManager";
 import { makeAutoObservable } from "mobx";
@@ -13,6 +13,7 @@ import { ShakeManager } from "./managers/ShakeManager";
 import { AnimationManager } from "./managers/AnimationManager";
 import { GameStateManager } from "./managers/GameStateManager";
 import { GameLoop } from "./managers/GameLoop";
+import { PopManager } from "./managers/PopManager";
 
 export class SuikaGame {
   public canvas: HTMLCanvasElement | null = null;
@@ -33,6 +34,7 @@ export class SuikaGame {
   private animationManager: AnimationManager;
   private gameStateManager: GameStateManager;
   private gameLoop: GameLoop;
+  private popManager: PopManager;
 
   constructor(canvas: HTMLCanvasElement | null, gameMode: GameMode = GameMode.ITALIAN_BRAINROT) {
     makeAutoObservable(this);
@@ -51,6 +53,7 @@ export class SuikaGame {
     this.shakeManager = new ShakeManager();
     this.animationManager = new AnimationManager(this);
     this.gameStateManager = new GameStateManager(this.characterManager);
+    this.popManager = new PopManager();
 
     // Set up manager connections
     this.setupManagerConnections();
@@ -95,8 +98,17 @@ export class SuikaGame {
     // Connect input manager drop callback
     this.inputManager.setOnDrop(this.handleDrop.bind(this));
 
+    // Connect input manager pop callback
+    this.inputManager.setOnPop(this.handlePopClick.bind(this));
+
+    // Connect input manager pop mode check
+    this.inputManager.setIsPopModeActive(() => this.popManager.isPopMode());
+
     // Connect animation manager to character manager for combo system
     this.characterManager.setAnimationManager(this.animationManager);
+
+    // Connect pop manager to character removal
+    this.popManager.setOnPopCharacter(this.handlePopCharacter.bind(this));
   }
 
   setCanvas(canvas: HTMLCanvasElement): void {
@@ -137,7 +149,13 @@ export class SuikaGame {
   }
 
   private async handleDrop(): Promise<void> {
-    if (this.gameStateManager.isGameOver() || !this.gameStateManager.getCurrentCharacter() || this.shakeManager.isShaking()) return;
+    if (
+      this.gameStateManager.isGameOver() ||
+      !this.gameStateManager.getCurrentCharacter() ||
+      this.shakeManager.isShaking() ||
+      this.popManager.isPopMode()
+    )
+      return;
 
     if (!this.animationManager.canDrop()) {
       // Queue the drop for later execution
@@ -197,6 +215,7 @@ export class SuikaGame {
     this.shakeManager.update(deltaTime);
     this.animationManager.update(deltaTime);
     this.gameStateManager.update(deltaTime);
+    this.popManager.update(deltaTime);
 
     // Check for queued drops and execute them if ready
     if (this.animationManager.isDropQueued() && this.animationManager.canDrop()) {
@@ -211,7 +230,7 @@ export class SuikaGame {
 
     // Draw current character preview and drop indicator
     const currentCharacter = this.gameStateManager.getCurrentCharacter();
-    if (currentCharacter && !this.gameStateManager.isGameOver() && !this.shakeManager.isShaking()) {
+    if (currentCharacter && !this.gameStateManager.isGameOver() && !this.shakeManager.isShaking() && !this.popManager.isPopMode()) {
       const dropY = GAME_CONFIG.GAME_OVER_HEIGHT - 50;
 
       // Show drop indicator when character is fully animated and ready
@@ -238,6 +257,11 @@ export class SuikaGame {
     // Draw particles
     for (const particle of this.characterManager.getParticles()) {
       this.renderer?.drawParticle(particle);
+    }
+
+    // Draw red X cursor in pop mode
+    if (this.popManager.isPopMode()) {
+      this.renderer?.drawRedXCursor(this.inputManager.getCurrentMouseX(), this.inputManager.getCurrentMouseY());
     }
 
     // Restore canvas state if shake was applied
@@ -370,5 +394,59 @@ export class SuikaGame {
 
   public isDebugMode(): boolean {
     return this.debugMode;
+  }
+
+  private handlePopClick(x: number, y: number): void {
+    if (x === -1 && y === -1) {
+      // Click outside canvas - cancel pop mode
+      this.popManager.cancelPopMode();
+      return;
+    }
+
+    if (this.popManager.isPopMode()) {
+      this.popManager.attemptPop(x, y);
+    }
+  }
+
+  private handlePopCharacter(x: number, y: number): boolean {
+    const characters = this.characterManager.getCharacters();
+
+    // Find character at the clicked position
+    for (const character of characters) {
+      const pos = this.physicsEngine.getBodyPosition(character.body);
+      const distance = Math.sqrt((pos.x - x) ** 2 + (pos.y - y) ** 2);
+
+      if (distance <= character.radius) {
+        // Remove the character
+        this.characterManager.removeCharacter(character.id);
+
+        // Play pop sound
+        this.soundManager.playPop(Sound.Pop, 1);
+
+        return true; // Successfully popped a character
+      }
+    }
+
+    return false; // No character found at this position
+  }
+
+  public startPopMode(): void {
+    this.popManager.startPopMode();
+  }
+
+  public cancelPopMode(): void {
+    this.popManager.cancelPopMode();
+  }
+
+  public getPopCooldown(): number {
+    return this.popManager.getCooldown();
+  }
+
+  public isPopMode(): boolean {
+    return this.popManager.isPopMode();
+  }
+
+  public canPop(): boolean {
+    return this.popManager.canPop();
   }
 }

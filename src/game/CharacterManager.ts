@@ -75,6 +75,14 @@ export class CharacterManager {
     this.characters.set(character.id, character);
   }
 
+  removeCharacter(id: number): void {
+    const character = this.characters.get(id);
+    if (character) {
+      this.physicsEngine.removeBody(character.body);
+      this.characters.delete(id);
+    }
+  }
+
   getCharacters(): Character[] {
     return Array.from(this.characters.values());
   }

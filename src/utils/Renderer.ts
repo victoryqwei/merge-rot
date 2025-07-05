@@ -300,4 +300,25 @@ export class Renderer {
     // Restore context state
     this.ctx.restore();
   }
+
+  drawRedXCursor(x: number, y: number): void {
+    const scaledX = x * this.pixelRatio;
+    const scaledY = y * this.pixelRatio;
+    const size = 20 * this.pixelRatio;
+
+    this.ctx.save();
+    this.ctx.strokeStyle = "rgba(255, 0, 0, 0.8)";
+    this.ctx.lineWidth = 4 * this.pixelRatio;
+    this.ctx.lineCap = "round";
+
+    // Draw X
+    this.ctx.beginPath();
+    this.ctx.moveTo(scaledX - size / 2, scaledY - size / 2);
+    this.ctx.lineTo(scaledX + size / 2, scaledY + size / 2);
+    this.ctx.moveTo(scaledX + size / 2, scaledY - size / 2);
+    this.ctx.lineTo(scaledX - size / 2, scaledY + size / 2);
+    this.ctx.stroke();
+
+    this.ctx.restore();
+  }
 }

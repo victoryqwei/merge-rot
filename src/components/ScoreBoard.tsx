@@ -1,4 +1,4 @@
-import { Box, Button, HStack, Image, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, Flex, HStack, Image, Text, VStack } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { AiOutlineHome } from "react-icons/ai";
@@ -7,6 +7,7 @@ import { GAME_MODE_LABELS } from "../constants/GameConstants";
 import { useGame } from "../game/useGame";
 import { useCharacterImage } from "../hooks/useCharacterImage";
 import ShakeButton from "./ShakeButton";
+import PopButton from "./PopButton";
 import { FaFire } from "react-icons/fa";
 
 interface ScoreBoardProps {
@@ -26,7 +27,7 @@ const ScoreBoard: React.FC<ScoreBoardProps> = observer(({ setShowSettings }) => 
           position="absolute"
           left={10}
           top="50%"
-          transform="translateY(-50%)"
+          transform="translateY(calc(-50% + 24px))"
           zIndex={1}
           justifyContent="flex-start"
           textAlign="left">
@@ -64,15 +65,17 @@ const ScoreBoard: React.FC<ScoreBoardProps> = observer(({ setShowSettings }) => 
               </Button>
             )}
           </HStack>
+          <Flex transform="translateY(12px)">
+            <PopButton />
+          </Flex>
         </VStack>
       )}
-
       {game.hasStarted && game.isComboDisplayVisible() && game.getComboMultiplier() > 1 && (
         <Text
           position="absolute"
-          left={10}
+          left="50%"
           top="50%"
-          transform="translateY(calc(50% + 20px))"
+          transform="translate(-50%, calc(50% + 20px))"
           color={
             game.getComboMultiplier() > 4
               ? "red.400"
