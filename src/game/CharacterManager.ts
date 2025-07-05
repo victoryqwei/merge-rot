@@ -229,7 +229,7 @@ export class CharacterManager {
     return false;
   }
 
-  private createExplosion(x: number, y: number): void {
+  public createExplosion(x: number, y: number): void {
     for (let i = 0; i < GAME_CONFIG.PARTICLE_COUNT; i++) {
       const particle: Particle = {
         x,

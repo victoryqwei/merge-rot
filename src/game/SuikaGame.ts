@@ -412,6 +412,9 @@ export class SuikaGame {
       const distance = Math.sqrt((pos.x - x) ** 2 + (pos.y - y) ** 2);
 
       if (distance <= character.radius) {
+        // Create explosion effect at character position
+        this.characterManager.createExplosion(pos.x, pos.y);
+
         // Remove the character
         this.characterManager.removeCharacter(character.id);
 
