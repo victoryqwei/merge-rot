@@ -2,7 +2,7 @@ import { Box, Button, Flex, HStack, Image, Text, VStack } from "@chakra-ui/react
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { AiOutlineHome } from "react-icons/ai";
-import { BiBug, BiCog } from "react-icons/bi";
+import { BiBug, BiCog, BiTrophy } from "react-icons/bi";
 import { GAME_MODE_LABELS } from "../constants/GameConstants";
 import { useGame } from "../game/useGame";
 import { useCharacterImage } from "../hooks/useCharacterImage";
@@ -12,16 +12,17 @@ import { FaFire } from "react-icons/fa";
 
 interface ScoreBoardProps {
   setShowSettings: (showSettings: boolean) => void;
+  setShowLeaderboard: (showLeaderboard: boolean) => void;
 }
 
-const ScoreBoard: React.FC<ScoreBoardProps> = observer(({ setShowSettings }) => {
+const ScoreBoard: React.FC<ScoreBoardProps> = observer(({ setShowSettings, setShowLeaderboard }) => {
   const game = useGame();
   const nextCharacterImage = useCharacterImage(game.nextCharacter?.name || null);
 
   const displayName = GAME_MODE_LABELS[game.getGameMode()].label;
 
   return (
-    <Box position="relative" maxW="500px" w="100%" p={4} h="100px" px={10} mx="auto">
+    <Box position="relative" maxW="540px" w="100%" p={4} h="100px" px={10} mx="auto">
       {game.hasStarted && (
         <VStack
           position="absolute"
@@ -31,7 +32,7 @@ const ScoreBoard: React.FC<ScoreBoardProps> = observer(({ setShowSettings }) => 
           zIndex={1}
           justifyContent="flex-start"
           textAlign="left">
-          <HStack>
+          <HStack spacing={1}>
             <Button
               variant="unstyled"
               color="white"
@@ -52,24 +53,38 @@ const ScoreBoard: React.FC<ScoreBoardProps> = observer(({ setShowSettings }) => 
               flexShrink={0}>
               <BiCog size={32} />
             </Button>
+
             {import.meta.env.MODE === "development" && (
-              <Button
-                variant="unstyled"
-                color={game.isDebugMode() ? "yellow.400" : "white"}
-                fontWeight="bold"
-                onClick={() => game.toggleDebugMode()}
-                _hover={{ color: "whiteAlpha.800" }}
-                transition="color 0.2s"
-                flexShrink={0}>
-                <BiBug size={32} />
-              </Button>
+              <>
+                <Button
+                  variant="unstyled"
+                  color="white"
+                  fontWeight="bold"
+                  flexShrink={0}
+                  onClick={() => setShowLeaderboard(true)}
+                  _hover={{ color: "whiteAlpha.800" }}
+                  transition="color 0.2s">
+                  <BiTrophy size={32} />
+                </Button>
+                <Button
+                  variant="unstyled"
+                  color={game.isDebugMode() ? "yellow.400" : "white"}
+                  fontWeight="bold"
+                  onClick={() => game.toggleDebugMode()}
+                  _hover={{ color: "whiteAlpha.800" }}
+                  transition="color 0.2s"
+                  flexShrink={0}>
+                  <BiBug size={32} />
+                </Button>
+              </>
             )}
           </HStack>
-          <Flex transform="translateY(12px)">
+          <Flex transform="translateY(12px)" justifyContent="flex-start" w="100%">
             <PopButton />
           </Flex>
         </VStack>
       )}
+
       {game.hasStarted && game.isComboDisplayVisible() && game.getComboMultiplier() > 1 && (
         <Text
           position="absolute"

@@ -10,12 +10,14 @@ import GameOverOverlay from "./GameOverOverlay";
 import ScoreBoard from "./ScoreBoard";
 import GameSettingsOverlay from "./GameSettingsOverlay";
 import LoadingOverlay from "./LoadingOverlay";
+import LeaderboardOverlay from "./LeaderboardOverlay";
 import { usePlatformInfo } from "../hooks/usePlatformInfo";
 
 const App: React.FC = observer(() => {
   const game = useGame();
   const [showModes, setShowModes] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const { isIOS } = usePlatformInfo();
 
   const handleRestart = () => {
@@ -32,7 +34,7 @@ const App: React.FC = observer(() => {
 
       {/* Score Board - positioned at top */}
       <Box position="absolute" top={isIOS ? 10 : 5} left="50%" transform="translateX(-50%)" zIndex={10} w="100%">
-        <ScoreBoard setShowSettings={setShowSettings} />
+        <ScoreBoard setShowSettings={setShowSettings} setShowLeaderboard={setShowLeaderboard} />
       </Box>
 
       {/* Character Progression - positioned at bottom */}
@@ -42,6 +44,7 @@ const App: React.FC = observer(() => {
 
       {showModes && <GameModeOverlay setShowModes={setShowModes} />}
       {showSettings && <GameSettingsOverlay setShowSettings={setShowSettings} />}
+      {showLeaderboard && <LeaderboardOverlay setShowLeaderboard={setShowLeaderboard} />}
       <GameOverOverlay onRestart={handleRestart} />
 
       {/* Game Canvas Container - centered */}
