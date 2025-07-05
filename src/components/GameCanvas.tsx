@@ -2,6 +2,7 @@ import { Box } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useRef } from "react";
 import { useGame } from "../game/useGame";
+import PopBanner from "./PopBanner";
 
 const GameCanvas: React.FC = observer(() => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -24,6 +25,7 @@ const GameCanvas: React.FC = observer(() => {
         transformOrigin: "center",
         transition: "transform 0.1s ease-out",
       }}>
+      <PopBanner />
       <canvas
         ref={canvasRef}
         width={400}

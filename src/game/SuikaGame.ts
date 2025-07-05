@@ -259,11 +259,6 @@ export class SuikaGame {
       this.renderer?.drawParticle(particle);
     }
 
-    // Draw red X cursor in pop mode
-    if (this.popManager.isPopMode()) {
-      this.renderer?.drawRedXCursor(this.inputManager.getCurrentMouseX(), this.inputManager.getCurrentMouseY());
-    }
-
     // Restore canvas state if shake was applied
     if (this.shakeManager.getShakeAngle() !== 0) {
       this.renderer?.restoreShakeRotation();

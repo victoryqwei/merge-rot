@@ -16,7 +16,7 @@ const ShakeButton: React.FC = observer(() => {
     }
   };
 
-  const isShakeDisabled = shakeCooldown > 0 || shakeAngle !== 0 || !game.hasStarted;
+  const isShakeDisabled = shakeCooldown > 0 || shakeAngle !== 0 || !game.hasStarted || game.isPopMode();
 
   useEffect(() => {
     let animationFrame: number;

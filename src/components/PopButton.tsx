@@ -19,11 +19,13 @@ const PopButton: React.FC = observer(() => {
   // Use the actual game cooldown instead of local state
   const popCooldown = game.getPopCooldown();
   const isPopMode = game.isPopMode();
-  const isPopDisabled = popCooldown > 0 || !game.hasStarted;
+  const isShaking = game.getShakeAngle() !== 0;
+  const isPopDisabled = popCooldown > 0 || !game.hasStarted || isShaking;
 
   // Determine button appearance based on state
   const getButtonColor = () => {
     if (popCooldown > 0) return "gray";
+    if (isShaking) return "gray"; // Disabled due to shaking
     if (isPopMode) return "orange"; // Different color when pop mode is active
     return "red";
   };
