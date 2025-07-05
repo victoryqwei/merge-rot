@@ -6,6 +6,14 @@ if [ $# -lt 1 ]; then
 fi
 
 if [ "$1" == "game" ]; then
+  # Run build process before release
+  echo "Running build process..."
+  if ! tsc -b && vite build; then
+    echo "Build failed. Aborting release."
+    exit 1
+  fi
+  echo "Build completed successfully."
+
   # Get the latest semantic version tag
   latest_tag=$(git tag -l 'v*' --sort=-v:refname | head -n 1)
 
