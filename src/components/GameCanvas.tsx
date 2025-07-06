@@ -26,18 +26,25 @@ const GameCanvas: React.FC = observer(() => {
         transition: "transform 0.1s ease-out",
       }}>
       <PopBanner />
-      <canvas
-        ref={canvasRef}
-        width={400}
-        height={600}
-        style={{
-          display: "block",
+      <Box
+        sx={{
           maxHeight: "70vh",
-          width: "auto",
-          height: "auto",
-          objectFit: "contain",
-        }}
-      />
+          "@supports (height: 100svh)": {
+            maxHeight: "70svh",
+          },
+        }}>
+        <canvas
+          ref={canvasRef}
+          width={400}
+          height={600}
+          style={{
+            display: "block",
+            width: "auto",
+            height: "auto",
+            objectFit: "contain",
+          }}
+        />
+      </Box>
     </Box>
   );
 });
