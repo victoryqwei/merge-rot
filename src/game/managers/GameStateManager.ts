@@ -90,7 +90,6 @@ export class GameStateManager {
     try {
       const serializedState = this.serializeGameState();
       localStorage.setItem("suika-game-save", JSON.stringify(serializedState));
-      console.log("Game state saved to localStorage");
     } catch (error) {
       console.error("Failed to save game state:", error);
     }
@@ -187,8 +186,6 @@ export class GameStateManager {
           this.characterManager.addCharacter(character);
         }
       }
-
-      console.log("Game state loaded from localStorage");
       return true;
     } catch (error) {
       console.error("Failed to load game state:", error);

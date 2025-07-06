@@ -1,18 +1,17 @@
 import { Box, Center, Text, VStack } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { MdOutlineTouchApp } from "react-icons/md";
 import { useGame } from "../game/useGame";
 import CharacterProgression from "./CharacterProgression";
 import GameCanvas from "./GameCanvas";
 import GameModeOverlay from "./GameModeOverlay";
 import GameOverOverlay from "./GameOverOverlay";
-import ScoreBoard from "./ScoreBoard";
 import GameSettingsOverlay from "./GameSettingsOverlay";
-import LoadingOverlay from "./LoadingOverlay";
 import LeaderboardOverlay from "./LeaderboardOverlay";
+import LoadingOverlay from "./LoadingOverlay";
 import SavedGameOverlay from "./SavedGameOverlay";
-import { usePlatformInfo } from "../hooks/usePlatformInfo";
+import ScoreBoard from "./ScoreBoard";
 
 const App: React.FC = observer(() => {
   const game = useGame();
@@ -20,7 +19,6 @@ const App: React.FC = observer(() => {
   const [showSettings, setShowSettings] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showSavedGame, setShowSavedGame] = useState(false);
-  const { isIOS } = usePlatformInfo();
 
   useEffect(() => {
     // Check for saved game only after loading is complete
@@ -46,11 +44,18 @@ const App: React.FC = observer(() => {
     setShowSavedGame(false);
   };
 
-  const isVertical = window.innerWidth < window.innerHeight;
   const oscillationLength = 40;
 
   return (
-    <Center minH="100vh" bgGradient="linear(to-t,rgb(129, 205, 255), #3b82f6)" position="relative">
+    <Center
+      bgGradient="linear(to-t,rgb(129, 205, 255), #3b82f6)"
+      position="relative"
+      sx={{
+        minH: "100vh",
+        "@supports (height: 100svh)": {
+          minH: "100svh",
+        },
+      }}>
       {/* Loading Overlay */}
       <LoadingOverlay progress={game.loadingProgress} isVisible={game.isLoading} />
 
@@ -58,12 +63,12 @@ const App: React.FC = observer(() => {
       {showSavedGame && <SavedGameOverlay onRestore={handleRestoreSavedGame} onStartFresh={handleStartFresh} />}
 
       {/* Score Board - positioned at top */}
-      <Box position="absolute" top={isIOS ? 10 : 5} left="50%" transform="translateX(-50%)" zIndex={10} w="100%">
+      <Box position="absolute" top={5} left="50%" transform="translateX(-50%)" zIndex={10} w="100%">
         <ScoreBoard setShowSettings={setShowSettings} setShowLeaderboard={setShowLeaderboard} />
       </Box>
 
       {/* Character Progression - positioned at bottom */}
-      <Box position="absolute" bottom={isVertical ? 10 : 5} left="50%" transform="translateX(-50%)" zIndex={10}>
+      <Box position="absolute" bottom={5} left="50%" transform="translateX(-50%)" zIndex={10}>
         <CharacterProgression setShowModes={setShowModes} setShowSettings={setShowSettings} />
       </Box>
 
