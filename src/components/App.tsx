@@ -50,7 +50,15 @@ const App: React.FC = observer(() => {
   const oscillationLength = 40;
 
   return (
-    <Center minH="100vh" bgGradient="linear(to-t,rgb(129, 205, 255), #3b82f6)" position="relative">
+    <Center
+      bgGradient="linear(to-t,rgb(129, 205, 255), #3b82f6)"
+      position="relative"
+      sx={{
+        minH: "100vh",
+        "@supports (height: 100svh)": {
+          minH: "100svh",
+        },
+      }}>
       {/* Loading Overlay */}
       <LoadingOverlay progress={game.loadingProgress} isVisible={game.isLoading} />
 
