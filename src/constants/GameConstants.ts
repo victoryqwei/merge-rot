@@ -33,22 +33,27 @@ export const GAME_MODE_LABELS: Record<
   {
     label: string;
     colorScheme: ThemeTypings["colorSchemes"];
+    imageName: string;
   }
 > = {
   [GameMode.ITALIAN_BRAINROT]: {
     label: "Italian Brainrot",
     colorScheme: "purple",
+    imageName: "shark",
   },
   [GameMode.CATS]: {
     label: "Cats",
     colorScheme: "teal",
+    imageName: "cat9",
   },
   [GameMode.CAPYBARA]: {
     label: "Capybara",
     colorScheme: "yellow",
+    imageName: "capy1",
   },
   [GameMode.GIGA]: {
     label: "Giga Chad",
     colorScheme: "red",
+    imageName: "giga",
   },
 };

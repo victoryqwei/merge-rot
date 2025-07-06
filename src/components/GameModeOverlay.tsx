@@ -1,8 +1,9 @@
 import React from "react";
-import { Center, VStack, Text, Button } from "@chakra-ui/react";
+import { Center, VStack, Text, Button, Image, HStack, Flex } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import { useGame } from "../game/useGame";
 import { GameMode, GAME_MODE_LABELS } from "../constants/GameConstants";
+import { useCharacterImage } from "../hooks/useCharacterImage";
 
 interface GameModeOverlayProps {
   setShowModes: (showModes: boolean) => void;
@@ -28,7 +29,9 @@ const GameModeOverlay: React.FC<GameModeOverlayProps> = observer(({ setShowModes
         </Text>
 
         <VStack spacing={4} w="100%">
-          {Object.entries(GAME_MODE_LABELS).map(([mode, { label, colorScheme }]) => {
+          {Object.entries(GAME_MODE_LABELS).map(([mode, { label, colorScheme, imageName }]) => {
+            const image = useCharacterImage(imageName);
+
             return (
               <Button
                 key={mode}
@@ -39,8 +42,17 @@ const GameModeOverlay: React.FC<GameModeOverlayProps> = observer(({ setShowModes
                 transition="all 0.3s"
                 onClick={() => handleModeClick(mode as GameMode)}
                 borderColor="white"
-                color="white">
-                {label}
+                color="white"
+                p={2}>
+                <HStack justifyContent="space-between" w="100%">
+                  <Flex w="100%" justifyContent="center">
+                    <Text fontSize="xl" fontWeight="bold">
+                      {label}
+                    </Text>
+                  </Flex>
+
+                  <Image src={image || ""} alt={label} w="40px" h="40px" objectFit="contain" />
+                </HStack>
               </Button>
             );
           })}
