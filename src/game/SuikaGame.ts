@@ -52,7 +52,7 @@ export class SuikaGame {
     this.inputManager = new InputManager();
     this.shakeManager = new ShakeManager();
     this.animationManager = new AnimationManager(this);
-    this.gameStateManager = new GameStateManager(this.characterManager);
+    this.gameStateManager = new GameStateManager(this.characterManager, this.gameMode);
     this.popManager = new PopManager();
 
     // Set up manager connections
@@ -115,11 +115,17 @@ export class SuikaGame {
     this.canvas = canvas;
     this.renderer = new Renderer(canvas);
     this.inputManager.setCanvas(canvas);
-    this.init();
+    this.init().catch(console.error);
   }
 
-  private init(): void {
+  private async init(): Promise<void> {
+    // Don't auto-load saved games - let the user choose through the UI
+    // Always start fresh during initialization
     this.gameStateManager.generateNextCharacter();
+
+    // Update InputManager with current character
+    this.inputManager.setCurrentCharacter(this.gameStateManager.getCurrentCharacter());
+
     this.setupWindowEvents();
     this.gameLoop.start();
 
@@ -370,6 +376,7 @@ export class SuikaGame {
   setGameMode(gameMode: GameMode): void {
     this.gameMode = gameMode;
     this.characterManager.setGameMode(gameMode);
+    this.gameStateManager.setGameMode(gameMode);
 
     // Save the selected gamemode to settings
     SettingsManager.updateSettings({ lastPlayedGameMode: gameMode });
@@ -446,5 +453,36 @@ export class SuikaGame {
 
   public canPop(): boolean {
     return this.popManager.canPop();
+  }
+
+  public hasSavedGame(): boolean {
+    return this.gameStateManager.hasSavedGame();
+  }
+
+  public clearSavedGame(): void {
+    this.gameStateManager.clearSavedGame();
+  }
+
+  public async loadSavedGame(): Promise<boolean> {
+    const loaded = await this.gameStateManager.loadGameState();
+    if (loaded) {
+      // Synchronize InputManager with loaded current character
+      this.inputManager.setCurrentCharacter(this.gameStateManager.getCurrentCharacter());
+
+      // Reset animation state for the loaded game
+      this.animationManager.reset();
+
+      console.log("Saved game loaded and synchronized");
+    }
+    return loaded;
+  }
+
+  public getCurrentCharacter(): CharacterClass | null {
+    return this.gameStateManager.getCurrentCharacter();
+  }
+
+  public destroy(): void {
+    this.gameStateManager.destroy();
+    this.gameLoop.stop();
   }
 }

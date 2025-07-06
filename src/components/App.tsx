@@ -1,6 +1,6 @@
 import { Box, Center, Text, VStack } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MdOutlineTouchApp } from "react-icons/md";
 import { useGame } from "../game/useGame";
 import CharacterProgression from "./CharacterProgression";
@@ -11,6 +11,7 @@ import ScoreBoard from "./ScoreBoard";
 import GameSettingsOverlay from "./GameSettingsOverlay";
 import LoadingOverlay from "./LoadingOverlay";
 import LeaderboardOverlay from "./LeaderboardOverlay";
+import SavedGameOverlay from "./SavedGameOverlay";
 import { usePlatformInfo } from "../hooks/usePlatformInfo";
 
 const App: React.FC = observer(() => {
@@ -18,10 +19,31 @@ const App: React.FC = observer(() => {
   const [showModes, setShowModes] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showSavedGame, setShowSavedGame] = useState(false);
   const { isIOS } = usePlatformInfo();
+
+  useEffect(() => {
+    // Check for saved game only after loading is complete
+    if (!game.isLoading && game.hasSavedGame()) {
+      setShowSavedGame(true);
+    }
+  }, [game, game.isLoading]);
 
   const handleRestart = () => {
     game.restart();
+  };
+
+  const handleRestoreSavedGame = async () => {
+    const loaded = await game.loadSavedGame();
+    if (loaded) {
+      setShowSavedGame(false);
+      // The game state should be properly synchronized after loading
+    }
+  };
+
+  const handleStartFresh = () => {
+    game.clearSavedGame();
+    setShowSavedGame(false);
   };
 
   const isVertical = window.innerWidth < window.innerHeight;
@@ -31,6 +53,9 @@ const App: React.FC = observer(() => {
     <Center minH="100vh" bgGradient="linear(to-t,rgb(129, 205, 255), #3b82f6)" position="relative">
       {/* Loading Overlay */}
       <LoadingOverlay progress={game.loadingProgress} isVisible={game.isLoading} />
+
+      {/* Saved Game Overlay */}
+      {showSavedGame && <SavedGameOverlay onRestore={handleRestoreSavedGame} onStartFresh={handleStartFresh} />}
 
       {/* Score Board - positioned at top */}
       <Box position="absolute" top={isIOS ? 10 : 5} left="50%" transform="translateX(-50%)" zIndex={10} w="100%">
