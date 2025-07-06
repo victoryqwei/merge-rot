@@ -22,7 +22,7 @@ const ScoreBoard: React.FC<ScoreBoardProps> = observer(({ setShowSettings, setSh
   const displayName = GAME_MODE_LABELS[game.getGameMode()].label;
 
   return (
-    <Box position="relative" maxW="540px" w="100%" p={4} h="100px" px={10} mx="auto">
+    <Box position="relative" maxW="540px" w="100%" h="100px" px={10} mx="auto">
       {game.hasStarted && (
         <VStack
           position="absolute"
