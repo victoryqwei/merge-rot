@@ -177,7 +177,9 @@ export class InputManager {
     const rect = this.canvas?.getBoundingClientRect();
     if (!rect) return null;
 
-    let mouseX = clientX - rect.left - GAME_CONFIG.PADDING;
+    const yRatio = GAME_CONFIG.CANVAS_HEIGHT / rect.height;
+
+    let mouseX = clientX - rect.left - GAME_CONFIG.PADDING + (clientX - window.innerWidth / 2) * (yRatio - 1);
     const mouseY = clientY - rect.top;
 
     // Constrain mouse position by character radius to prevent going past box boundaries
@@ -188,7 +190,7 @@ export class InputManager {
 
     return {
       x: mouseX + GAME_CONFIG.PADDING,
-      y: mouseY,
+      y: mouseY * yRatio,
     };
   }
 
