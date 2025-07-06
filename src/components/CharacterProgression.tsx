@@ -50,7 +50,7 @@ const CharacterProgression: React.FC<CharacterProgressionProps> = observer(({ se
       justify="flex-start"
       bg="whiteAlpha.400"
       borderRadius="full"
-      p={2}
+      p={1}
       w="min(90vw, 500px)"
       overflowX="scroll"
       flexWrap="nowrap">
@@ -74,7 +74,7 @@ const CharacterItem: React.FC<CharacterItemProps> = ({ character, index }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const size = `${clamp(2 + character.tier * 0.1, 2, 3.5)}em`;
+  const size = `${clamp(2 + character.tier * 0.1, 2, 3)}em`;
 
   const handleClick = (e: React.MouseEvent) => {
     if (isMobile) {
