@@ -3,6 +3,7 @@ import { CharacterClass } from "../../types/GameTypes";
 import { CharacterManager } from "../CharacterManager";
 import { GameMode } from "../../constants/GameConstants";
 import * as Matter from "matter-js";
+import type { SuikaGame } from "../SuikaGame";
 
 export interface GameState {
   score: number;
@@ -56,10 +57,10 @@ export class GameStateManager {
   private autoSaveEnabled: boolean = true;
   private autoSaveInterval: NodeJS.Timeout | null = null;
 
-  constructor(characterManager: CharacterManager, gameMode: GameMode = GameMode.ITALIAN_BRAINROT) {
+  constructor(characterManager: CharacterManager, private game: SuikaGame) {
     makeAutoObservable(this);
     this.characterManager = characterManager;
-    this.gameMode = gameMode;
+    this.gameMode = game.getGameMode();
     this.setupAutoSave();
   }
 
@@ -147,7 +148,7 @@ export class GameStateManager {
       const maxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
       if (saveAge > maxAge) {
-        console.log("Saved game is too old, starting fresh");
+        console.info("Saved game is too old, starting fresh");
         this.clearSavedGame();
         return false;
       }
@@ -156,7 +157,8 @@ export class GameStateManager {
       this.state.score = serializedState.score;
       this.state.gameOver = serializedState.gameOver;
       this.state.hasStarted = serializedState.hasStarted;
-      this.gameMode = serializedState.gameMode;
+
+      await this.game.setGameMode(serializedState.gameMode);
 
       // Restore current and next characters
       if (serializedState.currentCharacterName && serializedState.currentCharacterMode) {
@@ -196,7 +198,7 @@ export class GameStateManager {
 
   clearSavedGame(): void {
     localStorage.removeItem("suika-game-save");
-    console.log("Saved game cleared");
+    console.info("Saved game cleared");
   }
 
   hasSavedGame(): boolean {

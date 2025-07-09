@@ -25,14 +25,19 @@ export class CharacterManager {
     this.imageManager = new ImageManager();
     this.bodyCache = new BodyCache(physicsEngine, this.imageManager);
     this.gameMode = gameMode;
+
+    // Initialize images for the initial game mode
+    this.imageManager.init(gameMode);
   }
 
   getBodyCache(): BodyCache {
     return this.bodyCache;
   }
 
-  setGameMode(gameMode: GameMode): void {
-    this.gameMode = gameMode;
+  // Method to switch gamemode
+  async setGameMode(newGameMode: GameMode): Promise<void> {
+    this.gameMode = newGameMode;
+    await this.imageManager.switchGameMode(newGameMode);
   }
 
   getGameMode(): GameMode {

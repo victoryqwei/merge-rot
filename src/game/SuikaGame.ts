@@ -45,14 +45,14 @@ export class SuikaGame {
 
     // Initialize core systems
     this.physicsEngine = new PhysicsEngine();
-    this.soundManager = new SoundManager();
+    this.soundManager = new SoundManager(this.gameMode);
     this.characterManager = new CharacterManager(this.physicsEngine, this.soundManager, this.gameMode);
 
     // Initialize managers
     this.inputManager = new InputManager();
     this.shakeManager = new ShakeManager();
     this.animationManager = new AnimationManager(this);
-    this.gameStateManager = new GameStateManager(this.characterManager, this.gameMode);
+    this.gameStateManager = new GameStateManager(this.characterManager, this);
     this.popManager = new PopManager();
 
     // Set up manager connections
@@ -85,7 +85,7 @@ export class SuikaGame {
     // Track image loading completion
     this.characterManager.getImageManager().setOnLoadComplete(() => {
       // Images are loaded
-      this.characterManager.getBodyCache().preload();
+      this.characterManager.getBodyCache().preload(this.gameMode);
     });
   }
 
@@ -113,7 +113,7 @@ export class SuikaGame {
 
   setCanvas(canvas: HTMLCanvasElement): void {
     this.canvas = canvas;
-    this.renderer = new Renderer(canvas);
+    this.renderer = new Renderer(canvas, this.characterManager.getImageManager());
     this.inputManager.setCanvas(canvas);
     this.init().catch(console.error);
   }
@@ -373,9 +373,10 @@ export class SuikaGame {
     return this.animationManager.isComboDisplayVisible();
   }
 
-  setGameMode(gameMode: GameMode): void {
+  async setGameMode(gameMode: GameMode): Promise<void> {
     this.gameMode = gameMode;
-    this.characterManager.setGameMode(gameMode);
+    await this.characterManager.setGameMode(gameMode);
+    await this.soundManager.switchGameMode(gameMode);
     this.gameStateManager.setGameMode(gameMode);
 
     // Save the selected gamemode to settings
@@ -472,7 +473,7 @@ export class SuikaGame {
       // Reset animation state for the loaded game
       this.animationManager.reset();
 
-      console.log("Saved game loaded and synchronized");
+      console.info("Saved game loaded and synchronized");
     }
     return loaded;
   }

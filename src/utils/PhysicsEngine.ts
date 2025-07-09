@@ -184,19 +184,6 @@ export class PhysicsEngine {
     return false;
   }
 
-  // private allCharactersStopped(): boolean {
-  //   const velocityThreshold = 0.5; // Minimum velocity to consider "stopped"
-
-  //   for (const body of this.bodies) {
-  //     const velocity = Math.sqrt(body.velocity.x * body.velocity.x + body.velocity.y * body.velocity.y);
-  //     if (velocity > velocityThreshold) {
-  //       console.log("velocity", velocity);
-  //       return false; // At least one character is still moving
-  //     }
-  //   }
-  //   return true; // All characters have stopped moving
-  // }
-
   clear(): void {
     for (const body of this.bodies) {
       Matter.World.remove(this.world, body);

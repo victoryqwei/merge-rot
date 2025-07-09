@@ -15,16 +15,15 @@ export class BodyCache {
     this.imageManager = imageManager;
   }
 
-  async preload() {
-    // Preload all characters from all game modes
-    const allGameModes = Object.values(GameMode);
-    for (const gameMode of allGameModes) {
-      const characters = CharacterClass.getAllCharacters(gameMode);
-      console.info(`Preloading ${characters.length} characters for game mode ${gameMode}`);
-      for (const character of characters) {
-        const image = this.imageManager.getImage(character.name);
-        if (image) {
-          const cacheKey = this.getCacheKey(character);
+  async preload(gameMode: GameMode) {
+    // Preload characters for specific game mode
+    const characters = CharacterClass.getAllCharacters(gameMode);
+    console.info(`Preloading ${characters.length} characters for game mode ${gameMode}`);
+    for (const character of characters) {
+      const image = this.imageManager.getImage(character.name);
+      if (image) {
+        const cacheKey = this.getCacheKey(character);
+        if (!this.cache.has(cacheKey)) {
           this.cache.set(cacheKey, ShapeDetector.detectImageShape(image, character.radius));
         }
       }

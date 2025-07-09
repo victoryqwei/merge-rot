@@ -12,8 +12,8 @@ interface GameModeOverlayProps {
 const GameModeOverlay: React.FC<GameModeOverlayProps> = observer(({ setShowModes }) => {
   const game = useGame();
 
-  const handleModeClick = (mode: GameMode) => {
-    game.setGameMode(mode);
+  const handleModeClick = async (mode: GameMode) => {
+    await game.setGameMode(mode);
     setShowModes(false);
   };
 

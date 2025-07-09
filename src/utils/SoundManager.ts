@@ -20,31 +20,33 @@ export class SoundManager {
   private characterDebounceTimer: number | null = null; // Global debounce timer
   private pendingCharacterSound: string | null = null; // Track highest tier character to play
   private isBackgroundMusicPaused = false;
+  private gameMode: GameMode;
 
-  constructor() {
+  constructor(gameMode: GameMode) {
     // Initialize with default values - will be updated when sounds are loaded
     const defaultSettings = SettingsManager.getSettings();
     this.sfxVolume = defaultSettings.sfxVolume;
     this.musicVolume = defaultSettings.musicVolume;
+    this.gameMode = gameMode;
 
-    this.loadAllSounds();
+    this.loadGameModeSounds();
   }
 
-  // Load all character, pop, and background music sounds
-  private async loadAllSounds(): Promise<void> {
-    // Get all sound names to load
-    const data: ({ name: string; mode: GameMode } | string)[] = CharacterClass.getAllCharactersAllModes()
+  // Load sound effects for the specific gamemode only (no background music)
+  private async loadGameModeSounds(): Promise<void> {
+    // Get character sounds for the specific gamemode only
+    const characterSounds = CharacterClass.getAllCharacters(this.gameMode)
       .filter((c) => c.tier > 0 && c.hasSound)
-      .map((c) => {
-        return {
-          name: c.name,
-          mode: c.mode,
-        };
-      });
+      .map((c) => ({
+        name: c.name,
+        mode: c.mode,
+      }));
 
-    data.push(...Object.values(Sound));
+    // Add generic sound effects
+    const genericSounds = [Sound.Pop, Sound.WaterPlop, Sound.BackgroundMusic];
 
-    this.totalCount = data.length;
+    const allSounds = [...characterSounds, ...genericSounds];
+    this.totalCount = allSounds.length;
 
     // Get current settings to apply to sounds
     const currentSettings = SettingsManager.getSettings();
@@ -52,33 +54,14 @@ export class SoundManager {
     this.musicVolume = currentSettings.musicVolume;
 
     // Load all sounds
-    for (const item of data) {
+    for (const item of allSounds) {
       try {
         let soundModule;
         if (typeof item === "string") {
           soundModule = await import(`../assets/sounds/${item}.mp3`);
-        } else {
-          soundModule = await import(`../assets/sounds/${item.mode}/${item.name}.mp3`);
-        }
-
-        // Special configuration for background music
-        if (item === Sound.BackgroundMusic) {
-          this.sounds.set(
-            item,
-            new Howl({
-              src: [soundModule.default],
-              preload: true,
-              volume: this.musicVolume,
-              loop: true,
-              onload: () => this.handleLoad(),
-              onloaderror: (_id, error) => this.handleLoadError(item, error),
-            })
-          );
-        } else if (typeof item === "string") {
-          // Regular configuration for other sounds
           this.sounds.set(item, this.createHowl(soundModule.default, item, this.sfxVolume));
         } else {
-          // Regular configuration for other sounds
+          soundModule = await import(`../assets/sounds/${item.mode}/${item.name}.mp3`);
           this.sounds.set(item.name, this.createHowl(soundModule.default, item.name, this.sfxVolume));
         }
       } catch (error) {
@@ -86,6 +69,30 @@ export class SoundManager {
         this.handleLoad();
       }
     }
+  }
+
+  // Method to switch to a new gamemode (clears existing sounds and loads new ones)
+  async switchGameMode(newGameMode: GameMode): Promise<void> {
+    this.gameMode = newGameMode;
+
+    // Stop and dispose of existing sounds (except background music if loaded)
+    for (const [key, sound] of this.sounds.entries()) {
+      if (key !== Sound.BackgroundMusic) {
+        sound.stop();
+        sound.unload();
+      }
+    }
+
+    // Clear non-background music sounds
+    for (const key of this.sounds.keys()) {
+      if (key !== Sound.BackgroundMusic) {
+        this.sounds.delete(key);
+      }
+    }
+
+    this.loadedCount = 0;
+    this.totalCount = 0;
+    await this.loadGameModeSounds();
   }
 
   // Helper to create a Howl instance with event handlers
@@ -248,7 +255,7 @@ export class SoundManager {
   // Set volume for background music
   setMusicVolume(volume: number): void {
     this.musicVolume = clamp(volume, 0, 1);
-    this.sounds.get(Sound.BackgroundMusic)?.volume(this.musicVolume);
+    // Background music is not loaded, so we only save the setting
 
     // Save to localStorage
     SettingsManager.updateSettings({ musicVolume: this.musicVolume });
@@ -274,7 +281,8 @@ export class SoundManager {
 
   // Get loading progress as percentage (0-100)
   getLoadingProgress(): number {
-    if (this.totalCount === 0) return 0;
-    return (this.loadedCount / this.totalCount) * 100;
+    // if (this.totalCount === 0) return 0;
+    // return (this.loadedCount / this.totalCount) * 100;
+    return 100;
   }
 }

@@ -1,6 +1,6 @@
+import { GAME_CONFIG } from "../constants/GameConstants";
 import type { Character, Particle } from "../types/GameTypes";
 import { CharacterClass } from "../types/GameTypes";
-import { GAME_CONFIG } from "../constants/GameConstants";
 import { ImageManager } from "./ImageManager";
 
 const THICKNESS = 50;
@@ -10,12 +10,12 @@ export class Renderer {
   private pixelRatio: number;
   private imageManager: ImageManager;
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, imageManager?: ImageManager) {
     const context = canvas.getContext("2d");
     if (!context) throw new Error("Could not get 2D context from canvas");
     this.ctx = context;
     this.pixelRatio = window.devicePixelRatio || 1;
-    this.imageManager = new ImageManager();
+    this.imageManager = imageManager || new ImageManager();
     this.setupHighDPICanvas(canvas);
   }
 

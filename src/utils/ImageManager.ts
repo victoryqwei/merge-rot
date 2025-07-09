@@ -1,4 +1,5 @@
 import { CharacterClass } from "../types/GameTypes";
+import { GameMode } from "../constants/GameConstants";
 
 export class ImageManager {
   private images: Map<string, HTMLImageElement> = new Map();
@@ -6,19 +7,34 @@ export class ImageManager {
   private totalCount: number = 0;
   private onLoadComplete?: () => void;
 
-  constructor() {
-    this.loadImages();
+  constructor() {}
+
+  // Initialize and load images for a specific game mode
+  async init(gameMode: GameMode): Promise<void> {
+    await this.loadImages(gameMode);
   }
 
-  private async loadImages(): Promise<void> {
-    const imageData = CharacterClass.getAllCharactersAllModes().map((character) => ({
+  private async loadImages(gameMode: GameMode): Promise<void> {
+    // Only load images for the specific gamemode
+    const imageData = CharacterClass.getAllCharacters(gameMode).map((character) => ({
       name: character.name,
       mode: character.mode,
     }));
 
-    this.totalCount = imageData.length;
+    // Filter out already loaded images
+    const imagesToLoad = imageData.filter((data) => !this.images.has(data.name));
+    this.totalCount = imagesToLoad.length;
 
-    for (const data of imageData) {
+    // If all images are already loaded, trigger completion immediately
+    if (this.totalCount === 0) {
+      this.loadedCount = 0;
+      this.onLoadComplete?.();
+      return;
+    }
+
+    console.info("Loading images", imagesToLoad);
+
+    for (const data of imagesToLoad) {
       try {
         const img = new Image();
         img.onload = () => {
@@ -41,6 +57,8 @@ export class ImageManager {
         }
       }
     }
+
+    console.info("Loaded images for game mode:", gameMode);
   }
 
   getImage(name: string): HTMLImageElement | undefined {
@@ -57,7 +75,16 @@ export class ImageManager {
 
   // Get loading progress as percentage (0-100)
   getLoadingProgress(): number {
-    if (this.totalCount === 0) return 0;
+    if (this.totalCount === 0) return 100; // All images already cached
     return (this.loadedCount / this.totalCount) * 100;
+  }
+
+  // Method to switch to a new gamemode (loads new images but keeps existing ones cached)
+  async switchGameMode(newGameMode: GameMode): Promise<void> {
+    // Reset counters for the new loading operation
+    this.loadedCount = 0;
+    this.totalCount = 0;
+    // Load any new images needed for this gamemode (existing ones stay cached)
+    await this.loadImages(newGameMode);
   }
 }
