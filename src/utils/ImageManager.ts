@@ -32,8 +32,6 @@ export class ImageManager {
       return;
     }
 
-    console.info("Loading images", imagesToLoad);
-
     for (const data of imagesToLoad) {
       try {
         const img = new Image();

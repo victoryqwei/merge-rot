@@ -32,13 +32,40 @@
       buttonPosition: "bottom-left", //bottom-left, bottom-right, top-left, top-right
     };
 
-    // disable adinplay console banner by temporarily unbinding console.log
-    window.tempConsoleLog = window.console.log;
-    window.console.log = function () { };
+    // Simple Function.prototype.call override
+    (function () {
+      // Store the original call method in a way that bypasses Function.prototype
+      const call = Function.prototype.call;
+      const apply = Function.prototype.apply;
+
+      let counter = 0;
+
+      // Override Function.prototype.call
+      Function.prototype.call = function (thisArg, ...args) {
+        // Block any call to console.log
+        if (thisArg && typeof thisArg === 'function' && thisArg === console.log) {
+          return;
+        }
+        counter++;
+        if (counter < 1) {
+          // Use apply directly on the stored reference
+          return apply.call(this, [thisArg].concat(args));
+        }
+      };
+
+      // Store restore function globally
+      window.restoreConsole = function () {
+        Function.prototype.call = call;
+        delete window.restoreConsole;
+      };
+    })();
   </script>
   <script src="//api.adinplay.com/libs/aiptag/pub/BLC/blockcraft.online/tag.min.js"></script>
   <script>
-    window.console.log = window.tempConsoleLog;
+    // Restore after AdinPlay script loads
+    if (window.restoreConsole) {
+      window.restoreConsole();
+    }
   </script>
 </head>
 
