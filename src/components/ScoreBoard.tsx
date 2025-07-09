@@ -134,7 +134,7 @@ const ScoreBoard: React.FC<ScoreBoardProps> = observer(({ setShowSettings, setSh
           align="center"
           flexShrink={0}
           zIndex={1}>
-          <VStack spacing={1} align="center">
+          <VStack spacing={0} align="center" borderRadius="10px" border="2px solid white">
             <Box w="60px" h="60px" overflow="hidden" display="flex" alignItems="center" justifyContent="center">
               <Image
                 src={nextCharacterImage}
@@ -150,6 +150,9 @@ const ScoreBoard: React.FC<ScoreBoardProps> = observer(({ setShowSettings, setSh
                 }}
               />
             </Box>
+            <Text color="white" fontSize="12px" fontWeight="bold">
+              Next
+            </Text>
           </VStack>
           <ShakeButton />
         </VStack>

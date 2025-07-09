@@ -1,12 +1,11 @@
 import { Box, Button, HStack, Image, Tooltip } from "@chakra-ui/react";
 import { clamp } from "lodash";
 import { observer } from "mobx-react-lite";
-import React, { useState, useEffect, useRef } from "react";
-import { BiCog, BiJoystick } from "react-icons/bi";
+import React, { useEffect, useRef, useState } from "react";
+import { BiChevronRight, BiCog, BiJoystick } from "react-icons/bi";
 import { useGame } from "../game/useGame";
 import { useCharacterImage } from "../hooks/useCharacterImage";
 import { CharacterClass } from "../types/GameTypes";
-
 interface CharacterProgressionProps {
   setShowModes: (showModes: boolean) => void;
   setShowSettings: (showSettings: boolean) => void;
@@ -46,16 +45,23 @@ const CharacterProgression: React.FC<CharacterProgressionProps> = observer(({ se
 
   return (
     <HStack
-      spacing={1}
+      spacing={0}
       justify="flex-start"
       bg="whiteAlpha.400"
       borderRadius="full"
-      p={1}
-      w="min(90vw, 500px)"
+      py={1}
+      minW="360px"
       overflowX="scroll"
       flexWrap="nowrap">
       {allCharacters.map((character: CharacterClass, index: number) => (
-        <CharacterItem key={character.name} character={character} index={index} totalCharacters={allCharacters.length} />
+        <React.Fragment key={character.name}>
+          <CharacterItem character={character} index={index} totalCharacters={allCharacters.length} />
+          {index < allCharacters.length - 1 && (
+            <Box display="flex" alignItems="center" justifyContent="center" flexShrink={0}>
+              <BiChevronRight color="white" size={20} />
+            </Box>
+          )}
+        </React.Fragment>
       ))}
     </HStack>
   );
