@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Center, VStack, Text, Button, Slider, SliderTrack, SliderFilledTrack, SliderThumb, HStack } from "@chakra-ui/react";
+import { Center, VStack, Text, Button, Slider, SliderTrack, SliderFilledTrack, SliderThumb, HStack, Badge } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import { useGame } from "../game/useGame";
 
@@ -39,10 +39,12 @@ const GameSettingsOverlay: React.FC<SettingsOverlayProps> = observer(({ setShowS
   const game = useGame();
   const [musicVolume, setMusicVolume] = useState(game.getMusicVolume());
   const [sfxVolume, setSfxVolume] = useState(game.getSFXVolume());
+  const [serverStatus, setServerStatus] = useState(game.getServerConnectionStatus());
 
   useEffect(() => {
     setMusicVolume(game.getMusicVolume());
     setSfxVolume(game.getSFXVolume());
+    setServerStatus(game.getServerConnectionStatus());
   }, [game]);
 
   const volumeControls = [
@@ -75,6 +77,25 @@ const GameSettingsOverlay: React.FC<SettingsOverlayProps> = observer(({ setShowS
           {volumeControls.map((control) => (
             <VolumeControl key={control.label} {...control} />
           ))}
+          
+          <VStack spacing={4} w="100%">
+            <Text fontSize="lg" color="white" fontWeight="semibold">
+              Server Connection
+            </Text>
+            <HStack w="100%" spacing={4} justify="center">
+              <Badge 
+                colorScheme={
+                  serverStatus === 'connected' ? 'green' : 
+                  serverStatus === 'connecting' ? 'yellow' : 'red'
+                }
+                fontSize="md"
+                px={4}
+                py={2}
+              >
+                {serverStatus}
+              </Badge>
+            </HStack>
+          </VStack>
         </VStack>
 
         <Button

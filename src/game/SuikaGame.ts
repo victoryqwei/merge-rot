@@ -5,6 +5,7 @@ import { PhysicsEngine } from "../utils/PhysicsEngine";
 import { SoundManager, Sound } from "../utils/SoundManager";
 import { GAME_CONFIG, GameMode } from "../constants/GameConstants";
 import { SettingsManager } from "../utils/SettingsManager";
+import { SocketManager } from "../utils/SocketManager";
 import { makeAutoObservable } from "mobx";
 
 // Import managers
@@ -28,6 +29,10 @@ export class SuikaGame {
   public isLoading: boolean = true;
   public loadingProgress: number = 0;
 
+  // Server connection
+  private socketManager: SocketManager;
+  private serverMode: boolean = true;
+
   // Managers
   private inputManager: InputManager;
   private shakeManager: ShakeManager;
@@ -47,6 +52,9 @@ export class SuikaGame {
     this.physicsEngine = new PhysicsEngine();
     this.soundManager = new SoundManager(this.gameMode);
     this.characterManager = new CharacterManager(this.physicsEngine, this.soundManager, this.gameMode);
+
+    // Initialize server connection
+    this.socketManager = new SocketManager(this.gameMode);
 
     // Initialize managers
     this.inputManager = new InputManager();
@@ -109,6 +117,9 @@ export class SuikaGame {
 
     // Connect pop manager to character removal
     this.popManager.setOnPopCharacter(this.handlePopCharacter.bind(this));
+
+    // Connect socket manager to input manager
+    this.inputManager.setSocketManager(this.socketManager);
   }
 
   setCanvas(canvas: HTMLCanvasElement): void {
@@ -119,6 +130,19 @@ export class SuikaGame {
   }
 
   private async init(): Promise<void> {
+    // Connect to server first
+    try {
+      await this.socketManager.connect();
+      this.serverMode = true;
+      this.physicsEngine.setEnabled(false);
+      console.log("Connected to server");
+    } catch (error) {
+      console.error("Failed to connect to server:", error);
+      // Show error to user but continue with local mode as fallback
+      this.serverMode = false;
+      this.physicsEngine.setEnabled(true);
+    }
+
     // Don't auto-load saved games - let the user choose through the UI
     // Always start fresh during initialization
     this.gameStateManager.generateNextCharacter();
@@ -151,6 +175,13 @@ export class SuikaGame {
 
     window.addEventListener("focus", () => {
       this.soundManager.resumeBackgroundMusic();
+    });
+
+    // Debug mode toggle with 'D' key
+    window.addEventListener("keydown", (e) => {
+      if (e.key === 'D' || e.key === 'd') {
+        this.toggleDebugMode();
+      }
     });
   }
 
@@ -251,12 +282,29 @@ export class SuikaGame {
     }
 
     // Draw characters
-    for (const character of this.characterManager.getCharacters()) {
-      this.renderer?.drawCharacter(character);
+    if (this.serverMode) {
+      // Draw predicted characters for responsiveness
+      const predictedState = this.socketManager.getPredictedGameState();
+      if (predictedState) {
+        this.renderer?.drawServerCharacters(predictedState.characters);
+      }
 
-      // Draw debug polygons if debug mode is enabled
+      // In debug mode, draw server characters behind predicted ones
       if (this.debugMode) {
-        this.renderer?.drawCharacterPolygon(character);
+        const serverState = this.socketManager.getServerGameState();
+        if (serverState) {
+          this.renderer?.drawServerCharactersDebug(serverState.characters);
+        }
+      }
+    } else {
+      // Draw local characters
+      for (const character of this.characterManager.getCharacters()) {
+        this.renderer?.drawCharacter(character);
+
+        // Draw debug polygons if debug mode is enabled
+        if (this.debugMode) {
+          this.renderer?.drawCharacterPolygon(character);
+        }
       }
     }
 
@@ -273,6 +321,10 @@ export class SuikaGame {
 
   // Public API methods
   public getScore(): number {
+    if (this.serverMode) {
+      const predictedState = this.socketManager.getPredictedGameState();
+      return predictedState?.score || 0;
+    }
     return this.gameStateManager.getScore();
   }
 
@@ -301,10 +353,14 @@ export class SuikaGame {
   }
 
   public restart(): void {
-    this.gameStateManager.restart();
-    this.animationManager.reset();
-    this.inputManager.resetDragState();
-    this.inputManager.setCurrentCharacter(this.gameStateManager.getCurrentCharacter());
+    if (this.serverMode) {
+      this.socketManager.restartGame();
+    } else {
+      this.gameStateManager.restart();
+      this.animationManager.reset();
+      this.inputManager.resetDragState();
+      this.inputManager.setCurrentCharacter(this.gameStateManager.getCurrentCharacter());
+    }
   }
 
   public shake(intensity: number = 20, duration: number = 3000): void {
@@ -329,18 +385,34 @@ export class SuikaGame {
 
   // Getters for React components
   public get hasStarted(): boolean {
+    if (this.serverMode) {
+      const predictedState = this.socketManager.getPredictedGameState();
+      return predictedState?.hasStarted || false;
+    }
     return this.gameStateManager.hasStarted();
   }
 
   public get gameOver(): boolean {
+    if (this.serverMode) {
+      const predictedState = this.socketManager.getPredictedGameState();
+      return predictedState?.gameOver || false;
+    }
     return this.gameStateManager.isGameOver();
   }
 
   public get currentCharacter(): CharacterClass | null {
+    if (this.serverMode) {
+      const predictedState = this.socketManager.getPredictedGameState();
+      return predictedState?.currentCharacter || null;
+    }
     return this.gameStateManager.getCurrentCharacter();
   }
 
   public get nextCharacter(): CharacterClass | null {
+    if (this.serverMode) {
+      const predictedState = this.socketManager.getPredictedGameState();
+      return predictedState?.nextCharacter || null;
+    }
     return this.gameStateManager.getNextCharacter();
   }
 
@@ -391,13 +463,6 @@ export class SuikaGame {
     return this.gameMode;
   }
 
-  public toggleDebugMode(): void {
-    this.debugMode = !this.debugMode;
-  }
-
-  public isDebugMode(): boolean {
-    return this.debugMode;
-  }
 
   private handlePopClick(x: number, y: number): void {
     if (x === -1 && y === -1) {
@@ -479,11 +544,44 @@ export class SuikaGame {
   }
 
   public getCurrentCharacter(): CharacterClass | null {
+    if (this.serverMode) {
+      const serverState = this.socketManager.getServerGameState();
+      return serverState?.currentCharacter || null;
+    }
     return this.gameStateManager.getCurrentCharacter();
+  }
+
+  // Server connection methods
+  public isServerMode(): boolean {
+    return this.serverMode;
+  }
+
+  public toggleDebugMode(): void {
+    this.debugMode = !this.debugMode;
+    console.log(`Debug mode ${this.debugMode ? 'enabled' : 'disabled'}`);
+  }
+
+  public isDebugMode(): boolean {
+    return this.debugMode;
+  }
+
+  public getSocketManager(): SocketManager {
+    return this.socketManager;
+  }
+
+  public getServerConnectionStatus(): "disconnected" | "connecting" | "connected" {
+    return this.socketManager.getConnectionStatus();
+  }
+
+  public restartServerGame(): void {
+    if (this.serverMode) {
+      this.socketManager.restartGame();
+    }
   }
 
   public destroy(): void {
     this.gameStateManager.destroy();
     this.gameLoop.stop();
+    this.socketManager.disconnect();
   }
 }

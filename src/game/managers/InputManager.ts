@@ -1,6 +1,7 @@
 import { clamp } from "lodash";
 import { GAME_CONFIG } from "../../constants/GameConstants";
 import { CharacterClass } from "../../types/GameTypes";
+import { SocketManager } from "../../utils/SocketManager";
 
 export interface InputState {
   mouseX: number;
@@ -22,6 +23,7 @@ export class InputManager {
   private onDrop?: () => Promise<void>;
   private onPop?: (x: number, y: number) => void;
   private isPopModeActive?: () => boolean;
+  private socketManager: SocketManager | null = null;
 
   constructor() {
     this.detectMobile();
@@ -46,6 +48,10 @@ export class InputManager {
 
   setIsPopModeActive(callback: () => boolean): void {
     this.isPopModeActive = callback;
+  }
+
+  setSocketManager(socketManager: SocketManager): void {
+    this.socketManager = socketManager;
   }
 
   private detectMobile(): void {
@@ -79,8 +85,8 @@ export class InputManager {
         // Check if we're in pop mode
         if (this.isPopModeActive && this.isPopModeActive() && this.onPop) {
           this.onPop(mousePos.x, mousePos.y);
-        } else if (this.onDrop) {
-          await this.onDrop();
+        } else {
+          await this.handleDrop(mousePos.x);
         }
       }
     });
@@ -153,8 +159,8 @@ export class InputManager {
           // Check if we're in pop mode
           if (this.isPopModeActive && this.isPopModeActive() && this.onPop) {
             this.onPop(this.state.mouseX, this.state.mouseY);
-          } else if (this.onDrop) {
-            await this.onDrop();
+          } else {
+            await this.handleDrop(this.state.mouseX);
           }
           this.state.isDragging = false;
         }
@@ -212,5 +218,15 @@ export class InputManager {
 
   resetDragState(): void {
     this.state.isDragging = false;
+  }
+
+  private async handleDrop(x: number): Promise<void> {
+    if (this.socketManager?.isConnected()) {
+      // Send drop command to server
+      this.socketManager.dropCharacter(x);
+    } else if (this.onDrop) {
+      // Use local drop logic
+      await this.onDrop();
+    }
   }
 }

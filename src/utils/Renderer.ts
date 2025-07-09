@@ -58,6 +58,86 @@ export class Renderer {
     }
   }
 
+  drawServerCharacter(character: any): void {
+    const x = character.x * this.pixelRatio;
+    const y = character.y * this.pixelRatio;
+    const radius = character.radius * this.pixelRatio;
+    const image = this.imageManager.getImage(character.name);
+    if (image) {
+      this.ctx.save();
+      this.ctx.translate(x, y);
+      this.ctx.rotate(character.rotation);
+      const maxSize = radius * 2;
+      const { drawWidth, drawHeight } = this.getAspectFitSize(image.width, image.height, maxSize);
+      this.ctx.drawImage(image, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+      this.ctx.restore();
+    }
+  }
+
+  drawServerCharacters(characters: any[]): void {
+    for (const character of characters) {
+      this.drawServerCharacter(character);
+    }
+  }
+
+  drawServerCharactersDebug(characters: any[]): void {
+    for (const character of characters) {
+      this.drawServerCharacterDebug(character);
+    }
+  }
+
+  drawServerCharacterDebug(character: any): void {
+    const x = character.x * this.pixelRatio;
+    const y = character.y * this.pixelRatio;
+    const radius = character.radius * this.pixelRatio;
+    const image = this.imageManager.getImage(character.name);
+    
+    if (image) {
+      this.ctx.save();
+      
+      // Set opacity to 0.5 for faded effect
+      this.ctx.globalAlpha = 0.5;
+      
+      // Draw the character image at server position
+      this.ctx.translate(x, y);
+      this.ctx.rotate(character.rotation);
+      
+      const maxSize = radius * 2;
+      const { drawWidth, drawHeight } = this.getAspectFitSize(image.width, image.height, maxSize);
+      this.ctx.drawImage(image, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+      
+      this.ctx.restore();
+    } else {
+      // Fallback to polygon if image not available
+      this.ctx.save();
+      this.ctx.strokeStyle = 'red';
+      this.ctx.lineWidth = 2;
+      this.ctx.setLineDash([5, 5]);
+      this.ctx.globalAlpha = 0.5;
+      
+      // Draw 16-sided polygon to better approximate the physics circle
+      const sides = 16;
+      this.ctx.beginPath();
+      
+      for (let i = 0; i < sides; i++) {
+        const angle = (i * 2 * Math.PI) / sides + character.rotation;
+        const px = x + Math.cos(angle) * radius;
+        const py = y + Math.sin(angle) * radius;
+        
+        if (i === 0) {
+          this.ctx.moveTo(px, py);
+        } else {
+          this.ctx.lineTo(px, py);
+        }
+      }
+      
+      this.ctx.closePath();
+      this.ctx.stroke();
+      
+      this.ctx.restore();
+    }
+  }
+
   drawParticle(particle: Particle): void {
     this.ctx.fillStyle = `rgba(255, 255, 255, ${particle.life / GAME_CONFIG.PARTICLE_LIFE})`;
     this.ctx.beginPath();

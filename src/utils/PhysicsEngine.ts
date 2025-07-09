@@ -11,6 +11,7 @@ export class PhysicsEngine {
   private collisionDetector: Matter.Detector;
   private deltaTimeHistory: number[] = [];
   private readonly maxHistorySize: number = 100;
+  private enabled: boolean = true;
 
   constructor() {
     this.engine = Matter.Engine.create();
@@ -82,6 +83,11 @@ export class PhysicsEngine {
   }
 
   update(deltaTime: number): void {
+    // Skip physics updates if disabled (server mode)
+    if (!this.enabled) {
+      return;
+    }
+
     // Cap delta time to prevent large jumps when window regains focus
     const clampedDeltaTime = Math.min(deltaTime, GAME_CONFIG.MAX_DELTA_TIME * 1000);
 
@@ -97,6 +103,14 @@ export class PhysicsEngine {
     const averageDeltaTime = this.deltaTimeHistory.reduce((sum, dt) => sum + dt, 0) / this.deltaTimeHistory.length;
 
     Matter.Engine.update(this.engine, averageDeltaTime);
+  }
+
+  setEnabled(enabled: boolean): void {
+    this.enabled = enabled;
+  }
+
+  isEnabled(): boolean {
+    return this.enabled;
   }
 
   getBodyPosition(body: Matter.Body): { x: number; y: number } {
