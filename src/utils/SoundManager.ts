@@ -21,6 +21,7 @@ export class SoundManager {
   private pendingCharacterSound: string | null = null; // Track highest tier character to play
   private isBackgroundMusicPaused = false;
   private hasPlayedBackgroundMusic = false;
+  private hasLoaded = false;
   private gameMode: GameMode;
 
   constructor(gameMode: GameMode) {
@@ -35,6 +36,7 @@ export class SoundManager {
 
   // Load sound effects for the specific gamemode only (no background music)
   private async loadGameModeSounds(): Promise<void> {
+    if (this.hasLoaded) return;
     // Get character sounds for the specific gamemode only
     const characterSounds = CharacterClass.getAllCharacters(this.gameMode)
       .filter((c) => c.tier > 0 && c.hasSound)
@@ -70,6 +72,7 @@ export class SoundManager {
         this.handleLoad();
       }
     }
+    this.hasLoaded = true;
   }
 
   // Method to switch to a new gamemode (clears existing sounds and loads new ones)
@@ -98,10 +101,13 @@ export class SoundManager {
 
   // Helper to create a Howl instance with event handlers
   private createHowl(src: string, name: string, volume: number): Howl {
+    const isBackgroundMusic = name === Sound.BackgroundMusic;
+
     return new Howl({
       src: [src],
       preload: true,
       volume: volume,
+      loop: isBackgroundMusic,
       onload: () => this.handleLoad(),
       onloaderror: (_id, error) => this.handleLoadError(name, error),
     });
