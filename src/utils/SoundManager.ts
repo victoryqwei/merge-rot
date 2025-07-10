@@ -21,7 +21,6 @@ export class SoundManager {
   private pendingCharacterSound: string | null = null; // Track highest tier character to play
   private isBackgroundMusicPaused = false;
   private hasPlayedBackgroundMusic = false;
-  private hasLoaded = false;
   private gameMode: GameMode;
 
   constructor(gameMode: GameMode) {
@@ -36,7 +35,6 @@ export class SoundManager {
 
   // Load sound effects for the specific gamemode only (no background music)
   private async loadGameModeSounds(): Promise<void> {
-    if (this.hasLoaded) return;
     // Get character sounds for the specific gamemode only
     const characterSounds = CharacterClass.getAllCharacters(this.gameMode)
       .filter((c) => c.tier > 0 && c.hasSound)
@@ -59,6 +57,12 @@ export class SoundManager {
     // Load all sounds
     for (const item of allSounds) {
       try {
+        // check if sound is already loaded
+        if ((typeof item === "string" && this.sounds.has(item)) || (typeof item !== "string" && this.sounds.has(item.name))) {
+          this.loadedCount++;
+          continue;
+        }
+
         let soundModule;
         if (typeof item === "string") {
           soundModule = await import(`../assets/sounds/${item}.mp3`);
@@ -72,7 +76,6 @@ export class SoundManager {
         this.handleLoad();
       }
     }
-    this.hasLoaded = true;
   }
 
   // Method to switch to a new gamemode (clears existing sounds and loads new ones)
