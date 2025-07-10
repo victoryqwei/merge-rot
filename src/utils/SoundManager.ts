@@ -20,6 +20,7 @@ export class SoundManager {
   private characterDebounceTimer: number | null = null; // Global debounce timer
   private pendingCharacterSound: string | null = null; // Track highest tier character to play
   private isBackgroundMusicPaused = false;
+  private hasPlayedBackgroundMusic = false;
   private gameMode: GameMode;
 
   constructor(gameMode: GameMode) {
@@ -206,7 +207,10 @@ export class SoundManager {
   }
 
   playBackgroundMusic(): void {
-    this.play(Sound.BackgroundMusic, this.musicVolume);
+    if (!this.hasPlayedBackgroundMusic) {
+      this.play(Sound.BackgroundMusic, this.musicVolume);
+      this.hasPlayedBackgroundMusic = true;
+    }
   }
 
   // Pause background music (maintains position)
