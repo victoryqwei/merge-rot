@@ -77,6 +77,20 @@ const GameSettingsOverlay: React.FC<SettingsOverlayProps> = observer(({ setShowS
           ))}
         </VStack>
 
+        <VStack spacing={4} w="100%">
+          <Text fontSize="3xl" fontWeight="bold" color="white" textAlign="center">
+            How to Play
+          </Text>
+          <VStack spacing={2} w="100%">
+            <Text fontSize="md" color="white" textAlign="center">
+              • Drop to merge memes
+            </Text>
+            <Text fontSize="md" color="white" textAlign="center">
+              • Get the top meme to win
+            </Text>
+          </VStack>
+        </VStack>
+
         <Button
           colorScheme="gray"
           size="lg"
