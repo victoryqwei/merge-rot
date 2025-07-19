@@ -94,6 +94,7 @@ export class SuikaGame {
 
       if (this.loadingProgress >= 100) {
         this.isLoading = false;
+        CrazyGames.loadingStop();
         clearInterval(progressInterval);
       }
     }, 100);
@@ -155,6 +156,7 @@ export class SuikaGame {
 
     // Set up CrazyGames SDK
     CrazyGames.init();
+    CrazyGames.loadingStart();
   }
 
   private setupWindowEvents(): void {

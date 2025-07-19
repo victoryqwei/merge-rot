@@ -11,7 +11,7 @@ const PopButton: React.FC = observer(() => {
       // Cancel pop mode if it's currently active
       game.cancelPopMode();
     } else if (game.canPop()) {
-      const played = await game.cubicBezier.playVideoAd(true);
+      const played = await game.cubicBezier.playRewardedAd();
       // Start pop mode if it's not active and cooldown is finished
       game.startPopMode();
 

@@ -30,6 +30,18 @@ export default class CrazyGames {
     }
   }
 
+  static loadingStart() {
+    if (!CrazyGames.initialized) return;
+
+    (window as any).CrazyGames.SDK.game.loadingStart();
+  }
+
+  static loadingStop() {
+    if (!CrazyGames.initialized) return;
+
+    (window as any).CrazyGames.SDK.game.loadingStop();
+  }
+
   static resume() {
     if (!CrazyGames.initialized) return;
 
