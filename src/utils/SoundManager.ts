@@ -33,6 +33,15 @@ export class SoundManager {
     this.loadGameModeSounds();
   }
 
+  mute(flag: boolean) {
+    if (flag) {
+      Howler.volume(0);
+      return;
+    } else {
+      Howler.volume(this.musicVolume);
+    }
+  }
+
   // Load sound effects for the specific gamemode only (no background music)
   private async loadGameModeSounds(): Promise<void> {
     // Get character sounds for the specific gamemode only

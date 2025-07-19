@@ -9,10 +9,11 @@ const ShakeButton: React.FC = observer(() => {
   const [shakeAngle, setShakeAngle] = useState(0);
   const [shakeCooldown, setShakeCooldown] = useState(0);
 
-  const handleShake = () => {
+  const handleShake = async () => {
     if (shakeCooldown === 0) {
+      const played = await game.cubicBezier.playVideoAd(true);
+      setShakeCooldown(played ? 0 : 15); // Start 15 second cooldown
       game.shake();
-      setShakeCooldown(15); // Start 15 second cooldown
     }
   };
 
