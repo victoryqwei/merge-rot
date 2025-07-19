@@ -48,12 +48,12 @@ export const GAME_MODE_LABELS: Record<
   },
   [GameMode.CAPYBARA]: {
     label: "Capybara",
-    colorScheme: "yellow",
+    colorScheme: "red",
     imageName: "capy1",
   },
   [GameMode.GIGA]: {
     label: "Giga Chad",
-    colorScheme: "red",
+    colorScheme: "blue",
     imageName: "giga",
   },
 };

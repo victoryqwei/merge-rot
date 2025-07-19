@@ -16,19 +16,33 @@ const CharacterProgression: React.FC<CharacterProgressionProps> = observer(({ se
   const currentGameMode = game.getGameMode();
   const allCharacters = CharacterClass.getAllCharacters(currentGameMode);
 
+  const redDotSize = "12px";
+
   if (!game.hasStarted) {
     return (
       <HStack>
-        <Button
-          colorScheme="green"
-          size="md"
-          onClick={() => setShowModes(true)}
-          border="2px solid white"
-          iconSpacing={1}
-          paddingX={2}
-          leftIcon={<BiJoystick size={24} />}>
-          Modes
-        </Button>
+        <Box position="relative">
+          <Button
+            colorScheme="green"
+            size="md"
+            onClick={() => setShowModes(true)}
+            border="2px solid white"
+            iconSpacing={1}
+            paddingX={2}
+            leftIcon={<BiJoystick size={24} />}>
+            Modes
+          </Button>
+          <Box
+            position="absolute"
+            top="-2px"
+            left="-2px"
+            w={redDotSize}
+            h={redDotSize}
+            bg="red.500"
+            borderRadius="full"
+            border="2px solid white"
+          />
+        </Box>
         <Button
           paddingX={2}
           border="2px solid white"
