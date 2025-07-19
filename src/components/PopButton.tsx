@@ -6,13 +6,18 @@ import { useGame } from "../game/useGame";
 const PopButton: React.FC = observer(() => {
   const game = useGame();
 
-  const handlePop = () => {
+  const handlePop = async () => {
     if (game.isPopMode()) {
       // Cancel pop mode if it's currently active
       game.cancelPopMode();
     } else if (game.canPop()) {
+      const played = await game.cubicBezier.playVideoAd(true);
       // Start pop mode if it's not active and cooldown is finished
       game.startPopMode();
+
+      if (played) {
+        game.popManager.resetPopCooldown();
+      }
     }
   };
 

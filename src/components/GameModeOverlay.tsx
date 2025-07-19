@@ -15,6 +15,8 @@ const GameModeOverlay: React.FC<GameModeOverlayProps> = observer(({ setShowModes
   const handleModeClick = async (mode: GameMode) => {
     await game.setGameMode(mode);
     setShowModes(false);
+
+    game.cubicBezier.playVideoAd(true);
   };
 
   const returnToGame = () => {

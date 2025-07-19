@@ -14,13 +14,15 @@ import { AnimationManager } from "./managers/AnimationManager";
 import { GameStateManager } from "./managers/GameStateManager";
 import { GameLoop } from "./managers/GameLoop";
 import { PopManager } from "./managers/PopManager";
+import CrazyGames from "./CrazyGames";
+import CubicBezier from "../utils/CubicBezier";
 
 export class SuikaGame {
   public canvas: HTMLCanvasElement | null = null;
   private renderer?: Renderer;
   private physicsEngine: PhysicsEngine;
   private characterManager: CharacterManager;
-  private soundManager: SoundManager;
+  public soundManager: SoundManager;
   private gameMode: GameMode;
   private debugMode: boolean = false;
 
@@ -34,7 +36,10 @@ export class SuikaGame {
   private animationManager: AnimationManager;
   private gameStateManager: GameStateManager;
   private gameLoop: GameLoop;
-  private popManager: PopManager;
+  public popManager: PopManager;
+
+  // Ads
+  public cubicBezier: CubicBezier;
 
   constructor(canvas: HTMLCanvasElement | null, gameMode: GameMode = GameMode.ITALIAN_BRAINROT) {
     makeAutoObservable(this);
@@ -55,6 +60,9 @@ export class SuikaGame {
     this.gameStateManager = new GameStateManager(this.characterManager, this);
     this.popManager = new PopManager();
 
+    // Initialize CubicBezier
+    this.cubicBezier = new CubicBezier(this);
+
     // Set up manager connections
     this.setupManagerConnections();
 
@@ -65,6 +73,14 @@ export class SuikaGame {
     });
 
     if (canvas) this.setCanvas(canvas);
+  }
+
+  static get isCrazyGames(): boolean {
+    return (
+      window.location.hostname.includes("crazygames") ||
+      window.location.hostname.includes("127.0.0.1") ||
+      window.location.hostname.includes("mergerot.app")
+    );
   }
 
   private setupLoadingProgress(): void {
@@ -136,6 +152,9 @@ export class SuikaGame {
 
     // Set up loading progress tracking
     this.setupLoadingProgress();
+
+    // Set up CrazyGames SDK
+    CrazyGames.init();
   }
 
   private setupWindowEvents(): void {
@@ -147,10 +166,12 @@ export class SuikaGame {
     // Handle tab focus/blur for background music
     window.addEventListener("blur", () => {
       this.soundManager.pauseBackgroundMusic();
+      CrazyGames.pause();
     });
 
     window.addEventListener("focus", () => {
       this.soundManager.resumeBackgroundMusic();
+      CrazyGames.resume();
     });
   }
 

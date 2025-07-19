@@ -66,4 +66,8 @@ export class PopManager {
   canPop(): boolean {
     return this.state.cooldown <= 0;
   }
+
+  resetPopCooldown(): void {
+    this.state.cooldown = 0;
+  }
 }
