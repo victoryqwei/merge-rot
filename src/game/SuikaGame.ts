@@ -1,4 +1,4 @@
-import { CharacterClass } from "../types/GameTypes";
+import { CharacterClass, Character } from "../types/GameTypes";
 import { CharacterManager } from "./CharacterManager";
 import { Renderer } from "../utils/Renderer";
 import { PhysicsEngine } from "../utils/PhysicsEngine";
@@ -155,7 +155,7 @@ export class SuikaGame {
     this.setupLoadingProgress();
 
     // Set up CrazyGames SDK
-    CrazyGames.init();
+    await CrazyGames.init();
     CrazyGames.loadingStart();
   }
 
@@ -273,9 +273,16 @@ export class SuikaGame {
       this.renderer?.drawAnimatedMouseCursor(this.inputManager.getCurrentMouseX(), dropY, currentCharacter, animationProgress, 1);
     }
 
+    // Find hovered character when in pop mode
+    let hoveredCharacter: Character | null = null;
+    if (this.popManager.isPopMode()) {
+      hoveredCharacter = this.findCharacterUnderMouse();
+    }
+
     // Draw characters
     for (const character of this.characterManager.getCharacters()) {
-      this.renderer?.drawCharacter(character);
+      const isHighlighted = this.popManager.isPopMode() && character === hoveredCharacter;
+      this.renderer?.drawCharacter(character, isHighlighted);
 
       // Draw debug polygons if debug mode is enabled
       if (this.debugMode) {
@@ -292,6 +299,35 @@ export class SuikaGame {
     if (this.shakeManager.getShakeAngle() !== 0) {
       this.renderer?.restoreShakeRotation();
     }
+  }
+
+  private findCharacterUnderMouse(): Character | null {
+    const mouseX = this.inputManager.getCurrentMouseX();
+    const mouseY = this.inputManager.getCurrentMouseY();
+    const characters = this.characterManager.getCharacters();
+
+    // Find all characters under the mouse position
+    const hoveredCharacters: Character[] = [];
+
+    for (const character of characters) {
+      const pos = this.physicsEngine.getBodyPosition(character.body);
+      const distance = Math.sqrt((pos.x - mouseX) ** 2 + (pos.y - mouseY) ** 2);
+
+      if (distance <= character.radius) {
+        hoveredCharacters.push(character);
+      }
+    }
+
+    // If no characters are hovered, return null
+    if (hoveredCharacters.length === 0) {
+      return null;
+    }
+
+    // Sort by radius (ascending) to prioritize smaller characters
+    hoveredCharacters.sort((a, b) => a.radius - b.radius);
+
+    // Return the smallest character
+    return hoveredCharacters[0];
   }
 
   // Public API methods

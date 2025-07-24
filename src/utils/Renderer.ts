@@ -42,7 +42,7 @@ export class Renderer {
     return { drawWidth, drawHeight };
   }
 
-  drawCharacter(character: Character): void {
+  drawCharacter(character: Character, isHighlighted: boolean = false): void {
     const x = character.body.position.x * this.pixelRatio;
     const y = character.body.position.y * this.pixelRatio;
     const radius = character.radius * this.pixelRatio;
@@ -54,8 +54,34 @@ export class Renderer {
       const maxSize = radius * 2;
       const { drawWidth, drawHeight } = this.getAspectFitSize(image.width, image.height, maxSize);
       this.ctx.drawImage(image, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+
+      // Draw highlight border if needed
+      if (isHighlighted) {
+        this.drawCharacterHighlight(radius);
+      }
+
       this.ctx.restore();
     }
+  }
+
+  private drawCharacterHighlight(radius: number): void {
+    // Draw a pulsing border around the character's circular boundary
+    const time = Date.now() / 1000;
+    const pulseIntensity = 0.5 + 0.5 * Math.sin(time * 6); // Pulse between 0.5 and 1.0
+    const borderWidth = 4 * this.pixelRatio;
+
+    this.ctx.strokeStyle = `rgba(255, 255, 255, ${0.8 * pulseIntensity})`;
+    this.ctx.lineWidth = borderWidth;
+    this.ctx.shadowColor = "rgba(255, 255, 255, 0.6)";
+    this.ctx.shadowBlur = 10 * this.pixelRatio;
+
+    this.ctx.beginPath();
+    this.ctx.arc(0, 0, radius + borderWidth / 2, 0, Math.PI * 2);
+    this.ctx.stroke();
+
+    // Reset shadow
+    this.ctx.shadowColor = "transparent";
+    this.ctx.shadowBlur = 0;
   }
 
   drawParticle(particle: Particle): void {
