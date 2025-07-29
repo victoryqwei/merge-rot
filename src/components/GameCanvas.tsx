@@ -20,6 +20,7 @@ const GameCanvas: React.FC = observer(() => {
     <Box
       position="relative"
       overflow="hidden"
+      cursor="pointer"
       style={{
         transform: `rotate(${game.getShakeAngle()}rad) translateY(${-game.getShakeLiftY()}px)`,
         transformOrigin: "center",

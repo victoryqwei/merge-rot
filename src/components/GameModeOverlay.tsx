@@ -48,7 +48,15 @@ const GameModeOverlay: React.FC<GameModeOverlayProps> = observer(({ setShowModes
                 p={2}>
                 <HStack justifyContent="space-between" w="100%">
                   <Flex w="100%" justifyContent="center">
-                    <Text fontSize="xl" fontWeight="bold">
+                    <Text
+                      fontSize="xl"
+                      fontWeight="bold"
+                      p={2}
+                      borderRadius="md"
+                      style={{
+                        WebkitTextStroke: "0.5px black",
+                        textShadow: "0.5px 0.5px 0 black, -0.5px -0.5px 0 black, 0.5px -0.5px 0 black, -0.5px 0.5px 0 black",
+                      }}>
                       {label}
                     </Text>
                   </Flex>
