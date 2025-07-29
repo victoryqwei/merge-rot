@@ -83,12 +83,14 @@ export default class CubicBezier {
     if (typeof aiptag.adplayer == "undefined") {
       console.warn("Video ad could not be loaded");
       resolve(false);
+      this.game.soundManager.mute(false);
       return;
     }
 
     if (aiptag.adplayer.aipConfig == null) {
       console.warn("Video ad could not be loaded");
       resolve(false);
+      this.game.soundManager.mute(false);
       return;
     }
 
