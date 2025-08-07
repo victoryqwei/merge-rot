@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import { MdOutlineTouchApp } from "react-icons/md";
 import { useGame } from "../game/useGame";
+import CrazyGames from "../game/CrazyGames";
 import CharacterProgression from "./CharacterProgression";
 import GameCanvas from "./GameCanvas";
 import GameModeOverlay from "./GameModeOverlay";
@@ -44,6 +45,24 @@ const App: React.FC = observer(() => {
     setShowSavedGame(false);
   };
 
+  const handleShowModes = (show: boolean) => {
+    if (show) {
+      CrazyGames.pause();
+    } else {
+      CrazyGames.resume();
+    }
+    setShowModes(show);
+  };
+
+  const handleShowSettings = (show: boolean) => {
+    if (show) {
+      CrazyGames.pause();
+    } else {
+      CrazyGames.resume();
+    }
+    setShowSettings(show);
+  };
+
   const oscillationLength = 40;
 
   return (
@@ -64,16 +83,16 @@ const App: React.FC = observer(() => {
 
       {/* Score Board - positioned at top */}
       <Box position="absolute" top={0} left="50%" transform="translateX(-50%)" zIndex={10} w="100%">
-        <ScoreBoard setShowSettings={setShowSettings} setShowLeaderboard={setShowLeaderboard} />
+        <ScoreBoard setShowSettings={handleShowSettings} setShowLeaderboard={setShowLeaderboard} />
       </Box>
 
       {/* Character Progression - positioned at bottom */}
       <Box position="absolute" bottom={5} left="50%" transform="translateX(-50%)" zIndex={10}>
-        <CharacterProgression setShowModes={setShowModes} setShowSettings={setShowSettings} />
+        <CharacterProgression setShowModes={handleShowModes} setShowSettings={handleShowSettings} />
       </Box>
 
-      {showModes && <GameModeOverlay setShowModes={setShowModes} />}
-      {showSettings && <GameSettingsOverlay setShowSettings={setShowSettings} />}
+      {showModes && <GameModeOverlay setShowModes={handleShowModes} />}
+      {showSettings && <GameSettingsOverlay setShowSettings={handleShowSettings} />}
       {showLeaderboard && <LeaderboardOverlay setShowLeaderboard={setShowLeaderboard} />}
       <GameOverOverlay onRestart={handleRestart} />
 

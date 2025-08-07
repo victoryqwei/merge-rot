@@ -168,12 +168,10 @@ export class SuikaGame {
     // Handle tab focus/blur for background music
     window.addEventListener("blur", () => {
       this.soundManager.pauseBackgroundMusic();
-      CrazyGames.pause();
     });
 
     window.addEventListener("focus", () => {
       this.soundManager.resumeBackgroundMusic();
-      CrazyGames.resume();
     });
   }
 
