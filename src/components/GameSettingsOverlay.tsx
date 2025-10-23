@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Center, VStack, Text, Button, Slider, SliderTrack, SliderFilledTrack, SliderThumb, HStack } from "@chakra-ui/react";
+import { Center, VStack, Text, Button, Slider, SliderTrack, SliderFilledTrack, SliderThumb, HStack, useColorMode, Switch } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import { useGame } from "../game/useGame";
 
@@ -37,6 +37,7 @@ const VolumeControl: React.FC<VolumeControlProps> = ({ label, value, onChange })
 
 const GameSettingsOverlay: React.FC<SettingsOverlayProps> = observer(({ setShowSettings }) => {
   const game = useGame();
+  const { colorMode, toggleColorMode } = useColorMode();
   const [musicVolume, setMusicVolume] = useState(game.getMusicVolume());
   const [sfxVolume, setSfxVolume] = useState(game.getSFXVolume());
 
@@ -75,6 +76,20 @@ const GameSettingsOverlay: React.FC<SettingsOverlayProps> = observer(({ setShowS
           {volumeControls.map((control) => (
             <VolumeControl key={control.label} {...control} />
           ))}
+        </VStack>
+
+        <VStack spacing={3} w="100%">
+          <HStack w="100%" justify="space-between" align="center">
+            <Text fontSize="lg" color="white" fontWeight="semibold">
+              Dark Mode
+            </Text>
+            <Switch
+              isChecked={colorMode === "dark"}
+              onChange={toggleColorMode}
+              colorScheme="purple"
+              size="lg"
+            />
+          </HStack>
         </VStack>
 
         <VStack spacing={4} w="100%">

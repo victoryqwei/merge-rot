@@ -1,4 +1,4 @@
-import { Box, Center, Text, VStack } from "@chakra-ui/react";
+import { Box, Center, Text, VStack, useColorMode } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import { MdOutlineTouchApp } from "react-icons/md";
@@ -16,6 +16,7 @@ import ScoreBoard from "./ScoreBoard";
 
 const App: React.FC = observer(() => {
   const game = useGame();
+  const { colorMode } = useColorMode();
   const [showModes, setShowModes] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
@@ -67,7 +68,11 @@ const App: React.FC = observer(() => {
 
   return (
     <Center
-      bgGradient="linear(to-t,rgb(129, 205, 255), #3b82f6)"
+      bgGradient={
+        colorMode === "dark"
+          ? "linear(to-t, gray.800, gray.900)"
+          : "linear(to-t,rgb(129, 205, 255), #3b82f6)"
+      }
       position="relative"
       sx={{
         minH: "100vh",
