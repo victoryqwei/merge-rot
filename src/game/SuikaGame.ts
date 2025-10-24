@@ -225,15 +225,16 @@ export class SuikaGame {
   private handleResize(): void {
     // Re-setup the canvas for high DPI if needed
     const pixelRatio = this.renderer?.getPixelRatio() || 1;
+    const scale = this.getGameBoxScale();
 
     // Update canvas size
     if (this.canvas) {
       this.canvas.width = GAME_CONFIG.CANVAS_WIDTH * pixelRatio;
       this.canvas.height = GAME_CONFIG.CANVAS_HEIGHT * pixelRatio;
 
-      // Set CSS size back to original dimensions
-      this.canvas.style.width = GAME_CONFIG.CANVAS_WIDTH + "px";
-      this.canvas.style.height = GAME_CONFIG.CANVAS_HEIGHT + "px";
+      // Set CSS size with scale applied
+      this.canvas.style.width = GAME_CONFIG.CANVAS_WIDTH * scale + "px";
+      this.canvas.style.height = GAME_CONFIG.CANVAS_HEIGHT * scale + "px";
     }
   }
 
@@ -347,6 +348,16 @@ export class SuikaGame {
 
   public getMusicVolume(): number {
     return this.soundManager.getMusicVolume();
+  }
+
+  public setGameBoxScale(scale: number): void {
+    SettingsManager.updateSettings({ gameBoxScale: scale });
+    this.handleResize();
+  }
+
+  public getGameBoxScale(): number {
+    const settings = SettingsManager.getSettings();
+    return settings.gameBoxScale;
   }
 
   public stopBackgroundMusic(): void {

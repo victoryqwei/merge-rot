@@ -4,6 +4,7 @@ export interface GameSettings {
   sfxVolume: number;
   musicVolume: number;
   lastPlayedGameMode: GameMode;
+  gameBoxScale: number;
 }
 
 export class SettingsManager {
@@ -12,6 +13,7 @@ export class SettingsManager {
     sfxVolume: 0.8,
     musicVolume: 0.5,
     lastPlayedGameMode: GameMode.ITALIAN_BRAINROT,
+    gameBoxScale: 1.0,
   };
 
   static getSettings(): GameSettings {
@@ -56,7 +58,10 @@ export class SettingsManager {
       typeof (settings as GameSettings).musicVolume === "number" &&
       (settings as GameSettings).musicVolume >= 0 &&
       (settings as GameSettings).musicVolume <= 1 &&
-      Object.values(GameMode).includes((settings as GameSettings).lastPlayedGameMode)
+      Object.values(GameMode).includes((settings as GameSettings).lastPlayedGameMode) &&
+      typeof (settings as GameSettings).gameBoxScale === "number" &&
+      (settings as GameSettings).gameBoxScale >= 0.5 &&
+      (settings as GameSettings).gameBoxScale <= 1.5
     );
   }
 }
