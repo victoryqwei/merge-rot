@@ -227,15 +227,19 @@ export class SuikaGame {
   private handleResize(): void {
     // Re-setup the canvas for high DPI if needed
     const pixelRatio = this.renderer?.getPixelRatio() || 1;
+    const scale = this.getGameBoxScale();
 
-    // Update canvas size
+    // Update canvas size to accommodate scaled box
     if (this.canvas) {
-      this.canvas.width = GAME_CONFIG.CANVAS_WIDTH * pixelRatio;
-      this.canvas.height = GAME_CONFIG.CANVAS_HEIGHT * pixelRatio;
+      const scaledWidth = GAME_CONFIG.PADDING * 2 + GAME_CONFIG.BOX_WIDTH * scale;
+      const scaledHeight = GAME_CONFIG.CANVAS_HEIGHT * scale;
+      
+      this.canvas.width = scaledWidth * pixelRatio;
+      this.canvas.height = scaledHeight * pixelRatio;
 
-      // Set CSS size back to original dimensions
-      this.canvas.style.width = GAME_CONFIG.CANVAS_WIDTH + "px";
-      this.canvas.style.height = GAME_CONFIG.CANVAS_HEIGHT + "px";
+      // Set CSS size with scale applied
+      this.canvas.style.width = scaledWidth + "px";
+      this.canvas.style.height = scaledHeight + "px";
     }
   }
 
@@ -358,6 +362,7 @@ export class SuikaGame {
       this.renderer.setBoxScale(scale);
     }
     this.inputManager.setBoxScale(scale);
+    this.handleResize();
   }
 
   public getGameBoxScale(): number {

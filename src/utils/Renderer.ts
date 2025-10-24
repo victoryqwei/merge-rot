@@ -25,14 +25,18 @@ export class Renderer {
   }
 
   private setupHighDPICanvas(canvas: HTMLCanvasElement): void {
-    canvas.width = GAME_CONFIG.CANVAS_WIDTH * this.pixelRatio;
-    canvas.height = GAME_CONFIG.CANVAS_HEIGHT * this.pixelRatio;
-    canvas.style.width = GAME_CONFIG.CANVAS_WIDTH + "px";
-    canvas.style.height = GAME_CONFIG.CANVAS_HEIGHT + "px";
+    const scaledWidth = GAME_CONFIG.PADDING * 2 + GAME_CONFIG.BOX_WIDTH * this.boxScale;
+    const scaledHeight = GAME_CONFIG.CANVAS_HEIGHT * this.boxScale;
+    canvas.width = scaledWidth * this.pixelRatio;
+    canvas.height = scaledHeight * this.pixelRatio;
+    canvas.style.width = scaledWidth + "px";
+    canvas.style.height = scaledHeight + "px";
   }
 
   clear(): void {
-    this.ctx.clearRect(0, 0, GAME_CONFIG.CANVAS_WIDTH * this.pixelRatio, GAME_CONFIG.CANVAS_HEIGHT * this.pixelRatio);
+    const scaledWidth = GAME_CONFIG.PADDING * 2 + GAME_CONFIG.BOX_WIDTH * this.boxScale;
+    const scaledHeight = GAME_CONFIG.CANVAS_HEIGHT * this.boxScale;
+    this.ctx.clearRect(0, 0, scaledWidth * this.pixelRatio, scaledHeight * this.pixelRatio);
   }
 
   private getAspectFitSize(imgWidth: number, imgHeight: number, maxSize: number) {
