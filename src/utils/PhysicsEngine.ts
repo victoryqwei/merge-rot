@@ -11,8 +11,9 @@ export class PhysicsEngine {
   private collisionDetector: Matter.Detector;
   private deltaTimeHistory: number[] = [];
   private readonly maxHistorySize: number = 100;
+  private boundaryBodies: Matter.Body[] = [];
 
-  constructor() {
+  constructor(boxScale: number = 1.0) {
     this.engine = Matter.Engine.create();
     this.world = this.engine.world;
 
@@ -25,18 +26,20 @@ export class PhysicsEngine {
     });
 
     // Create boundaries
-    this.createBoundaries();
+    this.createBoundaries(boxScale);
   }
 
-  private createBoundaries(): void {
+  private createBoundaries(scale: number = 1.0): void {
     const thickness = 20;
+    const scaledBoxWidth = GAME_CONFIG.BOX_WIDTH * scale;
+    const scaledBoxHeight = GAME_CONFIG.BOX_HEIGHT * scale;
 
     // Left wall
     const leftWall = Matter.Bodies.rectangle(
       -thickness / 2 + GAME_CONFIG.PADDING + 5,
-      GAME_CONFIG.BOX_HEIGHT / 2,
+      scaledBoxHeight / 2,
       thickness,
-      GAME_CONFIG.BOX_HEIGHT,
+      scaledBoxHeight,
       {
         isStatic: true,
       }
@@ -44,23 +47,35 @@ export class PhysicsEngine {
 
     // Right wall
     const rightWall = Matter.Bodies.rectangle(
-      GAME_CONFIG.BOX_WIDTH + thickness / 2 + GAME_CONFIG.PADDING - 5,
-      GAME_CONFIG.BOX_HEIGHT / 2,
+      scaledBoxWidth + thickness / 2 + GAME_CONFIG.PADDING - 5,
+      scaledBoxHeight / 2,
       thickness,
-      GAME_CONFIG.BOX_HEIGHT,
+      scaledBoxHeight,
       { isStatic: true }
     );
 
     // Floor
     const floor = Matter.Bodies.rectangle(
-      GAME_CONFIG.BOX_WIDTH / 2,
-      GAME_CONFIG.BOX_HEIGHT + thickness / 2 - 5,
-      GAME_CONFIG.BOX_WIDTH,
+      scaledBoxWidth / 2,
+      scaledBoxHeight + thickness / 2 - 5,
+      scaledBoxWidth,
       thickness,
       { isStatic: true }
     );
 
-    Matter.World.add(this.world, [leftWall, rightWall, floor]);
+    this.boundaryBodies = [leftWall, rightWall, floor];
+    Matter.World.add(this.world, this.boundaryBodies);
+  }
+
+  public rebuildBoundaries(scale: number): void {
+    // Remove old boundaries
+    for (const body of this.boundaryBodies) {
+      Matter.World.remove(this.world, body);
+    }
+    this.boundaryBodies = [];
+
+    // Create new boundaries with the new scale
+    this.createBoundaries(scale);
   }
 
   createCharacterBody(radius: number, x: number, y: number): Matter.Body {

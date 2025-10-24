@@ -12,6 +12,7 @@ export interface InputState {
 export class InputManager {
   private canvas: HTMLCanvasElement | null = null;
   private currentCharacter: CharacterClass | null = null;
+  private boxScale: number = 1.0;
   private state: InputState = {
     mouseX: GAME_CONFIG.BOX_WIDTH / 2,
     mouseY: GAME_CONFIG.CANVAS_HEIGHT / 2,
@@ -25,6 +26,10 @@ export class InputManager {
 
   constructor() {
     this.detectMobile();
+  }
+
+  setBoxScale(scale: number): void {
+    this.boxScale = scale;
   }
 
   setCanvas(canvas: HTMLCanvasElement): void {
@@ -183,9 +188,10 @@ export class InputManager {
     const mouseY = clientY - rect.top;
 
     // Constrain mouse position by character radius to prevent going past box boundaries
+    const scaledBoxWidth = GAME_CONFIG.BOX_WIDTH * this.boxScale;
     if (this.currentCharacter) {
       const radius = this.currentCharacter.radius;
-      mouseX = clamp(mouseX, radius, GAME_CONFIG.BOX_WIDTH - radius);
+      mouseX = clamp(mouseX, radius, scaledBoxWidth - radius);
     }
 
     return {

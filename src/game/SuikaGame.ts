@@ -49,7 +49,7 @@ export class SuikaGame {
     this.gameMode = settings.lastPlayedGameMode || gameMode;
 
     // Initialize core systems
-    this.physicsEngine = new PhysicsEngine();
+    this.physicsEngine = new PhysicsEngine(settings.gameBoxScale);
     this.soundManager = new SoundManager(this.gameMode);
     this.characterManager = new CharacterManager(this.physicsEngine, this.soundManager, this.gameMode);
 
@@ -131,7 +131,9 @@ export class SuikaGame {
   setCanvas(canvas: HTMLCanvasElement): void {
     this.canvas = canvas;
     this.renderer = new Renderer(canvas, this.characterManager.getImageManager());
+    this.renderer.setBoxScale(this.getGameBoxScale());
     this.inputManager.setCanvas(canvas);
+    this.inputManager.setBoxScale(this.getGameBoxScale());
     this.init().catch(console.error);
   }
 
@@ -225,16 +227,15 @@ export class SuikaGame {
   private handleResize(): void {
     // Re-setup the canvas for high DPI if needed
     const pixelRatio = this.renderer?.getPixelRatio() || 1;
-    const scale = this.getGameBoxScale();
 
     // Update canvas size
     if (this.canvas) {
       this.canvas.width = GAME_CONFIG.CANVAS_WIDTH * pixelRatio;
       this.canvas.height = GAME_CONFIG.CANVAS_HEIGHT * pixelRatio;
 
-      // Set CSS size with scale applied
-      this.canvas.style.width = GAME_CONFIG.CANVAS_WIDTH * scale + "px";
-      this.canvas.style.height = GAME_CONFIG.CANVAS_HEIGHT * scale + "px";
+      // Set CSS size back to original dimensions
+      this.canvas.style.width = GAME_CONFIG.CANVAS_WIDTH + "px";
+      this.canvas.style.height = GAME_CONFIG.CANVAS_HEIGHT + "px";
     }
   }
 
@@ -352,7 +353,11 @@ export class SuikaGame {
 
   public setGameBoxScale(scale: number): void {
     SettingsManager.updateSettings({ gameBoxScale: scale });
-    this.handleResize();
+    this.physicsEngine.rebuildBoundaries(scale);
+    if (this.renderer) {
+      this.renderer.setBoxScale(scale);
+    }
+    this.inputManager.setBoxScale(scale);
   }
 
   public getGameBoxScale(): number {

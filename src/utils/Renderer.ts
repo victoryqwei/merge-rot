@@ -9,6 +9,7 @@ export class Renderer {
   private ctx: CanvasRenderingContext2D;
   private pixelRatio: number;
   private imageManager: ImageManager;
+  private boxScale: number = 1.0;
 
   constructor(canvas: HTMLCanvasElement, imageManager?: ImageManager) {
     const context = canvas.getContext("2d");
@@ -17,6 +18,10 @@ export class Renderer {
     this.pixelRatio = window.devicePixelRatio || 1;
     this.imageManager = imageManager || new ImageManager();
     this.setupHighDPICanvas(canvas);
+  }
+
+  setBoxScale(scale: number): void {
+    this.boxScale = scale;
   }
 
   private setupHighDPICanvas(canvas: HTMLCanvasElement): void {
@@ -92,9 +97,9 @@ export class Renderer {
   }
 
   drawOuterEdges(padding = 0, color = "rgba(139, 69, 19, 1)") {
-    const boxY = GAME_CONFIG.GAME_OVER_HEIGHT * this.pixelRatio;
-    const boxHeight = (GAME_CONFIG.BOX_HEIGHT - GAME_CONFIG.GAME_OVER_HEIGHT) * this.pixelRatio;
-    const boxWidth = GAME_CONFIG.BOX_WIDTH * this.pixelRatio;
+    const boxY = GAME_CONFIG.GAME_OVER_HEIGHT * this.boxScale * this.pixelRatio;
+    const boxHeight = (GAME_CONFIG.BOX_HEIGHT - GAME_CONFIG.GAME_OVER_HEIGHT) * this.boxScale * this.pixelRatio;
+    const boxWidth = GAME_CONFIG.BOX_WIDTH * this.boxScale * this.pixelRatio;
     const thickness = THICKNESS * this.pixelRatio;
 
     this.ctx.strokeStyle = color;
@@ -121,9 +126,9 @@ export class Renderer {
   }
 
   drawBox(): void {
-    const boxY = GAME_CONFIG.GAME_OVER_HEIGHT * this.pixelRatio;
-    const boxHeight = (GAME_CONFIG.BOX_HEIGHT - GAME_CONFIG.GAME_OVER_HEIGHT) * this.pixelRatio;
-    const boxWidth = GAME_CONFIG.BOX_WIDTH * this.pixelRatio;
+    const boxY = GAME_CONFIG.GAME_OVER_HEIGHT * this.boxScale * this.pixelRatio;
+    const boxHeight = (GAME_CONFIG.BOX_HEIGHT - GAME_CONFIG.GAME_OVER_HEIGHT) * this.boxScale * this.pixelRatio;
+    const boxWidth = GAME_CONFIG.BOX_WIDTH * this.boxScale * this.pixelRatio;
     const thickness = 50 * this.pixelRatio;
 
     this.ctx.save();
