@@ -16,13 +16,15 @@ const GameCanvas: React.FC = observer(() => {
 
   // Optionally, use game.getShakeAngle() for rotation
 
+  const boxScale = game.getBoxScale();
+
   return (
     <Box
       position="relative"
       overflow="hidden"
       cursor="pointer"
       style={{
-        transform: `rotate(${game.getShakeAngle()}rad) translateY(${-game.getShakeLiftY()}px)`,
+        transform: `rotate(${game.getShakeAngle()}rad) translateY(${-game.getShakeLiftY()}px) scale(${boxScale})`,
         transformOrigin: "center",
         transition: "transform 0.1s ease-out",
       }}>

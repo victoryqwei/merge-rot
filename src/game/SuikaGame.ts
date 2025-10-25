@@ -25,6 +25,7 @@ export class SuikaGame {
   public soundManager: SoundManager;
   private gameMode: GameMode;
   private debugMode: boolean = false;
+  private boxScale: number = 1.0;
 
   // Loading state
   public isLoading: boolean = true;
@@ -47,6 +48,7 @@ export class SuikaGame {
     // Load the last played gamemode from settings, fallback to provided gameMode
     const settings = SettingsManager.getSettings();
     this.gameMode = settings.lastPlayedGameMode || gameMode;
+    this.boxScale = settings.boxScale || 1.0;
 
     // Initialize core systems
     this.physicsEngine = new PhysicsEngine();
@@ -537,6 +539,16 @@ export class SuikaGame {
 
   public getCurrentCharacter(): CharacterClass | null {
     return this.gameStateManager.getCurrentCharacter();
+  }
+
+  public getBoxScale(): number {
+    return this.boxScale;
+  }
+
+  public setBoxScale(scale: number): void {
+    this.boxScale = scale;
+    SettingsManager.updateSettings({ boxScale: scale });
+    this.handleResize();
   }
 
   public destroy(): void {

@@ -11,25 +11,29 @@ interface VolumeControlProps {
   label: string;
   value: number;
   onChange: (value: number) => void;
+  min: number;
+  max: number;
+  step: number;
+  displayValue: string;
 }
 
-const VolumeControl: React.FC<VolumeControlProps> = ({ label, value, onChange }) => (
+const VolumeControl: React.FC<VolumeControlProps> = ({ label, value, onChange, min, max, step, displayValue }) => (
   <VStack spacing={3} w="100%">
     <Text fontSize="lg" color="white" fontWeight="semibold">
       {label}
     </Text>
     <HStack w="100%" spacing={4}>
       <Text fontSize="sm" color="white" minW="40px">
-        0%
+        {Math.round(min * 100)}%
       </Text>
-      <Slider value={value} onChange={onChange} min={0} max={1} step={0.01} colorScheme="purple" size="lg">
+      <Slider value={value} onChange={onChange} min={min} max={max} step={step} colorScheme="purple" size="lg">
         <SliderTrack bg="whiteAlpha.300">
           <SliderFilledTrack bg="purple.400" />
         </SliderTrack>
         <SliderThumb bg="purple.500" border="2px solid white" />
       </Slider>
       <Text fontSize="sm" color="white" minW="40px">
-        {Math.round(value * 100)}%
+        {displayValue}
       </Text>
     </HStack>
   </VStack>
@@ -39,10 +43,12 @@ const GameSettingsOverlay: React.FC<SettingsOverlayProps> = observer(({ setShowS
   const game = useGame();
   const [musicVolume, setMusicVolume] = useState(game.getMusicVolume());
   const [sfxVolume, setSfxVolume] = useState(game.getSFXVolume());
+  const [boxScale, setBoxScale] = useState(game.getBoxScale());
 
   useEffect(() => {
     setMusicVolume(game.getMusicVolume());
     setSfxVolume(game.getSFXVolume());
+    setBoxScale(game.getBoxScale());
   }, [game]);
 
   const volumeControls = [
@@ -53,6 +59,10 @@ const GameSettingsOverlay: React.FC<SettingsOverlayProps> = observer(({ setShowS
         setMusicVolume(value);
         game.setMusicVolume(value);
       },
+      min: 0,
+      max: 1,
+      step: 0.01,
+      displayValue: `${Math.round(musicVolume * 100)}%`,
     },
     {
       label: "SFX Volume",
@@ -61,6 +71,22 @@ const GameSettingsOverlay: React.FC<SettingsOverlayProps> = observer(({ setShowS
         setSfxVolume(value);
         game.setSFXVolume(value);
       },
+      min: 0,
+      max: 1,
+      step: 0.01,
+      displayValue: `${Math.round(sfxVolume * 100)}%`,
+    },
+    {
+      label: "Box Size",
+      value: boxScale,
+      onChange: (value: number) => {
+        setBoxScale(value);
+        game.setBoxScale(value);
+      },
+      min: 0.5,
+      max: 1.5,
+      step: 0.1,
+      displayValue: `${Math.round(boxScale * 100)}%`,
     },
   ];
 
